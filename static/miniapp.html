@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VOLT Logistics Mini-App</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        .container {
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .button {
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #0088cc;
+            color: white;
+        }
+        .button:hover {
+            background-color: #007bb5;
+        }
+        .section {
+            display: none;
+        }
+        .section.active {
+            display: block;
+        }
+        label {
+            margin-right: 10px;
+        }
+        .order-list {
+            margin-top: 20px;
+        }
+        .order-item {
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+        }
+        .result {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>VOLT Logistics</h1>
+        <div id="calculator" class="section active">
+            <h2>Калькулятор</h2>
+            <label for="marketplace">Маркетплейс:</label>
+            <select id="marketplace" class="form-control">
+                <option value="china">Китай 🇨🇳</option>
+                <option value="europe">Европа 🇪🇺</option>
+                <option value="usa">США 🇺🇸</option>
+                <option value="japan">Япония 🏺</option>
+            </select>
+            <br>
+            <label for="price">Цена (в валюте маркетплейса):</label>
+            <input type="number" id="price" step="any" required class="form-control">
+            <br>
+            <button class="button" onclick="calculate()">Рассчитать</button>
+            <div id="result" class="result"></div>
+        </div>
+        <div id="create-order" class="section">
+            <h2>Создание Заказа</h2>
+            <label for="order-price">Цена (в валюте маркетплейса):</label>
+            <input type="number" id="order-price" step="any" required class="form-control">
+            <br>
+            <button class="button" onclick="createOrder()">Создать Заказ</button>
+        </div>
+        <div id="track-order" class="section">
+            <h2>Отслеживание Заказа</h2>
+            <label for="order-id">Номер заказа:</label>
+            <input type="number" id="order-id" required class="form-control">
+            <br>
+            <button class="button" onclick="trackOrder()">Отследить Заказ</button>
+            <div id="order-status" class="order-status"></div>
+        </div>
+        <div id="manager" class="section">
+            <h2>Панель Менеджера</h2>
+            <label for="edit-order-id">Номер заказа:</label>
+            <input type="number" id="edit-order-id" required class="form-control">
+            <br>
+            <label for="new-status">Новый статус:</label>
+            <input type="text" id="new-status" required class="form-control">
+            <br>
+            <button class="button" onclick="editOrderStatus()">Редактировать Статус Заказа</button>
+            <br>
+            <label for="comment-text">Комментарий:</label>
+            <textarea id="comment-text" class="form-control" rows="3"></textarea>
+            <br>
+            <button class="button" onclick="addComment()">Добавить Комментарий</button>
+            <br>
+            <label for="photo-upload">Прикрепить Фотографию:</label>
+            <input type="file" id="photo-upload" accept="image/*" class="form-control-file">
+            <br>
+            <button class="button" onclick="attachPhoto()">Прикрепить Фотографию</button>
+            <br>
+            <label for="phone-number">Номер телефона/карты/счета:</label>
+            <input type="text" id="phone-number" required class="form-control">
+            <br>
+            <label for="requisite-amount">Сумма:</label>
+            <input type="number" id="requisite-amount" step="any" required class="form-control">
+            <br>
+            <label for="bank">Банк получателя:</label>
+            <input type="text" id="bank" required class="form-control">
+            <br>
+            <button class="button" onclick="sendRequisites()">Отправить Реквизиты</button>
+        </div>
+        <button class="button" onclick="toggleSection('calculator')">Калькулятор</button>
+        <button class="button" onclick="toggleSection('create-order')">Создать Заказ</button>
+        <button class="button" onclick="toggleSection('track-order')">Отследить Заказ</button>
+        <button class="button" onclick="toggleSection('manager')">Менеджер</button>
+    </div>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script>
+        const tg = window.Telegram.WebApp;
+
+        // Проверка, является ли пользователь менеджером
+        const isManager = tg.initDataUnsafe.user.id in [919034275, 372145026, 6432717873];
+
+        function toggleSection(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.add('active');
+        }
+
+        function calculate() {
+            const marketplace = document.getElementById('marketplace').value;
+            const price = parseFloat(document.getElementById('price').value);
+            let result = 0;
+            let currency = '';
+            let commission = 0;
+            let exchangeRate = 0;
+
+            switch (marketplace) {
+                case 'china':
+                    currency = 'CNY';
+                    exchangeRate = 14.5;
+                    commission = 0.08; // 8%
+                    break;
+                case 'europe':
+                    currency = 'EUR';
+                    exchangeRate = 105.3;
+                    commission = 0.05; // 5%
+                    break;
+                case 'usa':
+                    currency = 'USD';
+                    exchangeRate = 98.1;
+                    commission = 0.1; // 10%
+                    break;
+                case 'japan':
+                    currency = 'JPY';
+                    exchangeRate = 0.72;
+                    commission = 0.03; // 3%
+                    break;
+                default:
+                    alert('Выберите маркетплейс');
+                    return;
+            }
+
+            result = (price * exchangeRate) * (1 + commission);
+            document.getElementById('result').innerText = `Итоговая стоимость: ${result.toFixed(2)} ₽`;
+        }
+
+        function createOrder() {
+            const price = parseFloat(document.getElementById('order-price').value);
+            if (isNaN(price) || price <= 0) {
+                alert('Введите корректную цену.');
+                return;
+            }
+
+            const requestData = {
+                command: 'create_order',
+                price: price
+            };
+
+            tg.sendData(JSON.stringify(requestData));
+        }
+
+        function trackOrder() {
+            const orderId = parseInt(document.getElementById('order-id').value);
+            if (isNaN(orderId) || orderId <= 0) {
+                alert('Введите корректный номер заказа.');
+                return;
+            }
+
+            const requestData = {
+                command: 'track_order',
+                order_id: orderId
+            };
+
+            tg.sendData(JSON.stringify(requestData));
+        }
+
+        function editOrderStatus() {
+            if (!isManager) {
+                alert('У вас нет прав для выполнения этой операции.');
+                return;
+            }
+
+            const orderId = parseInt(document.getElementById('edit-order-id').value);
+            const newStatus = document.getElementById('new-status').value;
+
+            if (isNaN(orderId) || orderId <= 0 || newStatus.trim() === '') {
+                alert('Введите корректные данные.');
+                return;
+            }
+
+            const requestData = {
+                command: 'edit_order_status',
+                order_id: orderId,
+                status: newStatus
+            };
+
+            tg.sendData(JSON.stringify(requestData));
+        }
+
+        function addComment() {
+            if (!isManager) {
+                alert('У вас нет прав для выполнения этой операции.');
+                return;
+            }
+
+            const orderId = parseInt(document.getElementById('edit-order-id').value);
+            const commentText = document.getElementById('comment-text').value;
+
+            if (isNaN(orderId) || orderId <= 0 || commentText.trim() === '') {
+                alert('Введите корректные данные.');
+                return;
+            }
+
+            const requestData = {
+                command: 'add_comment',
+                order_id: orderId,
+                comment: commentText
+            };
+
+            tg.sendData(JSON.stringify(requestData));
+        }
+
+        function attachPhoto() {
+            if (!isManager) {
+                alert('У вас нет прав для выполнения этой операции.');
+                return;
+            }
+
+            const fileInput = document.getElementById('photo-upload');
+            if (!fileInput.files.length) {
+                alert('Прикрепите фотографию.');
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(event) {
+                const base64Image = event.target.result.split(',')[1];
+                const requestData = {
+                    command: 'attach_photo',
+                    order_id: parseInt(document.getElementById('edit-order-id').value),
+                    photo: base64Image
+                };
+
+                tg.sendData(JSON.stringify(requestData));
+            };
+
+            reader.readAsDataURL(file);
+        }
+
+        function sendRequisites() {
+            if (!isManager) {
+                alert('У вас нет прав для выполнения этой операции.');
+                return;
+            }
+
+            const phoneNumber = document.getElementById('phone-number').value;
+            const amount = parseFloat(document.getElementById('requisite-amount').value);
+            const bank = document.getElementById('bank').value;
+
+            if (phoneNumber.trim() === '' || isNaN(amount) || amount <= 0 || bank.trim() === '') {
+                alert('Введите корректные данные.');
+                return;
+            }
+
+            const requestData = {
+                command: 'send_requisites',
+                order_id: parseInt(document.getElementById('edit-order-id').value),
+                phone_number: phoneNumber,
+                amount: amount,
+                bank: bank
+            };
+
+            tg.sendData(JSON.stringify(requestData));
+        }
+
+        // Обработка данных от бота
+        tg.onEvent('web_app_data', function(data) {
+            const response = JSON.parse(data.data);
+            if (response.command === 'track_order') {
+                document.getElementById('order-status').innerText = `Статус: ${response.status}`;
+            } else if (response.command === 'create_order') {
+                alert(`Заказ #${response.order_id} успешно создан.`);
+                toggleSection('create-order');
+            } else if (response.command === 'edit_order_status') {
+                alert(`Статус заказа #${response.order_id} изменен на: ${response.status}`);
+            } else if (response.command === 'add_comment') {
+                alert(`Комментарий к заказу #${response.order_id} добавлен.`);
+            } else if (response.command === 'attach_photo') {
+                alert(`Фотография к заказу #${response.order_id} прикреплена.`);
+            } else if (response.command === 'send_requisites') {
+                alert(`Реквизиты к заказу #${response.order_id} отправлены.`);
+            }
+        });
+
+        tg.ready();
+    </script>
+</body>
+</html>
