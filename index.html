@@ -48,15 +48,6 @@
         label {
             margin-right: 10px;
         }
-        .order-list {
-            margin-top: 20px;
-        }
-        .order-item {
-            margin-bottom: 10px;
-            padding: 10px;
-            background-color: #e9ecef;
-            border-radius: 5px;
-        }
         .result {
             margin-top: 20px;
             font-size: 18px;
@@ -70,7 +61,7 @@
         <div id="calculator" class="section active">
             <h2>Калькулятор</h2>
             <label for="marketplace">Маркетплейс:</label>
-            <select id="marketplace" class="form-control">
+            <select id="marketplace" class="form-control" onchange="updateMarketplace()">
                 <option value="china">Китай 🇨🇳</option>
                 <option value="europe">Европа 🇪🇺</option>
                 <option value="usa">США 🇺🇸</option>
@@ -126,59 +117,129 @@
             managerButton.onclick = () => toggleSection('manager');
             document.querySelector('.container').appendChild(managerButton);
         }
+
         function toggleSection(sectionId) {
             document.querySelectorAll('.section').forEach(section => {
                 section.classList.remove('active');
             });
             document.getElementById(sectionId).classList.add('active');
         }
+
+        function updateMarketplace() {
+            const marketplace = document.getElementById('marketplace').value;
+            const priceLabel = document.querySelector('label[for="price"]');
+            switch (marketplace) {
+                case 'china':
+                    priceLabel.innerText = 'Цена (в юанях CNY):';
+                    break;
+                case 'europe':
+                    priceLabel.innerText = 'Цена (в евро EUR):';
+                    break;
+                case 'usa':
+                    priceLabel.innerText = 'Цена (в долларах USD):';
+                    break;
+                case 'japan':
+                    priceLabel.innerText = 'Цена (в иенах JPY):';
+                    break;
+                default:
+                    priceLabel.innerText = 'Цена (в валюте маркетплейса):';
+            }
+        }
+
         function calculate() {
             const marketplace = document.getElementById('marketplace').value;
             const price = parseFloat(document.getElementById('price').value);
+            if (isNaN(price) || price <= 0) {
+                alert('Введите корректную цену.');
+                return;
+            }
             let result = 0;
             let currency = '';
             let commission = 0;
             let exchangeRate = 0;
+            let commissionPercentage = 0;
+            let additionalCost = 0;
+            let finalMessage = '';
+
             switch (marketplace) {
                 case 'china':
                     currency = 'CNY';
                     exchangeRate = 14.5;
-                    commission = 0.08; // 8%
+                    commissionPercentage = 8; // 8%
+                    additionalCost = (price * 1.08 * exchangeRate) + (15 * exchangeRate) + 50; // Доставка по Китаю + страхование + проверка + доставка до России
+                    additionalCost = Math.round(additionalCost * 10) / 10;
+                    const insurance = Math.round(((price * 1.08 * exchangeRate) * 0.03) * 100) / 100; // Страхование (3%)
+                    const measurements = Math.round(((price * 1.08 * exchangeRate) * 0.05) * 100) / 100; // Комиссия за выкуп и проверку (5%)
+                    finalMessage = (f"Итоговая стоимость товаров: ~{additionalCost} ₽\n\n"
+                                    f"Курс юаня при подсчете: 1 CNY - {exchangeRate}\n\n"
+                                    "Сроки доставки:\n"
+                                    "🇨🇳 Срок доставки по Китаю до нашего склада зависит от продавца (в среднем 3 дня с момента отправки.)\n"
+                                    "🇷🇺 До России (Москва) от склада в Китае:\n\t▫️Авто Express: (9-14 дней)\n\t▫️Обычное авто: (18-29 дней)\n\t▫️Авиа: (3-5 дней)\n\n"
+                                    f"Оплачивается сразу:\n{price} + 15 ¥ (доставка по Китаю) + 50 ₽ (доставка до России)\nВАЖНО: Доставка по Китаю возможно будет иметь другую стоимость\n\n"
+                                    "▫️Доставка Китай -> Россия оплачивается отдельно, только после приезда груза на склад в Китае.\n\n"
+                                    f"Расчет:\n▫️Страхование груза (3%): {insurance} ₽\n▫️Комиссия за выкуп и проверка товара на брак (5%): {measurements} ₽\n\n"
+                                    "Оформить заказ или задать любой интересующий вопрос: @VoltZakaz");
                     break;
                 case 'europe':
                     currency = 'EUR';
                     exchangeRate = 105.3;
-                    commission = 0.05; // 5%
+                    if (price <= 1000) {
+                        commissionPercentage = 25;
+                    } else if (price > 1000 && price <= 5000) {
+                        commissionPercentage = 15;
+                    } else {
+                        alert('Цена договорная. Пишите в лс менеджеру.');
+                        return;
+                    }
+                    result = (price * exchangeRate) * (1 + commissionPercentage / 100);
+                    result = Math.round(result * 100) / 100;
+                    const advancePaymentEuro = price * (1 + commissionPercentage / 100);
+                    finalMessage = (f"Итоговая стоимость товаров: ~{result} ₽\n\n"
+                                    f"Итоговая стоимость: {advancePaymentEuro} €\n\n"
+                                    "Сроки доставки:\n🇪🇺 1-7 дней по Европе\n🇷🇺 10-14 дней до вашей двери\n\n"
+                                    "Оформить заказ или задать любой интересующий вопрос: @VoltZakaz");
                     break;
                 case 'usa':
                     currency = 'USD';
                     exchangeRate = 98.1;
-                    commission = 0.1; // 10%
+                    if (price <= 1000) {
+                        commissionPercentage = 25;
+                    } else if (price > 1000 && price <= 5000) {
+                        commissionPercentage = 15;
+                    } else {
+                        alert('Цена договорная. Пишите в лс менеджеру.');
+                        return;
+                    }
+                    result = (price * exchangeRate) * (1 + commissionPercentage / 100);
+                    result = Math.round(result * 100) / 100;
+                    const advancePaymentUsa = price * (1 + commissionPercentage / 100);
+                    finalMessage = (f"Итоговая стоимость товаров: ~{result} ₽\n\n"
+                                    f"Итоговая стоимость: {advancePaymentUsa} $\n\n"
+                                    "Сроки доставки:\n🇺🇸 1-7 дней по США\n🇷🇺 10-14 дней до вашей двери\n\n"
+                                    "Оформить заказ или задать любой интересующий вопрос: @VoltZakaz");
                     break;
                 case 'japan':
                     currency = 'JPY';
                     exchangeRate = 0.72;
-                    commission = 0.03; // 3%
+                    commissionPercentage = 5; // 5%
+                    const advancePaymentJapan = ((price * 1.05) + 300) * exchangeRate;
+                    result = advancePaymentJapan * price;
+                    result = Math.round(result * 100) / 100;
+                    finalMessage = (f"Итоговая стоимость товаров: ~{result} ₽\n\n"
+                                    f"Оплачивается сразу: {advancePaymentJapan} ¥\n\n"
+                                    f"Курс иена при подсчете: 1 JPY - {exchangeRate}\n\n"
+                                    "Сроки доставки:\n"
+                                    "🇯🇵 Внутри Японии: В среднем 1-3 дня\n"
+                                    "🇷🇺 До России (Ваш город): 12-20 дней (зависит от вашего города)\n\n"
+                                    "Оформить заказ или задать любой интересующий вопрос: @VoltZakaz");
                     break;
                 default:
                     alert('Выберите маркетплейс');
                     return;
             }
-            result = (price * exchangeRate) * (1 + commission);
-            document.getElementById('result').innerText = `Итоговая стоимость: ${result.toFixed(2)} ₽`;
+            document.getElementById('result').innerText = finalMessage;
         }
-        function createOrder() {
-            const price = parseFloat(document.getElementById('order-price').value);
-            if (isNaN(price) || price <= 0) {
-                alert('Введите корректную цену.');
-                return;
-            }
-            const requestData = {
-                command: 'create_order',
-                price: price
-            };
-            tg.sendData(JSON.stringify(requestData));
-        }
+
         function trackOrder() {
             const orderId = parseInt(document.getElementById('order-id').value);
             if (isNaN(orderId) || orderId <= 0) {
@@ -191,6 +252,7 @@
             };
             tg.sendData(JSON.stringify(requestData));
         }
+
         function editOrderStatus() {
             if (!isManager) {
                 alert('У вас нет прав для выполнения этой операции.');
@@ -209,6 +271,7 @@
             };
             tg.sendData(JSON.stringify(requestData));
         }
+
         function addComment() {
             if (!isManager) {
                 alert('У вас нет прав для выполнения этой операции.');
@@ -227,6 +290,7 @@
             };
             tg.sendData(JSON.stringify(requestData));
         }
+
         function attachPhoto() {
             if (!isManager) {
                 alert('У вас нет прав для выполнения этой операции.');
@@ -250,6 +314,7 @@
             };
             reader.readAsDataURL(file);
         }
+
         // Обработка данных от бота
         tg.onEvent('web_app_data', function(data) {
             const response = JSON.parse(data.data);
@@ -257,7 +322,7 @@
                 document.getElementById('order-status').innerText = `Статус: ${response.status}`;
             } else if (response.command === 'create_order') {
                 alert(`Заказ #${response.order_id} успешно создан.`);
-                toggleSection('create-order');
+                toggleSection('calculator'); // Возвращаемся к калькулятору после создания заказа
             } else if (response.command === 'edit_order_status') {
                 alert(`Статус заказа #${response.order_id} изменен на: ${response.status}`);
             } else if (response.command === 'add_comment') {
@@ -268,6 +333,7 @@
                 alert(`Реквизиты к заказу #${response.order_id} отправлены.`);
             }
         });
+
         tg.ready();
     </script>
 </body>
