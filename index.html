@@ -21,7 +21,7 @@
             width: 100%;
             max-width: 400px;
             text-align: center;
-            background-color: white;
+            background-color: rgb(0, 0, 0);
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -132,22 +132,25 @@
         <button class="button" onclick="toggleSection('calculator')">Калькулятор</button>
         <button class="button" onclick="toggleSection('create-order')">Создать Заказ</button>
         <button class="button" onclick="toggleSection('track-order')">Отследить Заказ</button>
-        <button class="button" onclick="toggleSection('manager')">Менеджер</button>
     </div>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
         const tg = window.Telegram.WebApp;
-
         // Проверка, является ли пользователь менеджером
         const isManager = tg.initDataUnsafe.user.id in [919034275, 372145026, 6432717873];
-
+        if (isManager) {
+            const managerButton = document.createElement('button');
+            managerButton.className = 'button';
+            managerButton.innerText = 'ПАНЕЛЬ МЕНЕДЖЕРА';
+            managerButton.onclick = () => toggleSection('manager');
+            document.querySelector('.container').appendChild(managerButton);
+        }
         function toggleSection(sectionId) {
             document.querySelectorAll('.section').forEach(section => {
                 section.classList.remove('active');
             });
             document.getElementById(sectionId).classList.add('active');
         }
-
         function calculate() {
             const marketplace = document.getElementById('marketplace').value;
             const price = parseFloat(document.getElementById('price').value);
@@ -155,7 +158,6 @@
             let currency = '';
             let commission = 0;
             let exchangeRate = 0;
-
             switch (marketplace) {
                 case 'china':
                     currency = 'CNY';
@@ -181,131 +183,104 @@
                     alert('Выберите маркетплейс');
                     return;
             }
-
             result = (price * exchangeRate) * (1 + commission);
             document.getElementById('result').innerText = `Итоговая стоимость: ${result.toFixed(2)} ₽`;
         }
-
         function createOrder() {
             const price = parseFloat(document.getElementById('order-price').value);
             if (isNaN(price) || price <= 0) {
                 alert('Введите корректную цену.');
                 return;
             }
-
             const requestData = {
                 command: 'create_order',
                 price: price
             };
-
             tg.sendData(JSON.stringify(requestData));
         }
-
         function trackOrder() {
             const orderId = parseInt(document.getElementById('order-id').value);
             if (isNaN(orderId) || orderId <= 0) {
                 alert('Введите корректный номер заказа.');
                 return;
             }
-
             const requestData = {
                 command: 'track_order',
                 order_id: orderId
             };
-
             tg.sendData(JSON.stringify(requestData));
         }
-
         function editOrderStatus() {
             if (!isManager) {
                 alert('У вас нет прав для выполнения этой операции.');
                 return;
             }
-
             const orderId = parseInt(document.getElementById('edit-order-id').value);
             const newStatus = document.getElementById('new-status').value;
-
             if (isNaN(orderId) || orderId <= 0 || newStatus.trim() === '') {
                 alert('Введите корректные данные.');
                 return;
             }
-
             const requestData = {
                 command: 'edit_order_status',
                 order_id: orderId,
                 status: newStatus
             };
-
             tg.sendData(JSON.stringify(requestData));
         }
-
         function addComment() {
             if (!isManager) {
                 alert('У вас нет прав для выполнения этой операции.');
                 return;
             }
-
             const orderId = parseInt(document.getElementById('edit-order-id').value);
             const commentText = document.getElementById('comment-text').value;
-
             if (isNaN(orderId) || orderId <= 0 || commentText.trim() === '') {
                 alert('Введите корректные данные.');
                 return;
             }
-
             const requestData = {
                 command: 'add_comment',
                 order_id: orderId,
                 comment: commentText
             };
-
             tg.sendData(JSON.stringify(requestData));
         }
-
         function attachPhoto() {
             if (!isManager) {
                 alert('У вас нет прав для выполнения этой операции.');
                 return;
             }
-
             const fileInput = document.getElementById('photo-upload');
             if (!fileInput.files.length) {
                 alert('Прикрепите фотографию.');
                 return;
             }
-
             const file = fileInput.files[0];
             const reader = new FileReader();
-
             reader.onload = function(event) {
                 const base64Image = event.target.result.split(',')[1];
                 const requestData = {
                     command: 'attach_photo',
                     order_id: parseInt(document.getElementById('edit-order-id').value),
-                    photo: base64Image
+                    photo_id: base64Image
                 };
-
                 tg.sendData(JSON.stringify(requestData));
             };
-
             reader.readAsDataURL(file);
         }
-
         function sendRequisites() {
             if (!isManager) {
                 alert('У вас нет прав для выполнения этой операции.');
                 return;
             }
-
             const phoneNumber = document.getElementById('phone-number').value;
             const amount = parseFloat(document.getElementById('requisite-amount').value);
             const bank = document.getElementById('bank').value;
-
             if (phoneNumber.trim() === '' || isNaN(amount) || amount <= 0 || bank.trim() === '') {
                 alert('Введите корректные данные.');
                 return;
             }
-
             const requestData = {
                 command: 'send_requisites',
                 order_id: parseInt(document.getElementById('edit-order-id').value),
@@ -313,10 +288,8 @@
                 amount: amount,
                 bank: bank
             };
-
             tg.sendData(JSON.stringify(requestData));
         }
-
         // Обработка данных от бота
         tg.onEvent('web_app_data', function(data) {
             const response = JSON.parse(data.data);
@@ -335,7 +308,6 @@
                 alert(`Реквизиты к заказу #${response.order_id} отправлены.`);
             }
         });
-
         tg.ready();
     </script>
 </body>
