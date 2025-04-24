@@ -53,6 +53,33 @@
             font-size: 18px;
             color: #333;
         }
+        /* Стили для формы создания заказа */
+        .order-form {
+            margin-top: 20px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .item-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .item-row input[type="file"],
+        .item-row input[type="text"] {
+            width: 100%;
+            margin: 5px 0;
+        }
+        .add-item-button {
+            margin-top: 20px;
+        }
+        .user-info {
+            margin-top: 30px;
+        }
+        .submit-order-button {
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -62,7 +89,6 @@
         <button class="button" onclick="toggleSection('create-order')">📝 Создать новый заказ</button>
         <button class="button" onclick="toggleSection('my-orders')">📦 Мои заказы</button>
         <button class="button" id="manager-button" style="display: none;" onclick="toggleSection('manager')">🔒 Панель менеджера</button>
-
         <div id="calculator" class="section">
             <h2>Калькулятор</h2>
             <label for="country">Страна выкупа:</label>
@@ -71,7 +97,7 @@
                 <option value="china">Китай 🇨🇳</option>
                 <option value="europe">Европа 🇪🇺</option>
                 <option value="usa">США 🇺🇸</option>
-                <option value="japan">Япония 🏺</option>
+                <option value="japan">Япония 🏴󠁧󠁢󠁳󠁣󠁴󠁿</option>
             </select>
             <div id="marketplace-section" style="display: none;">
                 <br>
@@ -88,10 +114,9 @@
             <button class="button" onclick="calculate()">Рассчитать</button>
             <div id="result" class="result"></div>
         </div>
-
         <div id="create-order" class="section">
             <h2>Создание Заказа</h2>
-            <form id="order-form">
+            <form id="order-form" class="order-form">
                 <table id="order-table" class="table">
                     <thead>
                         <tr>
@@ -113,18 +138,18 @@
                         </tr>
                     </tbody>
                 </table>
-                <button type="button" class="button" onclick="addItem()">Добавить товар</button>
+                <button type="button" class="button add-item-button" onclick="addItem()">Добавить товар</button>
                 <br><br>
-                <label for="full-name">Ваше ФИО:</label>
-                <input type="text" id="full-name" class="form-control" required>
-                <br>
-                <label for="telegram-username">Ваш юзернейм в Telegram:</label>
-                <input type="text" id="telegram-username" class="form-control" required>
-                <br>
-                <button type="button" class="button" onclick="submitOrder()">Отправить заказ</button>
+                <div class="user-info">
+                    <label for="full-name">Ваше ФИО:</label>
+                    <input type="text" id="full-name" class="form-control" required>
+                    <br>
+                    <label for="telegram-username">Ваш юзернейм в Telegram:</label>
+                    <input type="text" id="telegram-username" class="form-control" required>
+                </div>
+                <button type="button" class="button submit-order-button" onclick="submitOrder()">Отправить заказ</button>
             </form>
         </div>
-
         <div id="edit-order" class="section">
             <h2>Редактирование Заказа</h2>
             <label for="edit-order-id">Номер заказа:</label>
@@ -145,62 +170,55 @@
             <br>
             <button class="button" onclick="attachPhoto()">Прикрепить Фотографию</button>
         </div>
+        <div id="my-orders" class="section">
+            <h2>Мои заказы</h2>
+            <table id="my-orders-table" class="table">
+                <thead>
+                    <tr>
+                        <th>Номер заказа</th>
+                        <th>Фото-отчет</th>
+                        <th>Этап</th>
+                    </tr>
+                </thead>
+                <tbody id="user-orders-container">
+                    <!-- Заказы будут загружаться здесь -->
+                </tbody>
+            </table>
+        </div>
+        <div id="manager" class="section">
+            <h2>Панель менеджера</h2>
+            <table id="manager-orders-table" class="table">
+                <thead>
+                    <tr>
+                        <th>Номер заказа</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody id="manager-orders-container">
+                    <!-- Заказы будут загружаться здесь -->
+                </tbody>
+            </table>
+        </div>
     </div>
-
-    <div id="my-orders" class="section">
-        <h2>Мои заказы</h2>
-        <table id="my-orders-table" class="table">
-            <thead>
-                <tr>
-                    <th>Номер заказа</th>
-                    <th>Фото-отчет</th>
-                    <th>Этап</th>
-                </tr>
-            </thead>
-            <tbody id="user-orders-container">
-                <!-- Заказы будут загружаться здесь -->
-            </tbody>
-        </table>
-    </div>
-
-    <div id="manager" class="section">
-        <h2>Панель менеджера</h2>
-        <table id="manager-orders-table" class="table">
-            <thead>
-                <tr>
-                    <th>Номер заказа</th>
-                    <th>Действия</th>
-                </tr>
-            </thead>
-            <tbody id="manager-orders-container">
-                <!-- Заказы будут загружаться здесь -->
-            </tbody>
-        </table>
-    </div>
-
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
         const tg = window.Telegram.WebApp;
         const userId = tg.initDataUnsafe.user.id;
         const isManager = [919034275, 372145026, 6432717873].includes(userId);
-
         if (isManager) {
             document.getElementById('manager-button').style.display = 'block';
         }
-
         function toggleSection(sectionId) {
             document.querySelectorAll('.section').forEach(section => {
                 section.classList.remove('active');
             });
             document.getElementById(sectionId).classList.add('active');
-
             if (sectionId === 'my-orders') {
                 loadUserOrders();
             } else if (sectionId === 'manager') {
                 loadManagerOrders();
             }
         }
-
         function handleCountryChange() {
             const country = document.getElementById('country').value;
             const marketplaceSection = document.getElementById('marketplace-section');
@@ -210,33 +228,27 @@
                 marketplaceSection.style.display = 'none';
             }
         }
-
         // Инициализация состояния при загрузке страницы
         document.addEventListener('DOMContentLoaded', () => {
             const countrySelect = document.getElementById('country');
             handleCountryChange(); // Вызываем функцию для корректной инициализации
         });
-
         function calculate() {
             const country = document.getElementById('country').value;
             const marketplace = country === 'china' ? document.getElementById('marketplace').value : null;
             const price = parseFloat(document.getElementById('price').value);
-
             if (!country) {
                 alert('Выберите страну выкупа.');
                 return;
             }
-
             if (isNaN(price) || price <= 0) {
                 alert('Введите корректную цену.');
                 return;
             }
-
             let result = 0;
             let currency = '';
             let commission = 0;
             let exchangeRate = 0;
-
             switch (country) {
                 case 'china':
                     currency = 'CNY';
@@ -262,72 +274,79 @@
                     alert('Выберите страну выкупа.');
                     return;
             }
-
             result = (price * exchangeRate) * (1 + commission);
             document.getElementById('result').innerText = `Итоговая стоимость: ${result.toFixed(2)} ₽`;
         }
+        function addItem() {
+            const container = document.getElementById('items-container');
+            const rowCount = container.children.length + 1;
+            const newItem = document.createElement('tr');
+            newItem.className = 'item-row';
+            newItem.innerHTML = `
+                <td>Товар #${rowCount}</td>
+                <td><input type="file" class="form-control-file item-photo" accept="image/*" required></td>
+                <td><input type="text" class="form-control item-color" required></td>
+                <td><input type="text" class="form-control item-size" required></td>
+                <td><input type="number" class="form-control item-quantity" min="1" required></td>
+            `;
+            container.appendChild(newItem);
+        }
+        function submitOrder() {
+            const items = [];
+            const rows = document.querySelectorAll('#items-container .item-row');
+            let isValid = true;
 
-        function createOrder() {
-            const price = parseFloat(document.getElementById('order-price').value);
-            if (isNaN(price) || price <= 0) {
-                alert('Введите корректную цену.');
+            rows.forEach(row => {
+                const photoInput = row.querySelector('.item-photo');
+                const colorInput = row.querySelector('.item-color');
+                const sizeInput = row.querySelector('.item-size');
+                const quantityInput = row.querySelector('.item-quantity');
+
+                if (!photoInput.files.length || !colorInput.value.trim() || !sizeInput.value.trim() || !quantityInput.value) {
+                    isValid = false;
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.readAsDataURL(photoInput.files[0]);
+                reader.onload = () => {
+                    items.push({
+                        photo: reader.result.split(',')[1],
+                        color: colorInput.value,
+                        size: sizeInput.value,
+                        quantity: parseInt(quantityInput.value)
+                    });
+
+                    if (items.length === rows.length) {
+                        sendOrderData(items);
+                    }
+                };
+            });
+
+            if (!isValid) {
+                alert('Пожалуйста, заполните все поля для каждого товара.');
+            }
+        }
+        function sendOrderData(items) {
+            const fullName = document.getElementById('full-name').value.trim();
+            const telegramUsername = document.getElementById('telegram-username').value.trim();
+
+            if (!fullName || !telegramUsername) {
+                alert('Пожалуйста, укажите ваше ФИО и юзернейм в Telegram.');
                 return;
             }
+
             const requestData = {
                 command: 'create_order',
-                price: price
+                full_name: fullName,
+                telegram_username: telegramUsername,
+                items: items
             };
+
             tg.sendData(JSON.stringify(requestData));
+            toggleSection('calculator'); // Возвращаемся к калькулятору
+            alert('Ваш заказ на рассмотрении! Ожидайте присвоения номера.');
         }
-
-        function loadUserOrders() {
-            fetch('/api/user/orders')
-                .then(response => response.json())
-                .then(orders => {
-                    const orderList = document.getElementById('order-list');
-                    orderList.innerHTML = '';
-                    orders.forEach(order => {
-                        const orderItem = document.createElement('div');
-                        orderItem.className = 'order-item';
-                        orderItem.innerHTML = `
-                            <div>
-                                <strong>Заказ #${order.id}</strong><br>
-                                Статус: ${order.status}
-                            </div>
-                        `;
-                        orderList.appendChild(orderItem);
-                    });
-                })
-                .catch(error => console.error('Ошибка загрузки заказов:', error));
-        }
-
-        function loadManagerOrders() {
-            fetch('/api/manager/orders')
-                .then(response => response.json())
-                .then(orders => {
-                    const orderList = document.getElementById('order-list-manager');
-                    orderList.innerHTML = '';
-                    orders.forEach(order => {
-                        const orderItem = document.createElement('div');
-                        orderItem.className = 'order-item';
-                        orderItem.innerHTML = `
-                            <div>
-                                <strong>Заказ #${order.id}</strong><br>
-                                Статус: ${order.status}
-                            </div>
-                            <button class="button" onclick="editOrder(${order.id})">Редактировать</button>
-                        `;
-                        orderList.appendChild(orderItem);
-                    });
-                })
-                .catch(error => console.error('Ошибка загрузки заказов:', error));
-        }
-
-        function editOrder(orderId) {
-            document.getElementById('edit-order-id').value = orderId;
-            toggleSection('edit-order');
-        }
-
         function editOrderStatus() {
             if (!isManager) {
                 alert('У вас нет прав для выполнения этой операции.');
@@ -346,7 +365,6 @@
             };
             tg.sendData(JSON.stringify(requestData));
         }
-
         function addComment() {
             if (!isManager) {
                 alert('У вас нет прав для выполнения этой операции.');
@@ -365,7 +383,6 @@
             };
             tg.sendData(JSON.stringify(requestData));
         }
-
         function attachPhoto() {
             if (!isManager) {
                 alert('У вас нет прав для выполнения этой операции.');
@@ -389,7 +406,6 @@
             };
             reader.readAsDataURL(file);
         }
-
         function sendRequisites() {
             if (!isManager) {
                 alert('У вас нет прав для выполнения этой операции.');
@@ -411,7 +427,6 @@
             };
             tg.sendData(JSON.stringify(requestData));
         }
-
         // Обработка данных от бота
         tg.onEvent('web_app_data', function(data) {
             const response = JSON.parse(data.data);
