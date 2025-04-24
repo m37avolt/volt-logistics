@@ -58,34 +58,70 @@
 <body>
     <div class="container">
         <h1>VOLT Logistics</h1>
-        <div id="calculator" class="section active">
+        <button class="button" onclick="toggleSection('calculator')">🧮 Калькулятор</button>
+        <button class="button" onclick="toggleSection('create-order')">📝 Создать новый заказ</button>
+        <button class="button" onclick="toggleSection('my-orders')">📦 Мои заказы</button>
+        <button class="button" id="manager-button" style="display: none;" onclick="toggleSection('manager')">🔒 Панель менеджера</button>
+
+        <div id="calculator" class="section">
             <h2>Калькулятор</h2>
-            <label for="marketplace">Маркетплейс:</label>
-            <select id="marketplace" class="form-control">
+            <label for="country">Страна выкупа:</label>
+            <select id="country" class="form-control" onchange="handleCountryChange()">
+                <option value="" selected disabled>Выберите страну</option>
                 <option value="china">Китай 🇨🇳</option>
                 <option value="europe">Европа 🇪🇺</option>
                 <option value="usa">США 🇺🇸</option>
                 <option value="japan">Япония 🏺</option>
             </select>
+            <div id="marketplace-section" style="display: none;">
+                <br>
+                <label for="marketplace">Маркетплейс:</label>
+                <select id="marketplace" class="form-control">
+                    <option value="poizon_taobao_weidan">Poizon/Taobao/Weidan и др.</option>
+                    <option value="weechat_yupoo_goofish">Weechat/YuPoo/Goofish</option>
+                </select>
+            </div>
             <br>
-            <label for="price">Цена (в валюте маркетплейса):</label>
+            <label for="price">Цена (в валюте страны):</label>
             <input type="number" id="price" step="any" required class="form-control">
             <br>
             <button class="button" onclick="calculate()">Рассчитать</button>
             <div id="result" class="result"></div>
         </div>
-        <div id="track-order" class="section">
-            <h2>Отслеживание Заказа</h2>
-            <label for="order-id">Номер заказа:</label>
-            <input type="number" id="order-id" required class="form-control">
-            <br>
-            <button class="button" onclick="trackOrder()">Отследить Заказ</button>
-            <div id="order-status" class="order-status"></div>
+
+        <div id="create-order" class="section">
+            <h2>Создание Заказа</h2>
+            <form id="order-form">
+                <div id="items-container">
+                    <!-- Поля для первого товара -->
+                    <div class="item">
+                        <label for="item-photo">Фото товара:</label>
+                        <input type="file" class="form-control-file item-photo" accept="image/*" required>
+                        <br>
+                        <label for="item-color">Цвет:</label>
+                        <input type="text" class="form-control item-color" required>
+                        <br>
+                        <label for="item-size">Размер:</label>
+                        <input type="text" class="form-control item-size" required>
+                        <br>
+                    </div>
+                </div>
+                <button type="button" class="button" onclick="addItem()">Добавить товар</button>
+                <br><br>
+                <label for="full-name">Ваше ФИО:</label>
+                <input type="text" id="full-name" class="form-control" required>
+                <br>
+                <label for="telegram-username">Ваш юзернейм в Telegram:</label>
+                <input type="text" id="telegram-username" class="form-control" required>
+                <br>
+                <button type="button" class="button" onclick="submitOrder()">Отправить заказ</button>
+            </form>
         </div>
-        <div id="manager" class="section">
-            <h2>Панель Менеджера</h2>
+
+        <div id="edit-order" class="section">
+            <h2>Редактирование Заказа</h2>
             <label for="edit-order-id">Номер заказа:</label>
-            <input type="number" id="edit-order-id" required class="form-control">
+            <input type="number" id="edit-order-id" readonly class="form-control">
             <br>
             <label for="new-status">Новый статус:</label>
             <input type="text" id="new-status" required class="form-control">
@@ -102,20 +138,16 @@
             <br>
             <button class="button" onclick="attachPhoto()">Прикрепить Фотографию</button>
         </div>
-        <button class="button" onclick="toggleSection('calculator')">Калькулятор</button>
-        <button class="button" onclick="toggleSection('track-order')">Отследить Заказ</button>
     </div>
+
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
         const tg = window.Telegram.WebApp;
-        // Проверка, является ли пользователь менеджером
-        const isManager = tg.initDataUnsafe.user.id in [919034275, 372145026, 6432717873];
+        const userId = tg.initDataUnsafe.user.id;
+        const isManager = [919034275, 372145026, 6432717873].includes(userId);
+
         if (isManager) {
-            const managerButton = document.createElement('button');
-            managerButton.className = 'button';
-            managerButton.innerText = 'ПАНЕЛЬ МЕНЕДЖЕРА';
-            managerButton.onclick = () => toggleSection('manager');
-            document.querySelector('.container').appendChild(managerButton);
+            document.getElementById('manager-button').style.display = 'block';
         }
 
         function toggleSection(sectionId) {
@@ -123,141 +155,139 @@
                 section.classList.remove('active');
             });
             document.getElementById(sectionId).classList.add('active');
+
+            if (sectionId === 'my-orders') {
+                loadUserOrders();
+            } else if (sectionId === 'manager') {
+                loadManagerOrders();
+            }
         }
 
+        function handleCountryChange() {
+            const country = document.getElementById('country').value;
+            const marketplaceSection = document.getElementById('marketplace-section');
+            if (country === 'china') {
+                marketplaceSection.style.display = 'block';
+            } else {
+                marketplaceSection.style.display = 'none';
+            }
+        }
+
+        // Инициализация состояния при загрузке страницы
+        document.addEventListener('DOMContentLoaded', () => {
+            const countrySelect = document.getElementById('country');
+            handleCountryChange(); // Вызываем функцию для корректной инициализации
+        });
+
         function calculate() {
-            const marketplace = document.getElementById('marketplace').value;
+            const country = document.getElementById('country').value;
+            const marketplace = country === 'china' ? document.getElementById('marketplace').value : null;
             const price = parseFloat(document.getElementById('price').value);
+
+            if (!country) {
+                alert('Выберите страну выкупа.');
+                return;
+            }
+
             if (isNaN(price) || price <= 0) {
                 alert('Введите корректную цену.');
                 return;
             }
+
             let result = 0;
             let currency = '';
-            let commissionPercentage = 0;
-            let exchangeRate = 0;
             let commission = 0;
-            let advancePayment = 0;
-            let finalMessage = '';
-            let rubles = 0;
+            let exchangeRate = 0;
 
-            switch (marketplace) {
+            switch (country) {
                 case 'china':
                     currency = 'CNY';
                     exchangeRate = 14.5;
-                    if (price <= 1000) {
-                        commissionPercentage = 25;
-                    } else if (price <= 5000) {
-                        commissionPercentage = 15;
-                    } else {
-                        finalMessage = "Цена договорная. Пишите в лс менеджеру.";
-                        break;
-                    }
-                    rubles = (price * exchangeRate) * (1 + commissionPercentage / 100);
-                    commission = rubles * commissionPercentage / 100;
-                    advancePayment = price * (1 + commissionPercentage / 100);
-                    finalMessage = (f"Итоговая стоимость товаров: ~{rubles.toFixed(2)} ₽\n\n"
-                                    f"Курс юаня при подсчете: 1 CNY - {exchangeRate}\n\n"
-                                    "Сроки доставки:\n"
-                                    "🇨🇳 Срок доставки по Китаю до нашего склада зависит от продавца (в среднем 3 дня с момента отправки.)\n"
-                                    "🇷🇺 До России (Москва) от склада в Китае:\n\t▫️Авто Express: (9-15 дней)\n\t▫️Обычное авто: (18-29 дней)\n\t▫️Авиа: (3-5 дней)\n\n"
-                                    f"Оплачивается сразу: {advancePayment.toFixed(2)} ¥\n"
-                                    "ВАЖНО: Доставка по Китаю возможно будет иметь другую стоимость\n\n"
-                                    "▫️Доставка Китай -> Россия оплачивается отдельно, только после приезда груза на склад в Китае.\n\n"
-                                    "Расчет:\n"
-                                    "▫️Страхование груза (3%): " + ((price * exchangeRate) * 0.03).toFixed(2) + " ₽\n"
-                                    "▫️Комиссия за выкуп и проверка товара на брак (5%): " + ((price * exchangeRate) * 0.05).toFixed(2) + " ₽\n"
-                                    "▫️Комиссия за выкуп и проверку товара на брак (" + commissionPercentage + "%): " + commission.toFixed(2) + " ₽\n\n"
-                                    "Оформить заказ или задать любой интересующий вопрос: @VoltZakaz");
+                    commission = marketplace === 'poizon_taobao_weidan' ? 0.08 : 0.13; // 8% или 13%
                     break;
                 case 'europe':
                     currency = 'EUR';
                     exchangeRate = 105.3;
-                    if (price <= 1000) {
-                        commissionPercentage = 25;
-                    } else if (price <= 5000) {
-                        commissionPercentage = 15;
-                    } else {
-                        finalMessage = "Цена договорная. Пишите в лс менеджеру.";
-                        break;
-                    }
-                    rubles = price * exchangeRate;
-                    commission = rubles * commissionPercentage / 100;
-                    totalCost = rubles + commission;
-                    advancePayment = price * (1 + commissionPercentage / 100);
-                    finalMessage = (f"Итоговая стоимость товаров: ~{totalCost.toFixed(2)} ₽\n\n"
-                                    f"Курс евро при подсчете: 1 EUR - {exchangeRate}\n\n"
-                                    "Сроки доставки:\n"
-                                    "🇪🇺 1-7 дней по Европе\n"
-                                    "🇷🇺 10-14 дней до вашей двери\n\n"
-                                    f"Итоговая стоимость: {advancePayment.toFixed(2)} €\n\n"
-                                    "Оформить заказ или задать любой интересующий вопрос: @VoltZakaz");
+                    commission = 0.05; // 5%
                     break;
                 case 'usa':
                     currency = 'USD';
                     exchangeRate = 98.1;
-                    if (price <= 1000) {
-                        commissionPercentage = 25;
-                    } else if (price <= 5000) {
-                        commissionPercentage = 15;
-                    } else {
-                        finalMessage = "Цена договорная. Пишите в лс менеджеру.";
-                        break;
-                    }
-                    rubles = price * exchangeRate;
-                    commission = rubles * commissionPercentage / 100;
-                    totalCost = rubles + commission;
-                    advancePayment = price * (1 + commissionPercentage / 100);
-                    finalMessage = (f"Итоговая стоимость товаров: ~{totalCost.toFixed(2)} ₽\n\n"
-                                    f"Курс доллара при подсчете: 1 USD - {exchangeRate}\n\n"
-                                    "Сроки доставки:\n"
-                                    "🇺🇸 1-7 дней по США\n"
-                                    "🇷🇺 10-14 дней до вашей двери\n\n"
-                                    f"Итоговая стоимость: {advancePayment.toFixed(2)} $\n\n"
-                                    "Оформить заказ или задать любой интересующий вопрос: @VoltZakaz");
+                    commission = 0.1; // 10%
                     break;
                 case 'japan':
                     currency = 'JPY';
                     exchangeRate = 0.72;
-                    if (price <= 1000) {
-                        commissionPercentage = 25;
-                    } else if (price <= 5000) {
-                        commissionPercentage = 15;
-                    } else {
-                        finalMessage = "Цена договорная. Пишите в лс менеджеру.";
-                        break;
-                    }
-                    rubles = price * exchangeRate;
-                    commission = rubles * commissionPercentage / 100;
-                    totalCost = rubles + commission;
-                    advancePayment = price * (1 + commissionPercentage / 100);
-                    finalMessage = (f"Итоговая стоимость товаров: ~{totalCost.toFixed(2)} ₽\n\n"
-                                    f"Курс иена при подсчете: 1 JPY - {exchangeRate}\n\n"
-                                    "Сроки доставки:\n"
-                                    "🇯🇵 Внутри Японии: В среднем 1-3 дня\n"
-                                    "🇷🇺 До России (Ваш город): 12-20 дней (зависит от вашего города)\n\n"
-                                    f"Оплачивается сразу: {advancePayment.toFixed(2)} ¥\n\n"
-                                    "Оформить заказ или задать любой интересующий вопрос: @VoltZakaz");
+                    commission = 0.03; // 3%
                     break;
                 default:
-                    alert('Выберите маркетплейс');
+                    alert('Выберите страну выкупа.');
                     return;
             }
 
-            document.getElementById('result').innerText = finalMessage;
+            result = (price * exchangeRate) * (1 + commission);
+            document.getElementById('result').innerText = `Итоговая стоимость: ${result.toFixed(2)} ₽`;
         }
 
-        function trackOrder() {
-            const orderId = parseInt(document.getElementById('order-id').value);
-            if (isNaN(orderId) || orderId <= 0) {
-                alert('Введите корректный номер заказа.');
+        function createOrder() {
+            const price = parseFloat(document.getElementById('order-price').value);
+            if (isNaN(price) || price <= 0) {
+                alert('Введите корректную цену.');
                 return;
             }
             const requestData = {
-                command: 'track_order',
-                order_id: orderId
+                command: 'create_order',
+                price: price
             };
             tg.sendData(JSON.stringify(requestData));
+        }
+
+        function loadUserOrders() {
+            fetch('/api/user/orders')
+                .then(response => response.json())
+                .then(orders => {
+                    const orderList = document.getElementById('order-list');
+                    orderList.innerHTML = '';
+                    orders.forEach(order => {
+                        const orderItem = document.createElement('div');
+                        orderItem.className = 'order-item';
+                        orderItem.innerHTML = `
+                            <div>
+                                <strong>Заказ #${order.id}</strong><br>
+                                Статус: ${order.status}
+                            </div>
+                        `;
+                        orderList.appendChild(orderItem);
+                    });
+                })
+                .catch(error => console.error('Ошибка загрузки заказов:', error));
+        }
+
+        function loadManagerOrders() {
+            fetch('/api/manager/orders')
+                .then(response => response.json())
+                .then(orders => {
+                    const orderList = document.getElementById('order-list-manager');
+                    orderList.innerHTML = '';
+                    orders.forEach(order => {
+                        const orderItem = document.createElement('div');
+                        orderItem.className = 'order-item';
+                        orderItem.innerHTML = `
+                            <div>
+                                <strong>Заказ #${order.id}</strong><br>
+                                Статус: ${order.status}
+                            </div>
+                            <button class="button" onclick="editOrder(${order.id})">Редактировать</button>
+                        `;
+                        orderList.appendChild(orderItem);
+                    });
+                })
+                .catch(error => console.error('Ошибка загрузки заказов:', error));
+        }
+
+        function editOrder(orderId) {
+            document.getElementById('edit-order-id').value = orderId;
+            toggleSection('edit-order');
         }
 
         function editOrderStatus() {
@@ -322,6 +352,28 @@
             reader.readAsDataURL(file);
         }
 
+        function sendRequisites() {
+            if (!isManager) {
+                alert('У вас нет прав для выполнения этой операции.');
+                return;
+            }
+            const phoneNumber = document.getElementById('phone-number').value;
+            const amount = parseFloat(document.getElementById('requisite-amount').value);
+            const bank = document.getElementById('bank').value;
+            if (phoneNumber.trim() === '' || isNaN(amount) || amount <= 0 || bank.trim() === '') {
+                alert('Введите корректные данные.');
+                return;
+            }
+            const requestData = {
+                command: 'send_requisites',
+                order_id: parseInt(document.getElementById('edit-order-id').value),
+                phone_number: phoneNumber,
+                amount: amount,
+                bank: bank
+            };
+            tg.sendData(JSON.stringify(requestData));
+        }
+
         // Обработка данных от бота
         tg.onEvent('web_app_data', function(data) {
             const response = JSON.parse(data.data);
@@ -329,9 +381,10 @@
                 document.getElementById('order-status').innerText = `Статус: ${response.status}`;
             } else if (response.command === 'create_order') {
                 alert(`Заказ #${response.order_id} успешно создан.`);
-                toggleSection('calculator'); // Возвращаемся к калькулятору после создания заказа
+                toggleSection('calculator'); // Вернуться к калькулятору после создания заказа
             } else if (response.command === 'edit_order_status') {
                 alert(`Статус заказа #${response.order_id} изменен на: ${response.status}`);
+                toggleSection('manager');
             } else if (response.command === 'add_comment') {
                 alert(`Комментарий к заказу #${response.order_id} добавлен.`);
             } else if (response.command === 'attach_photo') {
@@ -340,7 +393,6 @@
                 alert(`Реквизиты к заказу #${response.order_id} отправлены.`);
             }
         });
-
         tg.ready();
     </script>
 </body>
