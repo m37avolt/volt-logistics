@@ -59,7 +59,7 @@
     <div class="container">
         <h1>VOLT Logistics</h1>
         <button class="button" onclick="toggleSection('calculator')">🧮 Калькулятор</button>
-        <button class="button" onclick="openBot()">📝 Создать новый заказ</button>
+        <button class="button" onclick="createNewOrder()">📝 Создать новый заказ</button>
         <button class="button" onclick="toggleSection('my-orders')">📦 Мои заказы</button>
         <button class="button" id="manager-button" style="display: none;" onclick="toggleSection('manager')">🔒 Панель менеджера</button>
         <div id="calculator" class="section">
@@ -120,22 +120,23 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
         const tg = window.Telegram.WebApp;
+
+        // Получаем ID текущего пользователя
         const userId = tg.initDataUnsafe.user.id;
+
+        // Проверяем, является ли пользователь менеджером
         const isManager = [919034275, 372145026, 6432717873].includes(userId);
         if (isManager) {
             document.getElementById('manager-button').style.display = 'block';
         }
+
         function toggleSection(sectionId) {
             document.querySelectorAll('.section').forEach(section => {
                 section.classList.remove('active');
             });
             document.getElementById(sectionId).classList.add('active');
-            if (sectionId === 'my-orders') {
-                loadUserOrders();
-            } else if (sectionId === 'manager') {
-                loadManagerOrders();
-            }
         }
+
         function handleCountryChange() {
             const country = document.getElementById('country').value;
             const marketplaceSection = document.getElementById('marketplace-section');
@@ -145,27 +146,33 @@
                 marketplaceSection.style.display = 'none';
             }
         }
+
         // Инициализация состояния при загрузке страницы
         document.addEventListener('DOMContentLoaded', () => {
             const countrySelect = document.getElementById('country');
             handleCountryChange(); // Вызываем функцию для корректной инициализации
         });
+
         function calculate() {
             const country = document.getElementById('country').value;
             const marketplace = country === 'china' ? document.getElementById('marketplace').value : null;
             const price = parseFloat(document.getElementById('price').value);
+
             if (!country) {
                 alert('Выберите страну выкупа.');
                 return;
             }
+
             if (isNaN(price) || price <= 0) {
                 alert('Введите корректную цену.');
                 return;
             }
+
             let result = 0;
             let currency = '';
             let commission = 0;
             let exchangeRate = 0;
+
             switch (country) {
                 case 'china':
                     currency = 'CNY';
@@ -191,13 +198,38 @@
                     alert('Выберите страну выкупа.');
                     return;
             }
+
             result = (price * exchangeRate) * (1 + commission);
             document.getElementById('result').innerText = `Итоговая стоимость: ${result.toFixed(2)} ₽`;
         }
-        function openBot() {
-            // Открываем чат с ботом
-            window.location.href = `tg://resolve?domain=<BOT_USERNAME>&start=create_order`;
+
+        function createNewOrder() {
+            // Отправляем команду /create_new_order в чат с ботом
+            tg.sendData(JSON.stringify({ command: 'create_new_order' }));
+            // Возвращаемся в мини-апп после создания заказа
+            bot.send_message(user_id, "Ваш заказ на рассмотрении");
         }
+
+        // Обработка данных от бота
+        tg.onEvent('web_app_data', function(data) {
+            const response = JSON.parse(data.data);
+            if (response.command === 'track_order') {
+                document.getElementById('order-status').innerText = `Статус: ${response.status}`;
+            } else if (response.command === 'create_order') {
+                alert(`Заказ #${response.order_id} успешно создан.`);
+                toggleSection('calculator'); // Вернуться к калькулятору после создания заказа
+            } else if (response.command === 'edit_order_status') {
+                alert(`Статус заказа #${response.order_id} изменен на: ${response.status}`);
+                toggleSection('manager');
+            } else if (response.command === 'add_comment') {
+                alert(`Комментарий к заказу #${response.order_id} добавлен.`);
+            } else if (response.command === 'attach_photo') {
+                alert(`Фотография к заказу #${response.order_id} прикреплена.`);
+            } else if (response.command === 'send_requisites') {
+                alert(`Реквизиты к заказу #${response.order_id} отправлены.`);
+            }
+        });
+        tg.ready();
     </script>
 </body>
 </html>
