@@ -25,6 +25,7 @@
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            overflow-y: auto; /* Скролл при необходимости */
         }
         .button {
             margin: 10px;
@@ -53,15 +54,60 @@
             font-size: 18px;
             color: #333;
         }
+        .order-form {
+            margin-top: 20px;
+        }
+        .item-row {
+            margin-bottom: 10px;
+        }
+        .marketplace-select {
+            margin-top: 10px;
+        }
+        .file-upload {
+            margin-top: 20px;
+        }
+        .manager-section {
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>VOLT Logistics</h1>
         <button class="button" onclick="toggleSection('calculator')">🧮 Калькулятор</button>
-        <button class="button" onclick="createNewOrder()">📝 Создать новый заказ</button>
+        <button class="button" onclick="toggleSection('create-order')">📝 Создать новый заказ</button>
         <button class="button" onclick="toggleSection('my-orders')">📦 Мои заказы</button>
         <button class="button" id="manager-button" style="display: none;" onclick="toggleSection('manager')">🔒 Панель менеджера</button>
+
+        <!-- Меню для создания нового заказа -->
+        <div id="create-order" class="section">
+            <h2>Создать новый заказ</h2>
+            <label for="country">Страна выкупа:</label>
+            <select id="country" class="form-control" onchange="handleCountryChange()">
+                <option value="" selected disabled>Выберите страну</option>
+                <option value="china">Китай 🇨🇳</option>
+                <option value="europe">Европа 🇪🇺</option>
+                <option value="usa">США 🇺🇸</option>
+                <option value="japan">Япония 🏴󠁧󠁢󠁳󠁣󠁴󠁿</option>
+            </select>
+
+            <!-- Форма для товаров -->
+            <div id="order-form" class="order-form" style="display: none;">
+                <h3>Добавьте товары</h3>
+                <div id="items-container"></div>
+                <button class="button" onclick="addItem()">Добавить еще товар</button>
+                <br>
+                <label for="full-name">ФИО:</label>
+                <input type="text" id="full-name" required>
+                <br>
+                <label for="telegram-username">Telegram username:</label>
+                <input type="text" id="telegram-username" required>
+                <br>
+                <button class="button" onclick="submitOrder()">Создать заказ</button>
+            </div>
+        </div>
+
+        <!-- Калькулятор -->
         <div id="calculator" class="section">
             <h2>Калькулятор</h2>
             <label for="country">Страна выкупа:</label>
@@ -76,8 +122,8 @@
                 <br>
                 <label for="marketplace">Маркетплейс:</label>
                 <select id="marketplace" class="form-control">
-                    <option value="poizon_taobao_weidan">Poizon/Taobao/Weidan и др.</option>
-                    <option value="weechat_yupoo_goofish">Weechat/YuPoo/Goofish</option>
+                    <option value="poizon_taobao_weidan">POIZON/TAOBAO/WEIDAN И ДР.</option>
+                    <option value="weechat_yupoo_goofish">WEECHAT/YUPOO/GOOFISH</option>
                 </select>
             </div>
             <br>
@@ -87,14 +133,15 @@
             <button class="button" onclick="calculate()">Рассчитать</button>
             <div id="result" class="result"></div>
         </div>
+
+        <!-- Мои заказы -->
         <div id="my-orders" class="section">
             <h2>Мои заказы</h2>
             <table id="my-orders-table" class="table">
                 <thead>
                     <tr>
                         <th>Номер заказа</th>
-                        <th>Фото-отчет</th>
-                        <th>Этап</th>
+                        <th>Статус</th>
                     </tr>
                 </thead>
                 <tbody id="user-orders-container">
@@ -102,6 +149,8 @@
                 </tbody>
             </table>
         </div>
+
+        <!-- Панель менеджера -->
         <div id="manager" class="section">
             <h2>Панель менеджера</h2>
             <table id="manager-orders-table" class="table">
@@ -117,6 +166,7 @@
             </table>
         </div>
     </div>
+
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
         const tg = window.Telegram.WebApp;
@@ -140,10 +190,14 @@
         function handleCountryChange() {
             const country = document.getElementById('country').value;
             const marketplaceSection = document.getElementById('marketplace-section');
+            const orderForm = document.getElementById('order-form');
+
             if (country === 'china') {
-                marketplaceSection.style.display = 'block';
+                marketplaceSection.style.display = 'none'; // Убираем общую строку с маркетплейсом
+                orderForm.style.display = 'block';
             } else {
                 marketplaceSection.style.display = 'none';
+                orderForm.style.display = 'block';
             }
         }
 
@@ -203,11 +257,75 @@
             document.getElementById('result').innerText = `Итоговая стоимость: ${result.toFixed(2)} ₽`;
         }
 
-        function createNewOrder() {
-            // Отправляем команду /create_new_order в чат с ботом
-            tg.sendData(JSON.stringify({ command: 'create_new_order' }));
-            // Возвращаемся в мини-апп после создания заказа
-            bot.send_message(user_id, "Ваш заказ на рассмотрении");
+        // Функция для добавления строки с товаром
+        function addItem() {
+            const itemsContainer = document.getElementById('items-container');
+            const rowCount = itemsContainer.childElementCount + 1;
+
+            const newItem = document.createElement('div');
+            newItem.className = 'item-row';
+            newItem.innerHTML = `
+                <label>Товар #${rowCount}:</label>
+                <input type="file" class="form-control-file item-photo" accept="image/*" required>
+                <input type="text" class="form-control item-color" placeholder="Цвет" required>
+                <input type="text" class="form-control item-size" placeholder="Размер" required>
+                <input type="number" class="form-control item-price" placeholder="Цена" step="any" required>
+                <label for="item-marketplace-${rowCount}">Маркетплейс:</label>
+                <select id="item-marketplace-${rowCount}" class="form-control">
+                    <option value="poizon_taobao_weidan">POIZON/TAOBAO/WEIDAN И ДР.</option>
+                    <option value="weechat_yupoo_goofish">WEECHAT/YUPOO/GOOFISH</option>
+                </select>
+                <button class="button" onclick="removeItem(this)">Удалить</button>
+            `;
+            itemsContainer.appendChild(newItem);
+        }
+
+        // Функция для удаления строки с товаром
+        function removeItem(button) {
+            const itemRow = button.parentElement;
+            itemRow.remove();
+        }
+
+        // Функция для отправки данных о заказе
+        function submitOrder() {
+            const full_name = document.getElementById('full-name').value.trim();
+            const telegram_username = document.getElementById('telegram-username').value.trim();
+            const country = document.getElementById('country').value;
+
+            const itemsContainer = document.getElementById('items-container');
+            const items = Array.from(itemsContainer.children).map(itemRow => {
+                const photoInput = itemRow.querySelector('.item-photo');
+                const colorInput = itemRow.querySelector('.item-color');
+                const sizeInput = itemRow.querySelector('.item-size');
+                const priceInput = itemRow.querySelector('.item-price');
+                const marketplaceSelect = itemRow.querySelector('.form-control');
+
+                return {
+                    photo: photoInput.files[0] ? photoInput.files[0].name : '',
+                    color: colorInput.value,
+                    size: sizeInput.value,
+                    price: parseFloat(priceInput.value),
+                    marketplace: marketplaceSelect.value
+                };
+            });
+
+            if (!full_name || !telegram_username || !country || items.length === 0) {
+                alert('Пожалуйста, укажите ваше ФИО, юзернейм в Telegram и добавьте хотя бы один товар.');
+                return;
+            }
+
+            // Отправляем данные в бота
+            const requestData = {
+                command: 'create_order',
+                full_name: full_name,
+                telegram_username: telegram_username,
+                country: country,
+                items: items
+            };
+
+            tg.sendData(JSON.stringify(requestData));
+            toggleSection('calculator'); // Вернуться к калькулятору
+            alert('Ваш заказ успешно создан!');
         }
 
         // Обработка данных от бота
