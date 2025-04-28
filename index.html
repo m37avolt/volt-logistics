@@ -199,6 +199,9 @@
                 marketplaceSection.style.display = 'none';
                 orderForm.style.display = 'block';
             }
+
+            // Автоматически добавляем первый товар
+            addItem();
         }
 
         // Инициализация состояния при загрузке страницы
@@ -270,14 +273,23 @@
                 <input type="text" class="form-control item-color" placeholder="Цвет" required>
                 <input type="text" class="form-control item-size" placeholder="Размер" required>
                 <input type="number" class="form-control item-price" placeholder="Цена" step="any" required>
-                <label for="item-marketplace-${rowCount}">Маркетплейс:</label>
-                <select id="item-marketplace-${rowCount}" class="form-control">
-                    <option value="poizon_taobao_weidan">POIZON/TAOBAO/WEIDAN И ДР.</option>
-                    <option value="weechat_yupoo_goofish">WEECHAT/YUPOO/GOOFISH</option>
-                </select>
                 <button class="button" onclick="removeItem(this)">Удалить</button>
             `;
             itemsContainer.appendChild(newItem);
+
+            // Добавляем поле "Маркетплейс" только для товаров из Китая
+            const country = document.getElementById('country').value;
+            if (country === 'china') {
+                const marketplaceSelect = document.createElement('select');
+                marketplaceSelect.className = 'form-control';
+                marketplaceSelect.id = `item-marketplace-${rowCount}`;
+                marketplaceSelect.innerHTML = `
+                    <option value="poizon_taobao_weidan">POIZON/TAOBAO/WEIDAN И ДР.</option>
+                    <option value="weechat_yupoo_goofish">WEECHAT/YUPOO/GOOFISH</option>
+                `;
+                newItem.insertAdjacentElement('beforeend', marketplaceSelect);
+                newItem.insertAdjacentHTML('beforeend', '<label for="item-marketplace-${rowCount}">Маркетплейс:</label>');
+            }
         }
 
         // Функция для удаления строки с товаром
@@ -298,14 +310,14 @@
                 const colorInput = itemRow.querySelector('.item-color');
                 const sizeInput = itemRow.querySelector('.item-size');
                 const priceInput = itemRow.querySelector('.item-price');
-                const marketplaceSelect = itemRow.querySelector('.form-control');
+                const marketplaceSelect = itemRow.querySelector('.form-control'); // Только для Китая
 
                 return {
                     photo: photoInput.files[0] ? photoInput.files[0].name : '',
                     color: colorInput.value,
                     size: sizeInput.value,
                     price: parseFloat(priceInput.value),
-                    marketplace: marketplaceSelect.value
+                    marketplace: marketplaceSelect ? marketplaceSelect.value : null // Для Китая
                 };
             });
 
