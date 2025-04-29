@@ -25,7 +25,7 @@
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            overflow-y: auto; /* Скролл при необходимости */
+            overflow-y: auto;
         }
         .button {
             margin: 10px;
@@ -58,16 +58,13 @@
             margin-top: 20px;
         }
         .item-row {
-            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 15px;
+            background-color: #fafafa;
         }
         .marketplace-select {
-            margin-top: 10px;
-        }
-        .file-upload {
-            margin-top: 20px;
-        }
-        .manager-section {
-            margin-top: 20px;
+            display: none;
         }
     </style>
 </head>
@@ -79,46 +76,46 @@
         <button class="button" onclick="toggleSection('my-orders')">📦 Мои заказы</button>
         <button class="button" id="manager-button" style="display: none;" onclick="toggleSection('manager')">🔒 Панель менеджера</button>
 
-        <!-- Меню для создания нового заказа -->
+        <!-- Меню "Создать новый заказ" -->
         <div id="create-order" class="section">
             <h2>Создать новый заказ</h2>
             <label for="country">Страна выкупа:</label>
             <select id="country" class="form-control" onchange="handleCountryChange()">
                 <option value="" selected disabled>Выберите страну</option>
-                <option value="china">Китай 🇨🇳</option>
-                <option value="europe">Европа 🇪🇺</option>
-                <option value="usa">США 🇺🇸</option>
-                <option value="japan">Япония 🏴󠁧󠁢󠁳󠁣󠁴󠁿</option>
+                <option value="china">🇨🇳 Китай</option>
+                <option value="japan">🇯🇵 Япония</option>
+                <option value="europe" disabled style="color: gray;">🇪🇺 Европа</option>
+                <option value="usa" disabled style="color: gray;">🇺🇸 США</option>
             </select>
 
-            <!-- Форма для товаров -->
             <div id="order-form" class="order-form" style="display: none;">
                 <h3>Добавьте товары</h3>
                 <div id="items-container"></div>
-                <button class="button" onclick="addItem()">Добавить еще товар</button>
-                <br>
+                <button class="button" onclick="addItem()">➕ Добавить еще товар</button>
+                <br><br>
                 <label for="full-name">ФИО:</label>
-                <input type="text" id="full-name" required>
+                <input type="text" id="full-name" required class="form-control">
                 <br>
                 <label for="telegram-username">Telegram username:</label>
-                <input type="text" id="telegram-username" required>
+                <input type="text" id="telegram-username" required class="form-control">
                 <br>
-                <button class="button" onclick="submitOrder()">Создать заказ</button>
+                <button class="button" onclick="submitOrder()">✅ Создать заказ</button>
             </div>
         </div>
 
         <!-- Калькулятор -->
         <div id="calculator" class="section">
-            <h2>Калькулятор</h2>
+            <h2>🧮 Калькулятор</h2>
             <label for="country">Страна выкупа:</label>
             <select id="country" class="form-control" onchange="handleCountryChange()">
                 <option value="" selected disabled>Выберите страну</option>
-                <option value="china">Китай 🇨🇳</option>
-                <option value="europe">Европа 🇪🇺</option>
-                <option value="usa">США 🇺🇸</option>
-                <option value="japan">Япония 🏴󠁧󠁢󠁳󠁣󠁴󠁿</option>
+                <option value="china">🇨🇳 Китай</option>
+                <option value="japan">🇯🇵 Япония</option>
+                <option value="europe" disabled style="color: gray;">🇪🇺 Европа</option>
+                <option value="usa" disabled style="color: gray;">🇺🇸 США</option>
             </select>
-            <div id="marketplace-section" style="display: none;">
+
+            <div id="marketplace-section" class="marketplace-select" style="display: none;">
                 <br>
                 <label for="marketplace">Маркетплейс:</label>
                 <select id="marketplace" class="form-control">
@@ -136,7 +133,7 @@
 
         <!-- Мои заказы -->
         <div id="my-orders" class="section">
-            <h2>Мои заказы</h2>
+            <h2>📦 Мои заказы</h2>
             <table id="my-orders-table" class="table">
                 <thead>
                     <tr>
@@ -152,7 +149,7 @@
 
         <!-- Панель менеджера -->
         <div id="manager" class="section">
-            <h2>Панель менеджера</h2>
+            <h2>🔒 Панель менеджера</h2>
             <table id="manager-orders-table" class="table">
                 <thead>
                     <tr>
@@ -177,158 +174,182 @@
         // Проверяем, является ли пользователь менеджером
         const isManager = [919034275, 372145026, 6432717873].includes(userId);
         if (isManager) {
-            document.getElementById('manager-button').style.display = 'block';
+            document.getElementById("manager-button").style.display = "block";
         }
 
         function toggleSection(sectionId) {
-            document.querySelectorAll('.section').forEach(section => {
-                section.classList.remove('active');
+            document.querySelectorAll(".section").forEach((section) => {
+                section.classList.remove("active");
             });
-            document.getElementById(sectionId).classList.add('active');
+            document.getElementById(sectionId).classList.add("active");
+        }
+        
+        function addJapanItem() {
+            const itemsContainer = document.getElementById("items-container");
+            const rowCount = itemsContainer.childElementCount + 1;
+
+            const newItem = document.createElement("div");
+            newItem.className = "item-row";
+            newItem.innerHTML = `
+                <label>Товар #${rowCount}:</label>
+                <input type="file" class="form-control-file item-photo" accept="image/*" multiple required onchange="previewPhotos(this)">
+                <div class="photo-preview" style="display: flex; flex-wrap: wrap; gap: 10px;"></div>
+                <input type="text" class="form-control item-link" placeholder="Ссылка / ID товара">
+                <input type="number" class="form-control item-price" placeholder="Цена за единицу" step="any" required>
+                <input type="text" class="form-control item-color" placeholder="Цвет">
+                <input type="text" class="form-control item-size" placeholder="Размер">
+                <button class="button" onclick="removeItem(this)">🗑 Удалить товар</button>
+            `;
+            itemsContainer.appendChild(newItem);
         }
 
         function handleCountryChange() {
-            const country = document.getElementById('country').value;
-            const marketplaceSection = document.getElementById('marketplace-section');
-            const orderForm = document.getElementById('order-form');
+            const countrySelect = document.getElementById("country");
+            const marketplaceSection = document.getElementById("marketplace-section");
+            const orderForm = document.getElementById("order-form");
 
-            if (country === 'china') {
-                marketplaceSection.style.display = 'none'; // Убираем общую строку с маркетплейсом
-                orderForm.style.display = 'block';
+            const selectedCountry = countrySelect.value;
+
+            // Очищаем контейнер с товарами при смене страны
+            const itemsContainer = document.getElementById("items-container");
+            itemsContainer.innerHTML = "";
+
+            if (selectedCountry === "china") {
+                marketplaceSection.style.display = "block";
+                orderForm.style.display = "block";
+                addItem(); // Добавляем первый товар для Китая
+            } else if (selectedCountry === "japan") {
+                marketplaceSection.style.display = "none"; // Скрываем маркетплейс для Японии
+                orderForm.style.display = "block";
+                addJapanItem(); // Добавляем товар с формой для Японии
             } else {
-                marketplaceSection.style.display = 'none';
-                orderForm.style.display = 'block';
+                marketplaceSection.style.display = "none";
+                orderForm.style.display = "none";
             }
-
-            // Автоматически добавляем первый товар
-            addItem();
         }
 
-        // Инициализация состояния при загрузке страницы
-        document.addEventListener('DOMContentLoaded', () => {
-            const countrySelect = document.getElementById('country');
-            handleCountryChange(); // Вызываем функцию для корректной инициализации
-        });
-
-        function calculate() {
-            const country = document.getElementById('country').value;
-            const marketplace = country === 'china' ? document.getElementById('marketplace').value : null;
-            const price = parseFloat(document.getElementById('price').value);
-
-            if (!country) {
-                alert('Выберите страну выкупа.');
-                return;
-            }
-
-            if (isNaN(price) || price <= 0) {
-                alert('Введите корректную цену.');
-                return;
-            }
-
-            let result = 0;
-            let currency = '';
-            let commission = 0;
-            let exchangeRate = 0;
-
-            switch (country) {
-                case 'china':
-                    currency = 'CNY';
-                    exchangeRate = 14.5;
-                    commission = marketplace === 'poizon_taobao_weidan' ? 0.08 : 0.13; // 8% или 13%
-                    break;
-                case 'europe':
-                    currency = 'EUR';
-                    exchangeRate = 105.3;
-                    commission = 0.05; // 5%
-                    break;
-                case 'usa':
-                    currency = 'USD';
-                    exchangeRate = 98.1;
-                    commission = 0.1; // 10%
-                    break;
-                case 'japan':
-                    currency = 'JPY';
-                    exchangeRate = 0.72;
-                    commission = 0.03; // 3%
-                    break;
-                default:
-                    alert('Выберите страну выкупа.');
-                    return;
-            }
-
-            result = (price * exchangeRate) * (1 + commission);
-            document.getElementById('result').innerText = `Итоговая стоимость: ${result.toFixed(2)} ₽`;
-        }
-
-        // Функция для добавления строки с товаром
         function addItem() {
-            const itemsContainer = document.getElementById('items-container');
-            const rowCount = itemsContainer.childElementCount + 1;
+                const itemsContainer = document.getElementById("items-container");
+                const rowCount = itemsContainer.childElementCount + 1;
 
-            const newItem = document.createElement('div');
-            newItem.className = 'item-row';
-            newItem.innerHTML = `
-                <label>Товар #${rowCount}:</label>
-                <input type="file" class="form-control-file item-photo" accept="image/*" required>
-                <input type="text" class="form-control item-color" placeholder="Цвет" required>
-                <input type="text" class="form-control item-size" placeholder="Размер" required>
-                <input type="number" class="form-control item-price" placeholder="Цена" step="any" required>
-                <button class="button" onclick="removeItem(this)">Удалить</button>
-            `;
-            itemsContainer.appendChild(newItem);
-
-            // Добавляем поле "Маркетплейс" только для товаров из Китая
-            const country = document.getElementById('country').value;
-            if (country === 'china') {
-                const marketplaceSelect = document.createElement('select');
-                marketplaceSelect.className = 'form-control';
-                marketplaceSelect.id = `item-marketplace-${rowCount}`;
-                marketplaceSelect.innerHTML = `
-                    <option value="poizon_taobao_weidan">POIZON/TAOBAO/WEIDAN И ДР.</option>
-                    <option value="weechat_yupoo_goofish">WEECHAT/YUPOO/GOOFISH</option>
+                const newItem = document.createElement("div");
+                newItem.className = "item-row";
+                newItem.innerHTML = `
+                    <div style="margin-top: 10px;">
+                        <label>Товар #${rowCount}:</label>
+                        <br>
+                        <label>Загрузите фото (до 5 штук):</label>
+                        <input type="file" class="form-control-file item-photo" accept="image/*" multiple onchange="previewPhotos(this)">
+                        <div class="photo-preview" style="display: flex; flex-wrap: wrap; gap: 10px;"></div>
+                        <br>
+                        <!-- Маркетплейс -->
+                        <label for="item-marketplace-${rowCount}">Маркетплейс:</label>
+                        <select id="item-marketplace-${rowCount}" class="form-control">
+                            <option value="poizon_taobao_weidan">POIZON/TAOBAO/WEIDAN И ДР.</option>
+                            <option value="weechat_yupoo_goofish">WEECHAT/YUPOO/GOOFISH</option>
+                        </select>
+                        <br>
+                        <!-- Ссылка / ID Weechat -->
+                        <div id="item-link-container-${rowCount}">
+                            <label for="item-link-${rowCount}">Ссылка:</label>
+                            <input type="text" id="item-link-${rowCount}" class="form-control" placeholder="Введите ссылку">
+                        </div>
+                        <!-- WeeChat ID, номер телефона или QR-код -->
+                        <div id="item-weechat-info-${rowCount}" style="display: none;">
+                            <label for="item-weechat-id-${rowCount}">WeeChat ID / Номер телефона / QR-код:</label>
+                            <input type="text" id="item-weechat-id-${rowCount}" class="form-control" placeholder="Введите WeeChat ID или номер телефона">
+                            <input type="file" id="item-qr-code-${rowCount}" accept="image/*" class="form-control-file" placeholder="Прикрепите QR-код">
+                        </div>
+                        <br>
+                        <!-- Цена -->
+                        <label for="item-price-${rowCount}">Цена (за единицу) без учета скидки на первый заказ:</label>
+                        <input type="number" id="item-price-${rowCount}" class="form-control" step="any" placeholder="Цена товара">
+                        <br>
+                        <!-- Цвет -->
+                        <label for="item-color-${rowCount}">Цвет:</label>
+                        <input type="text" id="item-color-${rowCount}" class="form-control" placeholder="Цвет товара">
+                        <br>
+                        <!-- Размер -->
+                        <label for="item-size-${rowCount}">Размер (EU):</label>
+                        <input type="text" id="item-size-${rowCount}" class="form-control" placeholder="Пример: M, 42">
+                        <br>
+                        <!-- Количество -->
+                        <label for="item-quantity-${rowCount}">Количество:</label>
+                        <input type="number" id="item-quantity-${rowCount}" class="form-control" min="1" placeholder="шт." value="1">
+                        <button class="button" onclick="removeItem(this)" style="margin-top: 10px;">🗑 Удалить товар</button>
+                    </div>
                 `;
-                newItem.insertAdjacentElement('beforeend', marketplaceSelect);
-                newItem.insertAdjacentHTML('beforeend', '<label for="item-marketplace-${rowCount}">Маркетплейс:</label>');
-            }
-        }
+                itemsContainer.appendChild(newItem);
 
-        // Функция для удаления строки с товаром
+                // Добавляем обработчик для выбора маркетплейса
+                const marketplaceSelect = newItem.querySelector(`#item-marketplace-${rowCount}`);
+                marketplaceSelect.addEventListener("change", function () {
+                    const selectedMarketplace = this.value;
+                    const linkContainer = newItem.querySelector(`#item-link-container-${rowCount}`);
+                    const weechatInfoContainer = newItem.querySelector(`#item-weechat-info-${rowCount}`);
+
+                    if (selectedMarketplace === "weechat_yupoo_goofish") {
+                        linkContainer.style.display = "none";
+                        weechatInfoContainer.style.display = "block";
+                    } else {
+                        linkContainer.style.display = "block";
+                        weechatInfoContainer.style.display = "none";
+                    }
+                });
+
+                // По умолчанию показываем поле "Ссылка / ID Weechat"
+                const country = document.getElementById("country").value;
+                if (country === "china") {
+                    const marketplaceInput = newItem.querySelector(`#item-marketplace-${rowCount}`);
+                    const selectedMarketplace = marketplaceInput.value;
+                    if (selectedMarketplace === "weechat_yupoo_goofish") {
+                        newItem.querySelector(`#item-weechat-info-${rowCount}`).style.display = "block";
+                        newItem.querySelector(`#item-link-container-${rowCount}`).style.display = "none";
+                    } else {
+                        newItem.querySelector(`#item-weechat-info-${rowCount}`).style.display = "none";
+                        newItem.querySelector(`#item-link-container-${rowCount}`).style.display = "block";
+                    }
+                }
+            }
+
         function removeItem(button) {
-            const itemRow = button.parentElement;
+            const itemRow = button.parentElement.parentElement;
             itemRow.remove();
         }
 
-        // Функция для отправки данных о заказе
         function submitOrder() {
-            const full_name = document.getElementById('full-name').value.trim();
-            const telegram_username = document.getElementById('telegram-username').value.trim();
-            const country = document.getElementById('country').value;
-
-            const itemsContainer = document.getElementById('items-container');
-            const items = Array.from(itemsContainer.children).map(itemRow => {
-                const photoInput = itemRow.querySelector('.item-photo');
-                const colorInput = itemRow.querySelector('.item-color');
-                const sizeInput = itemRow.querySelector('.item-size');
-                const priceInput = itemRow.querySelector('.item-price');
-                const marketplaceSelect = itemRow.querySelector('.form-control'); // Только для Китая
+            const full_name = document.getElementById("full-name").value.trim();
+            const telegram_username = document.getElementById("telegram-username").value.trim();
+            const country = document.getElementById("country").value;
+            const itemsContainer = document.getElementById("items-container");
+            const items = Array.from(itemsContainer.children).map((itemRow, index) => {
+                const photoInput = itemRow.querySelector(".item-photo");
+                const linkInput = itemRow.querySelector(`#item-link-${index + 1}`);
+                const priceInput = itemRow.querySelector(`#item-price-${index + 1}`);
+                const colorInput = itemRow.querySelector(`#item-color-${index + 1}`);
+                const sizeInput = itemRow.querySelector(`#item-size-${index + 1}`);
+                const quantityInput = itemRow.querySelector(`#item-quantity-${index + 1}`);
+                const marketplaceInput = itemRow.querySelector(`#item-marketplace-${index + 1}`);
 
                 return {
-                    photo: photoInput.files[0] ? photoInput.files[0].name : '',
+                    photos: photoInput.files.length > 0 ? [...photoInput.files].map(f => f.name) : [],
+                    link: linkInput.value,
+                    price: parseFloat(priceInput.value),
                     color: colorInput.value,
                     size: sizeInput.value,
-                    price: parseFloat(priceInput.value),
-                    marketplace: marketplaceSelect ? marketplaceSelect.value : null // Для Китая
+                    quantity: parseInt(quantityInput.value),
+                    marketplace: marketplaceInput ? marketplaceInput.value : null
                 };
             });
 
-            if (!full_name || !telegram_username || !country || items.length === 0) {
-                alert('Пожалуйста, укажите ваше ФИО, юзернейм в Telegram и добавьте хотя бы один товар.');
+            if (!full_name || !telegram_username || items.length === 0) {
+                alert("Пожалуйста, заполните ФИО, Telegram username и хотя бы один товар.");
                 return;
             }
 
             // Отправляем данные в бота
             const requestData = {
-                command: 'create_order',
+                command: "create_order",
                 full_name: full_name,
                 telegram_username: telegram_username,
                 country: country,
@@ -336,29 +357,53 @@
             };
 
             tg.sendData(JSON.stringify(requestData));
-            toggleSection('calculator'); // Вернуться к калькулятору
-            alert('Ваш заказ успешно создан!');
+            alert("Заказ успешно отправлен!");
+            toggleSection("my-orders"); // Вернуться к калькулятору
+        }
+
+        function previewPhotos(input) {
+            const preview = input.nextElementSibling;
+            preview.innerHTML = ""; // очищаем предыдущие превью
+
+            const files = input.files;
+            for (let i = 0; i < files.length && i < 5; i++) {
+                const file = files[i];
+                const reader = new FileReader();
+
+                reader.onload = function(e) {
+                    const img = document.createElement("img");
+                    img.src = e.target.result;
+                    img.style.width = "50px";
+                    img.style.height = "50px";
+                    img.style.objectFit = "cover";
+                    img.style.borderRadius = "5px";
+                    preview.appendChild(img);
+                };
+
+                reader.readAsDataURL(file);
+            }
         }
 
         // Обработка данных от бота
-        tg.onEvent('web_app_data', function(data) {
+        tg.onEvent("web_app_data", function(data) {
             const response = JSON.parse(data.data);
-            if (response.command === 'track_order') {
-                document.getElementById('order-status').innerText = `Статус: ${response.status}`;
-            } else if (response.command === 'create_order') {
+            if (response.command === "track_order") {
+                document.getElementById("order-status").innerText = `Статус: ${response.status}`;
+            } else if (response.command === "create_order") {
                 alert(`Заказ #${response.order_id} успешно создан.`);
-                toggleSection('calculator'); // Вернуться к калькулятору после создания заказа
-            } else if (response.command === 'edit_order_status') {
+                toggleSection("calculator");
+            } else if (response.command === "edit_order_status") {
                 alert(`Статус заказа #${response.order_id} изменен на: ${response.status}`);
-                toggleSection('manager');
-            } else if (response.command === 'add_comment') {
+                toggleSection("manager");
+            } else if (response.command === "add_comment") {
                 alert(`Комментарий к заказу #${response.order_id} добавлен.`);
-            } else if (response.command === 'attach_photo') {
+            } else if (response.command === "attach_photo") {
                 alert(`Фотография к заказу #${response.order_id} прикреплена.`);
-            } else if (response.command === 'send_requisites') {
+            } else if (response.command === "send_requisites") {
                 alert(`Реквизиты к заказу #${response.order_id} отправлены.`);
             }
         });
+
         tg.ready();
     </script>
 </body>
