@@ -76,7 +76,7 @@
         <button class="button" onclick="toggleSection('my-orders')">📦 Мои заказы</button>
         <button class="button" id="manager-button" style="display: none;" onclick="toggleSection('manager')">🔒 Панель менеджера</button>
 
-        <!-- Меню "Создать новый заказ" -->
+        <!-- Меню для создания заказа -->
         <div id="create-order" class="section">
             <h2>Создать новый заказ</h2>
             <label for="country">Страна выкупа:</label>
@@ -88,6 +88,7 @@
                 <option value="usa" disabled style="color: gray;">🇺🇸 США</option>
             </select>
 
+            <!-- Форма для товаров -->
             <div id="order-form" class="order-form" style="display: none;">
                 <h3>Добавьте товары</h3>
                 <div id="items-container"></div>
@@ -114,7 +115,6 @@
                 <option value="europe" disabled style="color: gray;">🇪🇺 Европа</option>
                 <option value="usa" disabled style="color: gray;">🇺🇸 США</option>
             </select>
-
             <div id="marketplace-section" class="marketplace-select" style="display: none;">
                 <br>
                 <label for="marketplace">Маркетплейс:</label>
@@ -183,7 +183,107 @@
             });
             document.getElementById(sectionId).classList.add("active");
         }
-        
+
+        function handleCountryChange() {
+            const countrySelect = document.getElementById("country");
+            const marketplaceSection = document.getElementById("marketplace-section");
+            const orderForm = document.getElementById("order-form");
+            const selectedCountry = countrySelect.value;
+
+            // Очищаем контейнер при смене страны
+            const itemsContainer = document.getElementById("items-container");
+            itemsContainer.innerHTML = "";
+
+            if (selectedCountry === "china") {
+                marketplaceSection.style.display = "block";
+                orderForm.style.display = "block";
+                addItem();
+            } else if (selectedCountry === "japan") {
+                marketplaceSection.style.display = "none";
+                orderForm.style.display = "block";
+                addJapanItem();
+            } else {
+                marketplaceSection.style.display = "none";
+                orderForm.style.display = "none";
+                alert("Пока доступны только Китай и Япония.");
+            }
+        }
+
+        // Добавление товара для Китая
+        function addItem() {
+            const itemsContainer = document.getElementById("items-container");
+            const rowCount = itemsContainer.childElementCount + 1;
+
+            const newItem = document.createElement("div");
+            newItem.className = "item-row";
+            newItem.innerHTML = `
+                <div style="margin-top: 10px;">
+                    <label>Товар #${rowCount}:</label>
+                    <br>
+                    <label>Загрузите фото (до 5 штук):</label>
+                    <input type="file" class="form-control-file item-photo" accept="image/*" multiple onchange="previewPhotos(this)">
+                    <div class="photo-preview" style="display: flex; flex-wrap: wrap; gap: 10px;"></div>
+                    <br>
+                    <label for="item-marketplace-${rowCount}">Маркетплейс:</label>
+                    <select id="item-marketplace-${rowCount}" class="form-control" onchange="updateMarketplaceFields(${rowCount})">
+                        <option value="poizon_taobao_weidan">POIZON/TAOBAO/WEIDAN И ДР.</option>
+                        <option value="weechat_yupoo_goofish">WEECHAT/YUPOO/GOOFISH</option>
+                    </select>
+                    <br>
+                    <div id="item-link-container-${rowCount}">
+                        <label for="item-link-${rowCount}">Ссылка на товар:</label>
+                        <input type="text" id="item-link-${rowCount}" class="form-control" placeholder="Введите ссылку">
+                    </div>
+                    <div id="item-weechat-info-${rowCount}" style="display: none;">
+                        <label for="item-weechat-id-${rowCount}">WeeChat ID / Номер телефона / QR-код:</label>
+                        <input type="text" id="item-weechat-id-${rowCount}" class="form-control" placeholder="Введите WeeChat ID или номер">
+                        <input type="file" id="item-qr-code-${rowCount}" accept="image/*" class="form-control-file" placeholder="QR-код">
+                    </div>
+                    <br>
+                    <label for="item-price-${rowCount}">Цена (за единицу) без учета скидки на первый заказ:</label>
+                    <input type="number" id="item-price-${rowCount}" class="form-control" step="any" placeholder="Цена товара">
+                    <br>
+                    <label for="item-color-${rowCount}">Цвет:</label>
+                    <input type="text" id="item-color-${rowCount}" class="form-control" placeholder="Цвет товара">
+                    <br>
+                    <label for="item-size-${rowCount}">Размер:</label>
+                    <input type="text" id="item-size-${rowCount}" class="form-control" placeholder="Пример: M, 42">
+                    <br>
+                    <label for="item-quantity-${rowCount}">Количество:</label>
+                    <input type="number" id="item-quantity-${rowCount}" class="form-control" min="1" placeholder="шт." value="1">
+                    <br>
+                    <label for="item-comment-${rowCount}">Комментарий:</label>
+                    <input type="text" id="item-comment-${rowCount}" class="form-control" placeholder="Батч, договоренности с поставщиком и т.д.">
+                    <br>
+                    <button class="button" onclick="removeItem(this)" style="margin-top: 10px;">🗑 Удалить товар</button>
+                </div>
+            `;
+            itemsContainer.appendChild(newItem);
+
+            // Сразу скрыть поля, если это WEECHAT
+            const marketplaceInput = newItem.querySelector(`#item-marketplace-${rowCount}`);
+            if (marketplaceInput.value === "weechat_yupoo_goofish") {
+                newItem.querySelector(`#item-link-container-${rowCount}`).style.display = "none";
+                newItem.querySelector(`#item-weechat-info-${rowCount}`).style.display = "block";
+            }
+        }
+
+        // Обновление полей маркетплейса
+        function updateMarketplaceFields(rowCount) {
+            const marketplaceInput = document.getElementById(`item-marketplace-${rowCount}`);
+            const linkContainer = document.getElementById(`item-link-container-${rowCount}`);
+            const weechatInfoContainer = document.getElementById(`item-weechat-info-${rowCount}`);
+
+            if (marketplaceInput && marketplaceInput.value === "weechat_yupoo_goofish") {
+                linkContainer.style.display = "none";
+                weechatInfoContainer.style.display = "block";
+            } else {
+                linkContainer.style.display = "block";
+                weechatInfoContainer.style.display = "none";
+            }
+        }
+
+        // Добавление товара для Японии
         function addJapanItem() {
             const itemsContainer = document.getElementById("items-container");
             const rowCount = itemsContainer.childElementCount + 1;
@@ -191,163 +291,69 @@
             const newItem = document.createElement("div");
             newItem.className = "item-row";
             newItem.innerHTML = `
-                <label>Товар #${rowCount}:</label>
-                <input type="file" class="form-control-file item-photo" accept="image/*" multiple required onchange="previewPhotos(this)">
-                <div class="photo-preview" style="display: flex; flex-wrap: wrap; gap: 10px;"></div>
-                <input type="text" class="form-control item-link" placeholder="Ссылка / ID товара">
-                <input type="number" class="form-control item-price" placeholder="Цена за единицу" step="any" required>
-                <input type="text" class="form-control item-color" placeholder="Цвет">
-                <input type="text" class="form-control item-size" placeholder="Размер">
-                <button class="button" onclick="removeItem(this)">🗑 Удалить товар</button>
+                <div style="margin-top: 10px;">
+                    <label>Товар #${rowCount}:</label>
+                    <br>
+                    <label>Загрузите фото (до 5 штук):</label>
+                    <input type="file" class="form-control-file item-photo" accept="image/*" multiple onchange="previewPhotos(this)">
+                    <div class="photo-preview" style="display: flex; flex-wrap: wrap; gap: 10px;"></div>
+                    <br>
+                    <label for="item-link-${rowCount}">Ссылка на товар:</label>
+                    <input type="text" id="item-link-${rowCount}" class="form-control" placeholder="Введите ссылку">
+                    <br>
+                    <label for="item-price-${rowCount}">Цена (за единицу) без учета скидки на первый заказ:</label>
+                    <input type="number" id="item-price-${rowCount}" class="form-control" step="any" placeholder="Цена товара">
+                    <br>
+                    <label for="item-color-${rowCount}">Цвет:</label>
+                    <input type="text" id="item-color-${rowCount}" class="form-control" placeholder="Цвет товара">
+                    <br>
+                    <label for="item-size-${rowCount}">Размер:</label>
+                    <input type="text" id="item-size-${rowCount}" class="form-control" placeholder="Пример: M, 42">
+                    <br>
+                    <label for="item-quantity-${rowCount}">Количество:</label>
+                    <input type="number" id="item-quantity-${rowCount}" class="form-control" min="1" placeholder="шт." value="1">
+                    <br>
+                    <label for="item-comment-${rowCount}">Комментарий:</label>
+                    <input type="text" id="item-comment-${rowCount}" class="form-control" placeholder="Батч, договоренности с поставщиком и т.д.">
+                    <br>
+                    <button class="button" onclick="removeItem(this)" style="margin-top: 10px;">🗑 Удалить товар</button>
+                </div>
             `;
             itemsContainer.appendChild(newItem);
         }
 
-        function handleCountryChange() {
-            const countrySelect = document.getElementById("country");
-            const marketplaceSection = document.getElementById("marketplace-section");
-            const orderForm = document.getElementById("order-form");
-
-            const selectedCountry = countrySelect.value;
-
-            // Очищаем контейнер с товарами при смене страны
-            const itemsContainer = document.getElementById("items-container");
-            itemsContainer.innerHTML = "";
-
-            if (selectedCountry === "china") {
-                marketplaceSection.style.display = "block";
-                orderForm.style.display = "block";
-                addItem(); // Добавляем первый товар для Китая
-            } else if (selectedCountry === "japan") {
-                marketplaceSection.style.display = "none"; // Скрываем маркетплейс для Японии
-                orderForm.style.display = "block";
-                addJapanItem(); // Добавляем товар с формой для Японии
-            } else {
-                marketplaceSection.style.display = "none";
-                orderForm.style.display = "none";
-            }
-        }
-
-        function addItem() {
-                const itemsContainer = document.getElementById("items-container");
-                const rowCount = itemsContainer.childElementCount + 1;
-
-                const newItem = document.createElement("div");
-                newItem.className = "item-row";
-                newItem.innerHTML = `
-                    <div style="margin-top: 10px;">
-                        <label>Товар #${rowCount}:</label>
-                        <br>
-                        <label>Загрузите фото (до 5 штук):</label>
-                        <input type="file" class="form-control-file item-photo" accept="image/*" multiple onchange="previewPhotos(this)">
-                        <div class="photo-preview" style="display: flex; flex-wrap: wrap; gap: 10px;"></div>
-                        <br>
-                        <!-- Маркетплейс -->
-                        <label for="item-marketplace-${rowCount}">Маркетплейс:</label>
-                        <select id="item-marketplace-${rowCount}" class="form-control">
-                            <option value="poizon_taobao_weidan">POIZON/TAOBAO/WEIDAN И ДР.</option>
-                            <option value="weechat_yupoo_goofish">WEECHAT/YUPOO/GOOFISH</option>
-                        </select>
-                        <br>
-                        <!-- Ссылка / ID Weechat -->
-                        <div id="item-link-container-${rowCount}">
-                            <label for="item-link-${rowCount}">Ссылка:</label>
-                            <input type="text" id="item-link-${rowCount}" class="form-control" placeholder="Введите ссылку">
-                        </div>
-                        <!-- WeeChat ID, номер телефона или QR-код -->
-                        <div id="item-weechat-info-${rowCount}" style="display: none;">
-                            <label for="item-weechat-id-${rowCount}">WeeChat ID / Номер телефона / QR-код:</label>
-                            <input type="text" id="item-weechat-id-${rowCount}" class="form-control" placeholder="Введите WeeChat ID или номер телефона">
-                            <input type="file" id="item-qr-code-${rowCount}" accept="image/*" class="form-control-file" placeholder="Прикрепите QR-код">
-                        </div>
-                        <br>
-                        <!-- Цена -->
-                        <label for="item-price-${rowCount}">Цена (за единицу) без учета скидки на первый заказ:</label>
-                        <input type="number" id="item-price-${rowCount}" class="form-control" step="any" placeholder="Цена товара">
-                        <br>
-                        <!-- Цвет -->
-                        <label for="item-color-${rowCount}">Цвет:</label>
-                        <input type="text" id="item-color-${rowCount}" class="form-control" placeholder="Цвет товара">
-                        <br>
-                        <!-- Размер -->
-                        <label for="item-size-${rowCount}">Размер (EU):</label>
-                        <input type="text" id="item-size-${rowCount}" class="form-control" placeholder="Пример: M, 42">
-                        <br>
-                        <!-- Количество -->
-                        <label for="item-quantity-${rowCount}">Количество:</label>
-                        <input type="number" id="item-quantity-${rowCount}" class="form-control" min="1" placeholder="шт." value="1">
-                        <button class="button" onclick="removeItem(this)" style="margin-top: 10px;">🗑 Удалить товар</button>
-                    </div>
-                `;
-                itemsContainer.appendChild(newItem);
-
-                // Добавляем обработчик для выбора маркетплейса
-                const marketplaceSelect = newItem.querySelector(`#item-marketplace-${rowCount}`);
-                marketplaceSelect.addEventListener("change", function () {
-                    const selectedMarketplace = this.value;
-                    const linkContainer = newItem.querySelector(`#item-link-container-${rowCount}`);
-                    const weechatInfoContainer = newItem.querySelector(`#item-weechat-info-${rowCount}`);
-
-                    if (selectedMarketplace === "weechat_yupoo_goofish") {
-                        linkContainer.style.display = "none";
-                        weechatInfoContainer.style.display = "block";
-                    } else {
-                        linkContainer.style.display = "block";
-                        weechatInfoContainer.style.display = "none";
-                    }
-                });
-
-                // По умолчанию показываем поле "Ссылка / ID Weechat"
-                const country = document.getElementById("country").value;
-                if (country === "china") {
-                    const marketplaceInput = newItem.querySelector(`#item-marketplace-${rowCount}`);
-                    const selectedMarketplace = marketplaceInput.value;
-                    if (selectedMarketplace === "weechat_yupoo_goofish") {
-                        newItem.querySelector(`#item-weechat-info-${rowCount}`).style.display = "block";
-                        newItem.querySelector(`#item-link-container-${rowCount}`).style.display = "none";
-                    } else {
-                        newItem.querySelector(`#item-weechat-info-${rowCount}`).style.display = "none";
-                        newItem.querySelector(`#item-link-container-${rowCount}`).style.display = "block";
-                    }
-                }
-            }
-
+        // Удаление товара
         function removeItem(button) {
             const itemRow = button.parentElement.parentElement;
             itemRow.remove();
         }
 
+        // Отправка данных
         function submitOrder() {
             const full_name = document.getElementById("full-name").value.trim();
             const telegram_username = document.getElementById("telegram-username").value.trim();
             const country = document.getElementById("country").value;
+
             const itemsContainer = document.getElementById("items-container");
             const items = Array.from(itemsContainer.children).map((itemRow, index) => {
-                const photoInput = itemRow.querySelector(".item-photo");
-                const linkInput = itemRow.querySelector(`#item-link-${index + 1}`);
-                const priceInput = itemRow.querySelector(`#item-price-${index + 1}`);
-                const colorInput = itemRow.querySelector(`#item-color-${index + 1}`);
-                const sizeInput = itemRow.querySelector(`#item-size-${index + 1}`);
-                const quantityInput = itemRow.querySelector(`#item-quantity-${index + 1}`);
-                const marketplaceInput = itemRow.querySelector(`#item-marketplace-${index + 1}`);
-
+                const rowCount = index + 1;
                 return {
-                    photos: photoInput.files.length > 0 ? [...photoInput.files].map(f => f.name) : [],
-                    link: linkInput.value,
-                    price: parseFloat(priceInput.value),
-                    color: colorInput.value,
-                    size: sizeInput.value,
-                    quantity: parseInt(quantityInput.value),
-                    marketplace: marketplaceInput ? marketplaceInput.value : null
+                    photo: itemRow.querySelector(`#item-photo-${rowCount}`)?.files[0]?.name || "",
+                    link: itemRow.querySelector(`#item-link-${rowCount}`)?.value || "",
+                    price: parseFloat(itemRow.querySelector(`#item-price-${rowCount}`)?.value || 0),
+                    color: itemRow.querySelector(`#item-color-${rowCount}`)?.value || "",
+                    size: itemRow.querySelector(`#item-size-${rowCount}`)?.value || "",
+                    quantity: parseInt(itemRow.querySelector(`#item-quantity-${rowCount}`)?.value || 1),
+                    comment: itemRow.querySelector(`#item-comment-${rowCount}`)?.value || "",
+                    marketplace: itemRow.querySelector(`#item-marketplace-${rowCount}`)?.value || null
                 };
             });
 
             if (!full_name || !telegram_username || items.length === 0) {
-                alert("Пожалуйста, заполните ФИО, Telegram username и хотя бы один товар.");
+                alert("Пожалуйста, укажите ваше ФИО, Telegram username и добавьте хотя бы один товар.");
                 return;
             }
 
-            // Отправляем данные в бота
             const requestData = {
                 command: "create_order",
                 full_name: full_name,
@@ -357,19 +363,19 @@
             };
 
             tg.sendData(JSON.stringify(requestData));
-            alert("Заказ успешно отправлен!");
-            toggleSection("my-orders"); // Вернуться к калькулятору
+                toggleSection("my-orders"); // Переключаемся обратно на калькулятор
+                alert("Ваш заказ успешно создан!");
         }
 
+        // Превью изображений
         function previewPhotos(input) {
             const preview = input.nextElementSibling;
-            preview.innerHTML = ""; // очищаем предыдущие превью
-
+            preview.innerHTML = "";
             const files = input.files;
+
             for (let i = 0; i < files.length && i < 5; i++) {
                 const file = files[i];
                 const reader = new FileReader();
-
                 reader.onload = function(e) {
                     const img = document.createElement("img");
                     img.src = e.target.result;
@@ -379,7 +385,6 @@
                     img.style.borderRadius = "5px";
                     preview.appendChild(img);
                 };
-
                 reader.readAsDataURL(file);
             }
         }
