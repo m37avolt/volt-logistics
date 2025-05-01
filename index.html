@@ -1,10 +1,13 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VOLT Logistics Mini-App</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>VOLT Logistics</title>
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -12,57 +15,76 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            text-align: center;
             height: 100vh;
             margin: 0;
-            padding: 20px;
             background-color: #f0f0f0;
         }
+
         .container {
             width: 100%;
             max-width: 400px;
-            text-align: center;
-            background-color: #fff;
             padding: 20px;
+            background: #fff;
             border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
             overflow-y: auto;
         }
+
         .button {
             margin: 10px;
             padding: 10px 20px;
             font-size: 16px;
             cursor: pointer;
-            border: none;
-            border-radius: 5px;
             background-color: #0088cc;
             color: white;
+            border: none;
+            border-radius: 5px;
         }
+
         .button:hover {
             background-color: #007bb5;
         }
+
         .section {
             display: none;
         }
+
         .section.active {
             display: block;
         }
+
         label {
             margin-right: 10px;
         }
+
         .result {
             margin-top: 20px;
             font-size: 18px;
             color: #333;
         }
-        .order-form {
-            margin-top: 20px;
-        }
+
         .item-row {
-            border: 1px solid #ddd;
-            padding: 10px;
             margin-bottom: 15px;
+            border: 1px solid #ccc;
+            padding: 10px;
             background-color: #fafafa;
         }
+
+        .photo-preview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        img.preview-img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+
         .marketplace-select {
             display: none;
         }
@@ -72,50 +94,22 @@
     <div class="container">
         <h1>VOLT Logistics</h1>
         <button class="button" onclick="toggleSection('calculator')">🧮 Калькулятор</button>
-        <button class="button" onclick="toggleSection('create-order')">📝 Создать новый заказ</button>
+        <button class="button" onclick="toggleSection('create-order')">📝 Создать заказ</button>
         <button class="button" onclick="toggleSection('my-orders')">📦 Мои заказы</button>
-        <button class="button" id="manager-button" style="display: none;" onclick="toggleSection('manager')">🔒 Панель менеджера</button>
+        <button class="button" id="manager-button" style="display: none;" onclick="toggleSection('manager')">🔒 Менеджер</button>
 
-        <!-- Меню для создания заказа -->
+        <!-- Создание заказа -->
         <div id="create-order" class="section">
-            <h2>Создать новый заказ</h2>
             <label for="country">Страна выкупа:</label>
             <select id="country" class="form-control" onchange="handleCountryChange()">
                 <option value="" selected disabled>Выберите страну</option>
                 <option value="china">🇨🇳 Китай</option>
                 <option value="japan">🇯🇵 Япония</option>
-                <option value="europe" disabled style="color: gray;">🇪🇺 Европа</option>
-                <option value="usa" disabled style="color: gray;">🇺🇸 США</option>
+                <option value="europe" disabled style="color: gray;">🇪🇺 Европа (временно недоступна)</option>
+                <option value="usa" disabled style="color: gray;">🇺🇸 США (временно недоступны)</option>
             </select>
 
-            <!-- Форма для товаров -->
-            <div id="order-form" class="order-form" style="display: none;">
-                <h3>Добавьте товары</h3>
-                <div id="items-container"></div>
-                <button class="button" onclick="addItem()">➕ Добавить еще товар</button>
-                <br><br>
-                <label for="full-name">ФИО:</label>
-                <input type="text" id="full-name" required class="form-control">
-                <br>
-                <label for="telegram-username">Telegram username:</label>
-                <input type="text" id="telegram-username" required class="form-control">
-                <br>
-                <button class="button" onclick="submitOrder()">✅ Создать заказ</button>
-            </div>
-        </div>
-
-        <!-- Калькулятор -->
-        <div id="calculator" class="section">
-            <h2>🧮 Калькулятор</h2>
-            <label for="country">Страна выкупа:</label>
-            <select id="country" class="form-control" onchange="handleCountryChange()">
-                <option value="" selected disabled>Выберите страну</option>
-                <option value="china">🇨🇳 Китай</option>
-                <option value="japan">🇯🇵 Япония</option>
-                <option value="europe" disabled style="color: gray;">🇪🇺 Европа</option>
-                <option value="usa" disabled style="color: gray;">🇺🇸 США</option>
-            </select>
-            <div id="marketplace-section" class="marketplace-select" style="display: none;">
+            <div id="marketplace-section" class="marketplace-select">
                 <br>
                 <label for="marketplace">Маркетплейс:</label>
                 <select id="marketplace" class="form-control">
@@ -123,9 +117,46 @@
                     <option value="weechat_yupoo_goofish">WEECHAT/YUPOO/GOOFISH</option>
                 </select>
             </div>
+
+            <div id="order-form" class="order-form" style="display: none; margin-top: 20px;">
+                <h3>Добавьте товар(ы)</h3>
+                <div id="items-container"></div>
+                <button type="button" class="button" onclick="addItem()">➕ Добавить товар</button><br><br>
+
+                <label for="full-name">ФИО:</label>
+                <input type="text" id="full-name" required class="form-control"><br><br>
+
+                <label for="telegram-username">Telegram username:</label>
+                <input type="text" id="telegram-username" required class="form-control"><br><br>
+
+                <button class="button" onclick="submitOrder()">✅ Создать заказ</button>
+            </div>
+        </div>
+
+        <!-- Калькулятор -->
+        <div id="calculator" class="section">
+            <h2>🧮 Калькулятор</h2>
+            <label for="calc-country">Страна выкупа:</label>
+            <select id="calc-country" class="form-control" onchange="updateCalculatorFields()">
+                <option value="" selected disabled>Выберите страну</option>
+                <option value="china">Китай 🇨🇳</option>
+                <option value="japan">Япония 🗼</option>
+                <option value="europe" disabled style="color: gray;">Европа 🇪🇺</option>
+                <option value="usa" disabled style="color: gray;">США 🇺🇸</option>
+            </select>
+
+            <div id="calc-marketplace-section" style="display: none;">
+                <br>
+                <label for="calc-marketplace">Маркетплейс:</label>
+                <select id="calc-marketplace" class="form-control">
+                    <option value="poizon_taobao_weidan">POIZON / TAOBAO / WEIDAN И ДР.</option>
+                    <option value="weechat_yupoo_goofish">WEECHAT / YUPOO / GOOFISH</option>
+                </select>
+            </div>
+
             <br>
-            <label for="price">Цена (в валюте страны):</label>
-            <input type="number" id="price" step="any" required class="form-control">
+            <label for="price">Цена (за единицу):</label>
+            <input type="number" id="price" step="any" placeholder="Введите цену" required class="form-control">
             <br>
             <button class="button" onclick="calculate()">Рассчитать</button>
             <div id="result" class="result"></div>
@@ -141,9 +172,7 @@
                         <th>Статус</th>
                     </tr>
                 </thead>
-                <tbody id="user-orders-container">
-                    <!-- Заказы будут загружаться здесь -->
-                </tbody>
+                <tbody id="user-orders-container"></tbody>
             </table>
         </div>
 
@@ -157,9 +186,7 @@
                         <th>Действия</th>
                     </tr>
                 </thead>
-                <tbody id="manager-orders-container">
-                    <!-- Заказы будут загружаться здесь -->
-                </tbody>
+                <tbody id="manager-orders-container"></tbody>
             </table>
         </div>
     </div>
@@ -168,7 +195,7 @@
     <script>
         const tg = window.Telegram.WebApp;
 
-        // Получаем ID текущего пользователя
+        // Получаем ID пользователя
         const userId = tg.initDataUnsafe.user.id;
 
         // Проверяем, является ли пользователь менеджером
@@ -178,38 +205,32 @@
         }
 
         function toggleSection(sectionId) {
-            document.querySelectorAll(".section").forEach((section) => {
-                section.classList.remove("active");
-            });
-            document.getElementById(sectionId).classList.add("active");
+            document.querySelectorAll('.section').forEach(sec => sec.style.display = 'none');
+            document.getElementById(sectionId).style.display = 'block';
         }
 
         function handleCountryChange() {
-            const countrySelect = document.getElementById("country");
+            const country = document.getElementById("country").value;
             const marketplaceSection = document.getElementById("marketplace-section");
             const orderForm = document.getElementById("order-form");
-            const selectedCountry = countrySelect.value;
 
             // Очищаем контейнер при смене страны
             const itemsContainer = document.getElementById("items-container");
             itemsContainer.innerHTML = "";
 
-            if (selectedCountry === "china") {
+            if (country === "china") {
                 marketplaceSection.style.display = "block";
                 orderForm.style.display = "block";
-                addItem();
-            } else if (selectedCountry === "japan") {
+                addItem(); // Автоматически добавляем первое поле
+            } else if (country === "japan") {
                 marketplaceSection.style.display = "none";
                 orderForm.style.display = "block";
-                addJapanItem();
+                addJapanItem(); // Для Японии своя форма
             } else {
-                marketplaceSection.style.display = "none";
-                orderForm.style.display = "none";
                 alert("Пока доступны только Китай и Япония.");
             }
         }
 
-        // Добавление товара для Китая
         function addItem() {
             const itemsContainer = document.getElementById("items-container");
             const rowCount = itemsContainer.childElementCount + 1;
@@ -218,61 +239,116 @@
             newItem.className = "item-row";
             newItem.innerHTML = `
                 <div style="margin-top: 10px;">
-                    <label>Товар #${rowCount}:</label>
-                    <br>
-                    <label>Загрузите фото (до 5 штук):</label>
+                    <hr>
+                    <h4>Товар #${rowCount}</h4>
+
+                    <!-- Фото товара -->
+                    <label>Загрузите фото:</label>
                     <input type="file" class="form-control-file item-photo" accept="image/*" multiple onchange="previewPhotos(this)">
-                    <div class="photo-preview" style="display: flex; flex-wrap: wrap; gap: 10px;"></div>
-                    <br>
+                    <div class="photo-preview" style="display:flex;flex-wrap:wrap;gap:10px;"></div>
+
+                    <!-- Маркетплейс -->
                     <label for="item-marketplace-${rowCount}">Маркетплейс:</label>
-                    <select id="item-marketplace-${rowCount}" class="form-control" onchange="updateMarketplaceFields(${rowCount})">
-                        <option value="poizon_taobao_weidan">POIZON/TAOBAO/WEIDAN И ДР.</option>
-                        <option value="weechat_yupoo_goofish">WEECHAT/YUPOO/GOOFISH</option>
+                    <select id="item-marketplace-${rowCount}" class="form-control" onchange="updateMarketplace(${rowCount})">
+                        <option value="poizon_taobao_weidan">POIZON / TAOBAO / WEIDAN И ДР.</option>
+                        <option value="weechat_yupoo_goofish">WEECHAT / YUPOO / GOOFISH</option>
                     </select>
-                    <br>
+
+                    <!-- Ссылка или WeeChat ID -->
                     <div id="item-link-container-${rowCount}">
                         <label for="item-link-${rowCount}">Ссылка на товар:</label>
-                        <input type="text" id="item-link-${rowCount}" class="form-control" placeholder="Введите ссылку">
+                        <input type="text" id="item-link-${rowCount}" class="form-control" placeholder="Введите ссылку: ">
                     </div>
                     <div id="item-weechat-info-${rowCount}" style="display: none;">
                         <label for="item-weechat-id-${rowCount}">WeeChat ID / Номер телефона / QR-код:</label>
-                        <input type="text" id="item-weechat-id-${rowCount}" class="form-control" placeholder="Введите WeeChat ID или номер">
+                        <input type="text" id="item-weechat-id-${rowCount}" class="form-control" placeholder="Пример: 123456789">
                         <input type="file" id="item-qr-code-${rowCount}" accept="image/*" class="form-control-file" placeholder="QR-код">
                     </div>
-                    <br>
-                    <label for="item-price-${rowCount}">Цена (за единицу) без учета скидки на первый заказ:</label>
-                    <input type="number" id="item-price-${rowCount}" class="form-control" step="any" placeholder="Цена товара">
-                    <br>
+
+                    <!-- Цена -->
+                    <label for="item-price-${rowCount}">Цена за единицу без учета скидок:</label>
+                    <input type="number" id="item-price-${rowCount}" class="form-control" step="any" placeholder="Введите цену">
+
+                    <!-- Цвет -->
                     <label for="item-color-${rowCount}">Цвет:</label>
-                    <input type="text" id="item-color-${rowCount}" class="form-control" placeholder="Цвет товара">
-                    <br>
+                    <input type="text" id="item-color-${rowCount}" class="form-control" placeholder="Укажите цвет">
+
+                    <!-- Размер -->
                     <label for="item-size-${rowCount}">Размер:</label>
-                    <input type="text" id="item-size-${rowCount}" class="form-control" placeholder="Пример: M, 42">
-                    <br>
+                    <input type="text" id="item-size-${rowCount}" class="form-control" placeholder="Пример: M / 42">
+
+                    <!-- Количество -->
                     <label for="item-quantity-${rowCount}">Количество:</label>
-                    <input type="number" id="item-quantity-${rowCount}" class="form-control" min="1" placeholder="шт." value="1">
-                    <br>
+                    <input type="number" id="item-quantity-${rowCount}" min="1" class="form-control" value="1">
+
+                    <!-- Комментарий к товару (если не нужен, то оставьте -) -->
                     <label for="item-comment-${rowCount}">Комментарий:</label>
-                    <input type="text" id="item-comment-${rowCount}" class="form-control" placeholder="Батч, договоренности с поставщиком и т.д.">
-                    <br>
-                    <button class="button" onclick="removeItem(this)" style="margin-top: 10px;">🗑 Удалить товар</button>
+                    <input type="text" id="item-comment-${rowCount}" class="form-control" placeholder="Батч, договоренности с поставщиком...">
+
+                    <!-- Удаление товара -->
+                    <button type="button" class="button" onclick="removeItem(this)" style="margin-top: 10px;">🗑 Удалить товар</button>
                 </div>
             `;
             itemsContainer.appendChild(newItem);
 
-            // Сразу скрыть поля, если это WEECHAT
-            const marketplaceInput = newItem.querySelector(`#item-marketplace-${rowCount}`);
-            if (marketplaceInput.value === "weechat_yupoo_goofish") {
-                newItem.querySelector(`#item-link-container-${rowCount}`).style.display = "none";
-                newItem.querySelector(`#item-weechat-info-${rowCount}`).style.display = "block";
-            }
+            // По умолчанию показываем "Ссылка", если не WEECHAT
+            newItem.querySelector(`#item-marketplace-${rowCount}`).addEventListener("change", () => {
+                updateMarketplace(rowCount);
+            });
+            updateMarketplace(rowCount);
         }
 
-        // Обновление полей маркетплейса
-        function updateMarketplaceFields(rowCount) {
-            const marketplaceInput = document.getElementById(`item-marketplace-${rowCount}`);
-            const linkContainer = document.getElementById(`item-link-container-${rowCount}`);
-            const weechatInfoContainer = document.getElementById(`item-weechat-info-${rowCount}`);
+        function addJapanItem() {
+            const itemsContainer = document.getElementById("items-container");
+            const rowCount = itemsContainer.childElementCount + 1;
+
+            const newItem = document.createElement("div");
+            newItem.className = "item-row";
+            newItem.innerHTML = `
+                <div style="margin-top: 10px;">
+                    <hr>
+                    <h4>Товар #${rowCount}</h4>
+
+                    <!-- Фото товара -->
+                    <label>Загрузите фото:</label>
+                    <input type="file" class="form-control-file item-photo" accept="image/*" multiple onchange="previewPhotos(this)">
+                    <div class="photo-preview" style="display:flex;flex-wrap:wrap;gap:10px;"></div>
+
+                    <!-- Ссылка на товар -->
+                    <label for="item-link-${rowCount}">Ссылка на товар:</label>
+                    <input type="text" id="item-link-${rowCount}" class="form-control" placeholder="Введите ссылку: ">
+
+                    <!-- Цена -->
+                    <label for="item-price-${rowCount}">Цена за единицу (JPY):</label>
+                    <input type="number" id="item-price-${rowCount}" class="form-control" step="any" placeholder="Укажите цену:">
+
+                    <!-- Цвет -->
+                    <label for="item-color-${rowCount}">Цвет:</label>
+                    <input type="text" id="item-color-${rowCount}" class="form-control" placeholder="Укажите цвет:">
+
+                    <!-- Размер -->
+                    <label for="item-size-${rowCount}">Размер:</label>
+                    <input type="text" id="item-size-${rowCount}" class="form-control" placeholder="Пример: M / 42">
+
+                    <!-- Количество -->
+                    <label for="item-quantity-${rowCount}">Количество:</label>
+                    <input type="number" id="item-quantity-${rowCount}" min="1" class="form-control" value="1">
+
+                    <!-- Комментарий -->
+                    <label for="item-comment-${rowCount}">Комментарий:</label>
+                    <input type="text" id="item-comment-${rowCount}" class="form-control" placeholder="Батч A1 | Примечание">
+
+                    <!-- Удаление товара -->
+                    <button type="button" class="button" onclick="removeItem(this)">🗑 Удалить товар</button>
+                </div>
+            `;
+            itemsContainer.appendChild(newItem);
+        }
+
+        function updateMarketplace(index) {
+            const marketplaceInput = document.getElementById(`item-marketplace-${index}`);
+            const linkContainer = document.getElementById(`item-link-container-${index}`);
+            const weechatInfoContainer = document.getElementById(`item-weechat-info-${index}`);
 
             if (marketplaceInput && marketplaceInput.value === "weechat_yupoo_goofish") {
                 linkContainer.style.display = "none";
@@ -283,91 +359,11 @@
             }
         }
 
-        // Добавление товара для Японии
-        function addJapanItem() {
-            const itemsContainer = document.getElementById("items-container");
-            const rowCount = itemsContainer.childElementCount + 1;
-
-            const newItem = document.createElement("div");
-            newItem.className = "item-row";
-            newItem.innerHTML = `
-                <div style="margin-top: 10px;">
-                    <label>Товар #${rowCount}:</label>
-                    <br>
-                    <label>Загрузите фото (до 5 штук):</label>
-                    <input type="file" class="form-control-file item-photo" accept="image/*" multiple onchange="previewPhotos(this)">
-                    <div class="photo-preview" style="display: flex; flex-wrap: wrap; gap: 10px;"></div>
-                    <br>
-                    <label for="item-link-${rowCount}">Ссылка на товар:</label>
-                    <input type="text" id="item-link-${rowCount}" class="form-control" placeholder="Введите ссылку">
-                    <br>
-                    <label for="item-price-${rowCount}">Цена (за единицу) без учета скидки на первый заказ:</label>
-                    <input type="number" id="item-price-${rowCount}" class="form-control" step="any" placeholder="Цена товара">
-                    <br>
-                    <label for="item-color-${rowCount}">Цвет:</label>
-                    <input type="text" id="item-color-${rowCount}" class="form-control" placeholder="Цвет товара">
-                    <br>
-                    <label for="item-size-${rowCount}">Размер:</label>
-                    <input type="text" id="item-size-${rowCount}" class="form-control" placeholder="Пример: M, 42">
-                    <br>
-                    <label for="item-quantity-${rowCount}">Количество:</label>
-                    <input type="number" id="item-quantity-${rowCount}" class="form-control" min="1" placeholder="шт." value="1">
-                    <br>
-                    <label for="item-comment-${rowCount}">Комментарий:</label>
-                    <input type="text" id="item-comment-${rowCount}" class="form-control" placeholder="Батч, договоренности с поставщиком и т.д.">
-                    <br>
-                    <button class="button" onclick="removeItem(this)" style="margin-top: 10px;">🗑 Удалить товар</button>
-                </div>
-            `;
-            itemsContainer.appendChild(newItem);
-        }
-
-        // Удаление товара
         function removeItem(button) {
             const itemRow = button.parentElement.parentElement;
             itemRow.remove();
         }
 
-        // Отправка данных
-        function submitOrder() {
-            const full_name = document.getElementById("full-name").value.trim();
-            const telegram_username = document.getElementById("telegram-username").value.trim();
-            const country = document.getElementById("country").value;
-
-            const itemsContainer = document.getElementById("items-container");
-            const items = Array.from(itemsContainer.children).map((itemRow, index) => {
-                const rowCount = index + 1;
-                return {
-                    photo: itemRow.querySelector(`#item-photo-${rowCount}`)?.files[0]?.name || "",
-                    link: itemRow.querySelector(`#item-link-${rowCount}`)?.value || "",
-                    price: parseFloat(itemRow.querySelector(`#item-price-${rowCount}`)?.value || 0),
-                    color: itemRow.querySelector(`#item-color-${rowCount}`)?.value || "",
-                    size: itemRow.querySelector(`#item-size-${rowCount}`)?.value || "",
-                    quantity: parseInt(itemRow.querySelector(`#item-quantity-${rowCount}`)?.value || 1),
-                    comment: itemRow.querySelector(`#item-comment-${rowCount}`)?.value || "",
-                    marketplace: itemRow.querySelector(`#item-marketplace-${rowCount}`)?.value || null
-                };
-            });
-
-            if (!full_name || !telegram_username || items.length === 0) {
-                alert("Пожалуйста, укажите ваше ФИО, Telegram username и добавьте хотя бы один товар.");
-                return;
-            }
-
-            const requestData = {
-                command: "create_order",
-                full_name: full_name,
-                telegram_username: telegram_username,
-                country: country,
-                items: items
-            };
-
-            tg.sendData(JSON.stringify(requestData));
-                toggleSection("my-orders"); // Переключаемся обратно на калькулятор
-                alert("Ваш заказ успешно создан!");
-        }
-
-        // Превью изображений
         function previewPhotos(input) {
             const preview = input.nextElementSibling;
             preview.innerHTML = "";
@@ -379,33 +375,112 @@
                 reader.onload = function(e) {
                     const img = document.createElement("img");
                     img.src = e.target.result;
-                    img.style.width = "50px";
-                    img.style.height = "50px";
-                    img.style.objectFit = "cover";
-                    img.style.borderRadius = "5px";
+                    img.className = "preview-img";
                     preview.appendChild(img);
                 };
                 reader.readAsDataURL(file);
             }
         }
 
-        // Обработка данных от бота
+        function calculate() {
+            const country = document.getElementById("calc-country").value;
+            const marketplace = document.getElementById("calc-marketplace").value;
+            const priceInput = document.getElementById("price").value.trim();
+
+            if (!country || !priceInput) {
+                alert("Выберите страну и введите цену.");
+                return;
+            }
+
+            const price = parseFloat(priceInput);
+            let result = 0;
+
+            switch(country) {
+                case "china":
+                    if (marketplace === "poizon_taobao_weidan") {
+                        result = price * currency_rates["CNY"] * 1.08;
+                    } else {
+                        result = price * currency_rates["CNY"] * 1.13;
+                    }
+                    break;
+                case "japan":
+                    result = price * currency_rates["JPY"] * 1.03;
+                    break;
+                default:
+                    alert("Ошибка: выберите корректную страну.");
+                    return;
+            }
+
+            document.getElementById("result").innerText = `Итоговая стоимость: ${result.toFixed(2)} ₽`;
+        }
+
+        function submitOrder() {
+            const full_name = document.getElementById("full-name").value.trim();
+            const telegram_username = document.getElementById("telegram-username").value.trim();
+            const country = document.getElementById("country").value;
+            const itemsContainer = document.getElementById("items-container");
+
+            if (!full_name || !telegram_username || !country || itemsContainer.childElementCount === 0) {
+                alert("⚠️ Заполните все поля перед созданием заказа.");
+                return;
+            }
+
+            const items = Array.from(itemsContainer.children).map((itemRow, idx) => {
+                const photoInput = itemRow.querySelector(".item-photo");
+                const linkOrIdInput = itemRow.querySelector(`#item-link-${idx + 1}`) ||
+                                     itemRow.querySelector(`#item-weechat-id-${idx + 1}`);
+                const priceInput = itemRow.querySelector(`#item-price-${idx + 1}`);
+                const colorInput = itemRow.querySelector(`#item-color-${idx + 1}`);
+                const sizeInput = itemRow.querySelector(`#item-size-${idx + 1}`);
+                const quantityInput = itemRow.querySelector(`#item-quantity-${idx + 1}`);
+                const commentInput = itemRow.querySelector(`#item-comment-${idx + 1}`);
+
+                return {
+                    photos: Array.from(photoInput.files).map(f => f.name),
+                    link_or_id: linkOrIdInput?.value || "",
+                    price: parseFloat(priceInput?.value || 0),
+                    color: colorInput?.value || "",
+                    size: sizeInput?.value || "",
+                    quantity: parseInt(quantityInput?.value || 1),
+                    comment: commentInput?.value || ""
+                };
+            });
+
+            const requestData = {
+                command: "create_order",
+                full_name: full_name,
+                telegram_username: telegram_username,
+                country: country,
+                items: items
+            };
+
+            tg.sendData(JSON.stringify(requestData));
+            alert("✅ Ваш заказ успешно создан!");
+            toggleSection("calculator");
+        }
+
+        // Обработка ответов от бота
         tg.onEvent("web_app_data", function(data) {
-            const response = JSON.parse(data.data);
-            if (response.command === "track_order") {
-                document.getElementById("order-status").innerText = `Статус: ${response.status}`;
-            } else if (response.command === "create_order") {
-                alert(`Заказ #${response.order_id} успешно создан.`);
-                toggleSection("calculator");
-            } else if (response.command === "edit_order_status") {
-                alert(`Статус заказа #${response.order_id} изменен на: ${response.status}`);
-                toggleSection("manager");
-            } else if (response.command === "add_comment") {
-                alert(`Комментарий к заказу #${response.order_id} добавлен.`);
-            } else if (response.command === "attach_photo") {
-                alert(`Фотография к заказу #${response.order_id} прикреплена.`);
-            } else if (response.command === "send_requisites") {
-                alert(`Реквизиты к заказу #${response.order_id} отправлены.`);
+            try {
+                const response = JSON.parse(data.data);
+
+                if (response.command === "create_order") {
+                    alert(`✅ Заказ #${response.order_id} создан.`);
+                    toggleSection("calculator");
+                } else if (response.command === "track_order") {
+                    document.getElementById("order-status").innerText = `Статус: ${response.status}`;
+                } else if (response.command === "edit_order_status") {
+                    alert(`Статус заказа #${response.order_id} изменён на '${response.status}'`);
+                    toggleSection("manager");
+                } else if (response.command === "add_comment") {
+                    alert(`Комментарий к заказу #${response.order_id} добавлен.`);
+                } else if (response.command === "attach_photo") {
+                    alert(`Фотография к заказу #${response.order_id} прикреплена.`);
+                } else if (response.command === "send_requisites") {
+                    alert(`Реквизиты к заказу #${response.order_id} отправлены.`);
+                }
+            } catch (e) {
+                console.error("Ошибка обработки данных от бота.", e);
             }
         });
 
