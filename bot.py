@@ -2,423 +2,366 @@
 import telebot
 import sqlite3
 import os
+from datetime import datetime
+import pandas as pd
 import json
 import base64
-from io import BytesIO
+import requests
 from telebot import types
-import time
 
+# --- Настройки бота ---
 BOT_TOKEN = '6425282545:AAHv28Q5sWLgMpMnn-9FLrASUYITQNMDFkM'
 bot = telebot.TeleBot(BOT_TOKEN)
 
-# Курсы валют
-yuan = 14.5
-yen = 0.72
-dollar = 98.1
-euro = 105.3
+# --- Курсы валют ---
+currency_rates = {
+    "CNY": 14.5,
+    "JPY": 0.72,
+    "USD": 98.1,
+    "EUR": 105.3
+}
 
-# Доверенные менеджеры
-trusted_users = [919034275, 372145026, 6432717873]
+# --- Настройки GitHub ---
+GITHUB_REPO = "m37avolt/volt-orders"  # замените на ваш username/repo
+GITHUB_TOKEN = "ghp_ваш_токен_здесь"  # замените на ваш Personal Access Token
 
-# Путь к базе данных
+GITHUB_API_URL = f"https://api.github.com/repos/{GITHUB_REPO}/contents/"
+
+# --- Пути к файлам ---
 script_dir = os.path.dirname(os.path.abspath(__file__))
 db_path = os.path.join(script_dir, 'volt_logistics.db')
-blocked_users = []
+orders_dir = os.path.join(script_dir, 'orders')
+logs_dir = os.path.os.makedirs(orders_dir, exist_ok=True)
+os.makedirs(logs_dir, exist_ok=True)
 
+log_file_path = os.path.join(logs_dir, f"volt_log_{datetime.now().strftime('%Y-%m-%d')}.txt")
+
+# --- Логирование ---
+def log_event(event_type, user_id, message=None):
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    with open(log_file_path, "a", encoding="utf-8") as f:
+        line = f"[{timestamp}] [{event_type}] [User {user_id}]"
+        if message:
+            line += f": {message}"
+        line += "\n"
+        f.write(line)
+    print(f"[LOG] {event_type} | User: {user_id} | Message: {message}")
+
+# --- Инициализация базы данных ---
+def init_db():
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+
+    # Таблица пользователей
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            telegram_id INTEGER PRIMARY KEY,
+            full_name TEXT,
+            telegram_username TEXT,
+            is_manager BOOLEAN DEFAULT FALSE
+        )
+    ''')
+
+    # Таблица заказов
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS orders (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            full_name TEXT,
+            telegram_username TEXT,
+            country TEXT,
+            status TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+
+    # Таблица товаров внутри заказа
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS order_items (
+            item_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            order_id INTEGER,
+            photo TEXT,
+            link_or_id TEXT,
+            color TEXT,
+            size TEXT,
+            price REAL,
+            quantity INTEGER,
+            comment TEXT,
+            FOREIGN KEY(order_id) REFERENCES orders(id)
+        )
+    ''')
+
+    conn.commit()
+    conn.close()
+    log_event("init_db", "system", "База данных инициализирована.")
+
+init_db()
+
+# --- Добавление пользователя ---
+def add_user(user_id, full_name, username):
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT OR IGNORE INTO users (telegram_id, full_name, telegram_username) VALUES (?, ?, ?)",
+        (user_id, full_name, username)
+    )
+    conn.commit()
+    conn.close()
+    log_event("user_registered", user_id, f"{full_name}, @{username}")
+
+# --- Создание заказа ---
+def create_order(user_id, full_name, telegram_username, country):
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute('''
+        INSERT INTO orders 
+        (user_id, full_name, telegram_username, country, status)
+        VALUES (?, ?, ?, ?, ?)
+    ''', (user_id, full_name, telegram_username, country, "В ожидании проверки"))
+    order_id = cursor.lastrowid
+    conn.commit()
+    conn.close()
+    log_event("order_created", user_id, f"Заказ #{order_id}, страна: {country}")
+    return order_id
+
+# --- Сохранение товара в заказе ---
+def add_item_to_order(order_id, photo, link_or_id, color, size, price, quantity, comment=''):
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute('''
+        INSERT INTO order_items 
+        (order_id, photo, link_or_id, color, size, price, quantity, comment)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    ''', (order_id, photo, link_or_id, color, size, price, quantity, comment))
+    conn.commit()
+    conn.close()
+    log_event("item_added", order_id,
+              f"Фото: {photo}, Ссылка: {link_or_id}, Цена: {price}, Кол-во: {quantity}")
+
+# --- Получение всех заказов ---
+def get_all_orders():
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, status, country FROM orders")
+    result = cursor.fetchall()
+    conn.close()
+    return result
+
+# --- Создание дневного Excel-файла ---
+def get_daily_excel_path():
+    today = datetime.now().strftime("%Y-%m-%d")
+    return os.path.join(orders_dir, f"{today}.xlsx")
+
+def ensure_daily_excel_exists():
+    daily_excel_path = get_daily_excel_path()
+    if not os.path.exists(daily_excel_path):
+        df = pd.DataFrame(columns=[
+            'Фото', 'ID / Ссылка', 'Цвет',
+            'Размер', 'Цена за единицу', 'Кол-во/шт',
+            'tg контакт', 'Страна выкупа', 'комментарий'
+        ])
+        df.to_excel(daily_excel_path, index=False)
+    return daily_excel_path
+
+# --- Сохранение в Excel ---
+def save_to_excel(item_data):
+    daily_excel_path = get_daily_excel_path()
+    try:
+        df_existing = pd.read_excel(daily_excel_path)
+    except Exception:
+        df_existing = pd.DataFrame(columns=item_data.keys())
+
+    df_new = pd.DataFrame([item_data])
+    df_combined = pd.concat([df_existing, df_new], ignore_index=True)
+    df_combined.to_excel(daily_excel_path, index=False)
+    log_event("excel_saved", "system", f"Данные записаны в {daily_excel_path}")
+
+    # Отправляем файл в GitHub
+    github_path = f"orders/{os.path.basename(daily_excel_path)}"
+    update_github_file(github_path, daily_excel_path, "Обновлён дневной заказ")
+
+# --- Обновление файла на GitHub ---
+def update_github_file(path_in_repo, file_path, commit_message="Update file"):
+    with open(file_path, "rb") as f:
+        content = f.read()
+
+    headers = {
+        "Authorization": f"token {GITHUB_TOKEN}",
+        "Accept": "application/vnd.github.v3+json"
+    }
+
+    url = GITHUB_API_URL + path_in_repo
+
+    # Получаем SHA файла (если существует)
+    try:
+        response = requests.get(url, headers=headers)
+        sha = response.json()["sha"] if response.status_code == 200 else None
+    except Exception:
+        sha = None
+
+    payload = {
+        "message": commit_message,
+        "content": base64.b64encode(content).decode("utf-8"),
+        "branch": "main"
+    }
+    if sha:
+        payload["sha"] = sha
+
+    response = requests.put(url, headers=headers, json=payload)
+    if response.status_code in [200, 201]:
+        log_event("github_sync", "system", f"{path_in_repo} успешно обновлен на GitHub.")
+    else:
+        log_event("github_error", "system", f"{response.status_code}: {response.text}")
+
+# --- Обновление SQLite в GitHub ---
+def sync_db_with_github():
+    db_dest_path = "volt_logistics.db"
+    update_github_file(db_dest_path, db_path, "Обновлена база данных")
+
+# --- Обработчик web_app_data ---
+@bot.message_handler(content_types=['web_app_data'])
+def handle_web_app_data(message):
+    try:
+        data = json.loads(message.web_app_data.data)
+        user_id = message.from_user.id
+        log_event("form_received", user_id, f"Получены данные от Web App: {data}")
+
+        if not is_registered(user_id):
+            bot.send_message(message.chat.id, "⚠️ Вы не зарегистрированы. Нажмите /start.")
+            return
+
+        if data.get('command') == 'create_order':
+            full_name = data.get('full_name')
+            telegram_username = data.get('telegram_username')
+            country = data.get('country')
+            items = data.get('items', [])
+
+            if not all([full_name, telegram_username, country, len(items) > 0]):
+                bot.send_message(message.chat.id, "⚠️ Не все поля формы заполнены.")
+                return
+
+            order_id = create_order(user_id, full_name, telegram_username, country)
+
+            for item in items:
+                photo_list = item.get('photos', [])
+                photo = ', '.join(photo_list) if isinstance(photo_list, list) else ''
+                link_or_id = item.get('link_or_id', '')
+                color = item.get('color', '')
+                size = item.get('size', '')
+                price = float(item.get('price', 0))
+                quantity = int(item.get('quantity', 1))
+                comment = item.get('comment', '')
+
+                add_item_to_order(order_id, photo, link_or_id, color, size, price, quantity, comment)
+
+                excel_data = {
+                    'Фото': photo,
+                    'ID / Ссылка': link_or_id,
+                    'Цвет': color,
+                    'Размер': size,
+                    'Цена за единицу': round(price * currency_rates.get(country.upper(), 1), 2),
+                    'Кол-во/шт': quantity,
+                    'tg контакт': telegram_username,
+                    'Страна выкупа': country.upper(),
+                    'комментарий': comment
+                }
+
+                save_to_excel(excel_data)
+
+            # Синхронизация базы данных с GitHub
+            sync_db_with_github()
+
+            bot.send_message(message.chat.id, f"✅ Ваш заказ #{order_id} создан!")
+
+        elif data.get('command') == 'preview_order':
+            bot.send_message(message.chat.id, "Вы предпросмотрели заказ.")
+            log_event("preview_order", user_id)
+
+    except Exception as e:
+        error_msg = str(e).replace("\n", "\\n")
+        log_event("error", user_id, error_msg)
+        bot.send_message(message.chat.id, f"❌ Ошибка при обработке данных: {error_msg}")
+
+# --- Проверка регистрации ---
+def is_registered(user_id):
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute("SELECT telegram_id FROM users WHERE telegram_id = ?", (user_id,))
+    result = cursor.fetchone()
+    conn.close()
+    return bool(result)
+
+# --- Команда /start ---
+@bot.message_handler(commands=['start'])
+def start(message):
+    user_id = message.from_user.id
+    full_name = message.from_user.full_name
+    username = message.from_user.username or ""
+    add_user(user_id, full_name, username)
+    send_options(message)
+
+# --- Главное меню ---
+def send_options(message):
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
+    btn1 = types.KeyboardButton("🧮КАЛЬКУЛЯТОР🧮")
+    btn2 = types.KeyboardButton("❗️ИНФОРМАЦИЯ❗️")
+    manager_btn = types.KeyboardButton("🔒 Панель менеджера")
+    markup.add(btn1, btn2, manager_btn)
+    bot.send_message(message.chat.id, "Выберите действие:", reply_markup=markup)
+
+# --- Является ли пользователь менеджером ---
 def is_manager(user_id):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute("SELECT is_manager FROM users WHERE telegram_id = ?", (user_id,))
     result = cursor.fetchone()
     conn.close()
-    if result and result[0]:
-        return True
-    return False
+    return bool(result[0]) if result else False
 
-def add_user(user_id, is_manager=False):
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
-    # Проверяем, является ли пользователь доверенным менеджером
-    if user_id in trusted_users:
-        is_manager = True
-    cursor.execute("INSERT OR IGNORE INTO users (telegram_id, is_manager) VALUES (?, ?)", 
-                   (user_id, is_manager))
-    conn.commit()
-    conn.close()
-
-def create_order(user_id, status="Новый", **kwargs):
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
-    cursor.execute(
-        "INSERT INTO orders (user_id, status, photos, comments) VALUES (?, ?, ?, ?)",
-        (user_id, status, kwargs.get('photos', ''), json.dumps(kwargs.get('comments', [])))
-    )
-    order_id = cursor.lastrowid
-    conn.commit()
-    conn.close()
-    return order_id
-
-def update_order(order_id, **kwargs):
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
-    set_clause = ', '.join([f"{k} = ?" for k in kwargs.keys()])
-    values = list(kwargs.values()) + [order_id]
-    cursor.execute(f"UPDATE orders SET {set_clause}, updated_at = CURRENT_TIMESTAMP WHERE id = ?", values)
-    conn.commit()
-    conn.close()
-
-def get_order(order_id):
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM orders WHERE id = ?", (order_id,))
-    order = cursor.fetchone()
-    conn.close()
-    return order
-
-def get_user_orders(user_id):
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
-    cursor.execute("SELECT id, status FROM orders WHERE user_id = ?", (user_id,))
-    orders = cursor.fetchall()
-    conn.close()
-    return orders
-
-def get_all_users():
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
-    cursor.execute("SELECT telegram_id FROM users")
-    users = cursor.fetchall()
-    conn.close()
-    return [u[0] for u in users]
-
-def send_order_notification(user_id, order_id, message_text):
-    bot.send_message(user_id, f"Заказ #{order_id}: {message_text}")
-
-def add_photo_to_order(order_id, photo_url):
-    order = get_order(order_id)
-    if order:
-        current_photos = order[4] or ''
-        new_photos = f"{current_photos},{photo_url}" if current_photos else photo_url
-        update_order(order_id, photos=new_photos)
-
-def add_comment_to_order(order_id, manager_id, comment_text):
-    order = get_order(order_id)
-    if order:
-        current_comments = order[5] or '[]'
-        comments_list = json.loads(current_comments)
-        comments_list.append({
-            'manager_id': manager_id,
-            'text': comment_text,
-            'created_at': time.strftime('%Y-%m-%d %H:%M:%S')
-        })
-        update_order(order_id, comments=json.dumps(comments_list))
-
-def send_options(message):
-    markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
-    btn1 = types.KeyboardButton("🧮КАЛЬКУЛЯТОР🧮")
-    btn2 = types.KeyboardButton("❗️ИНФОРМАЦИЯ❗️")
+# --- Менеджерская панель ---
+@bot.message_handler(func=lambda m: m.text == "🔒 Панель менеджера")
+def manager_panel(message):
     if is_manager(message.from_user.id):
-        manager_button = types.KeyboardButton("ПАНЕЛЬ МЕНЕДЖЕРА")
-        markup.add(btn1, btn2, manager_button)
+        markup = types.InlineKeyboardMarkup(row_width=2)
+        view_orders = types.InlineKeyboardButton("📊 Все заказы", callback_data="view_all_orders")
+        back = types.InlineKeyboardButton("⬅ Назад", callback_data="back_main")
+        markup.add(view_orders, back)
+        bot.send_message(message.chat.id, "Добро пожаловать в панель менеджера.", reply_markup=markup)
     else:
-        markup.add(btn1, btn2)
-    bot.send_message(message.chat.id, "Добро пожаловать! Выберите действие:", reply_markup=markup)
+        bot.send_message(message.chat.id, "Нет доступа к панели.")
 
-@bot.message_handler(commands=['start'])
-def start(message):
-    user_id = message.from_user.id
-    add_user(user_id)  # Добавляем пользователя в базу
-    send_options(message)
+# --- Callback handler ---
+@bot.callback_query_handler(func=lambda call: True)
+def handle_callback(call):
+    if call.data == "view_all_orders":
+        all_orders = get_all_orders()
+        response = "📦 Все заказы:\n\n" + ("\n".join([
+            f"• Заказ #{o[0]} | Статус: {o[1]} | Страна: {o[2]}"
+            for o in all_orders
+        ]) if all_orders else "Нет активных заказов.")
+        bot.send_message(call.message.chat.id, response)
+    elif call.data == "back_main":
+        send_options(call.message)
 
-@bot.message_handler(commands=['change_course'])
-def change_course(message):
-    sender_id = message.from_user.id
-    if sender_id in trusted_users:
-        bot.send_message(sender_id, "Введите новые курсы в формате: yuan;yen;dollar;euro\nНапример: `14.5;0.72;98.1;105.3`")
-        bot.register_next_step_handler(message, update_course)
-    else:
-        bot.send_message(sender_id, "Нет прав для выполнения этой команды.")
-
-def update_course(message):
-    global yuan, yen, dollar, euro
-    try:
-        new_values = list(map(float, message.text.split(';')))
-        if len(new_values) == 4:
-            yuan, yen, dollar, euro = new_values
-            bot.send_message(message.chat.id, f"Курсы обновлены:\nCNY: {yuan}\nUSD: {dollar}\nEUR: {euro}\nJPY: {yen}")
-        else:
-            bot.send_message(message.chat.id, "Ошибка! Убедитесь, что ввели ровно 4 значения, разделенные точкой с запятой.")
-    except ValueError:
-        bot.send_message(message.chat.id, "Ошибка! Убедитесь, что все значения числовые и введены правильно.")
-
-@bot.message_handler(commands=['sub'])
-def subscribe(message):
-    chat_id = message.chat.id
-    with sqlite3.connect(db_path) as conn:
-        conn.execute("UPDATE users SET is_subscribed = TRUE WHERE telegram_id = ?", (chat_id,))
-    bot.send_message(chat_id, "Вы успешно подписались на рассылку.")
-
-@bot.message_handler(commands=['unsub'])
-def unsubscribe(message):
-    chat_id = message.chat.id
-    with sqlite3.connect(db_path) as conn:
-        conn.execute("UPDATE users SET is_subscribed = FALSE WHERE telegram_id = ?", (chat_id,))
-    bot.send_message(chat_id, "Вы успешно отписаны от рассылки.")
-
-@bot.message_handler(commands=['broadcastspecial'])
-def send_broadcast(message):
-    if message.from_user.id in trusted_users:
-        bot.send_message(message.chat.id, "Введите текст для рассылки:")
-        bot.register_next_step_handler(message, handle_broadcast_text)
-    else:
-        bot.send_message(message.chat.id, "Нет прав для выполнения этой команды.")
-
-def handle_broadcast_text(message):
-    text = message.text
-    bot.send_message(message.chat.id, "Введите текст для первой кнопки или отправьте команду /skip, если кнопки не нужны.")
-    bot.register_next_step_handler(message, handle_button_text, text, [])
-
-def handle_button_text(message, text, buttons):
-    if message.text == "/skip":
-        bot.send_message(message.chat.id, "Прикрепите фотографию к сообщению, которое вы хотите отправить в рассылке. Если фото не требуется, отправьте команду /skip.")
-        bot.register_next_step_handler(message, handle_photo_for_broadcast, text, buttons)
-    else:
-        button_text = message.text
-        bot.send_message(message.chat.id, f"Введите URL для кнопки \"{button_text}\":")
-        bot.register_next_step_handler(message, handle_button_url, text, buttons, button_text)
-
-def handle_button_url(message, text, buttons, button_text):
-    button_url = message.text
-    buttons.append((button_text, button_url))
-    bot.send_message(message.chat.id, "Введите текст для следующей кнопки или отправьте команду /skip, если кнопки больше не нужны.")
-    bot.register_next_step_handler(message, handle_button_text, text, buttons)
-
-def handle_photo_for_broadcast(message, text, buttons):
-    if message.photo:
-        photo = message.photo[-1]
-        success, not_delivered_users = send_broadcast_with_photo(message.from_user.id, photo, text, buttons)
-        if success:
-            if not not_delivered_users:
-                bot.send_message(message.from_user.id, "Успешная рассылка. Пришла всем пользователям.")
-            else:
-                bot.send_message(message.from_user.id, f"Успешная рассылка. Не пришла пользователям {not_delivered_users}.")
-        else:
-            bot.send_message(message.from_user.id, "Рассылка не удалась.")
-    else:
-        success, not_delivered_users = send_broadcast_text(message.from_user.id, text, buttons)
-        if success:
-            if not not_delivered_users:
-                bot.send_message(message.from_user.id, "Успешная рассылка. Пришла всем пользователям.")
-            else:
-                bot.send_message(message.from_user.id, f"Успешная рассылка. Не пришла пользователям {not_delivered_users}.")
-        else:
-            bot.send_message(message.from_user.id, "Рассылка не удалась.")
-
-def send_broadcast_with_photo(sender_id, photo, text, buttons):
-    not_delivered_users = []
-    try:
-        users = get_all_users()  # Используем всех пользователей
-        markup = types.InlineKeyboardMarkup()
-        for btn_text, btn_url in buttons:
-            markup.add(types.InlineKeyboardButton(text=btn_text, url=btn_url))
-        for user_id in users:
-            if user_id not in blocked_users:
-                try:
-                    bot.send_photo(user_id, photo.file_id, caption=text, parse_mode="HTML", reply_markup=markup)
-                except telebot.apihelper.ApiException as e:
-                    if e.result.status_code == 403:
-                        blocked_users.append(user_id)
-                    else:
-                        not_delivered_users.append(user_id)
-        return True, not_delivered_users
-    except Exception as e:
-        print(f"Error sending broadcast with photo: {e}")
-        return False, not_delivered_users
-
-def send_broadcast_text(sender_id, text, buttons):
-    not_delivered_users = []
-    try:
-        users = get_all_users()  # Используем всех пользователей
-        markup = types.InlineKeyboardMarkup()
-        for btn_text, btn_url in buttons:
-            markup.add(types.InlineKeyboardButton(text=btn_text, url=btn_url))
-        for user_id in users:
-            if user_id not in blocked_users:
-                try:
-                    bot.send_message(user_id, text, parse_mode="HTML", reply_markup=markup)
-                except telebot.apihelper.ApiException as e:
-                    if e.result.status_code == 403:
-                        blocked_users.append(user_id)
-                    else:
-                        not_delivered_users.append(user_id)
-        return True, not_delivered_users
-    except Exception as e:
-        print(f"Error sending broadcast with text: {e}")
-        return False, not_delivered_users
-
-@bot.message_handler(func=lambda message: message.text == "🧮КАЛЬКУЛЯТОР🧮")
-def calculator_main(message):
-    markup = types.InlineKeyboardMarkup()
-    web_app_button = types.InlineKeyboardButton(
-        text="Открыть Калькулятор",
-        web_app=types.WebAppInfo(url="https://m37avolt.github.io/volt-logistics/")
-    )
-    markup.add(web_app_button)
-    bot.send_message(message.chat.id, "Калькулятор доступен здесь:", reply_markup=markup)
-
-@bot.message_handler(content_types=['web_app_data'])
-def handle_web_app_data(message):
-    try:
-        data = json.loads(message.web_app_data.data)
-        user_id = message.from_user.id
-
-        if data['command'] == 'create_order':
-            full_name = data['full_name']
-            telegram_username = data['telegram_username']
-            items = data['items']
-
-            # Создаем заказ в базе данных
-            order_id = create_order(user_id, status="Новый", full_name=full_name, telegram_username=telegram_username)
-
-            # Сохраняем информацию о товарах
-            for item in items:
-                add_item_to_order(order_id, item['photo'], item['color'], item['size'])
-
-            bot.send_message(user_id, f"Добавлен новый заказ! Номер заказа: #{order_id}")
-        else:
-            bot.send_message(user_id, "Неизвестная команда.")
-    except Exception as e:
-        bot.send_message(message.chat.id, f"Ошибка: {str(e)}")
-
-def add_item_to_order(order_id, photo, color, size):
+# --- Вывод всех заказов ---
+def get_all_orders():
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
-    cursor.execute(
-        "INSERT INTO order_items (order_id, photo, color, size) VALUES (?, ?, ?, ?)",
-        (order_id, photo, color, size)
-    )
-    conn.commit()
+    cursor.execute("SELECT id, status, country FROM orders")
+    result = cursor.fetchall()
     conn.close()
+    return result
 
-def update_order_status(order_id, new_status):
-    update_order(order_id, status=new_status)
-
-def get_order_status(order_id):
-    order = get_order(order_id)
-    return order[3] if order else None
-
-@bot.message_handler(commands=['track'])
-def track_order(message):
-    user_id = message.from_user.id
-    orders = get_user_orders(user_id)
-    if not orders:
-        bot.send_message(user_id, "У вас нет активных заказов.")
-        return_to_main_menu(message)
-    else:
-        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-        for order_id, status in orders:
-            markup.add(types.KeyboardButton(f"Заказ #{order_id} ({status})"))
-        back_button = types.KeyboardButton("Назад")
-        markup.add(back_button)
-        bot.send_message(user_id, "Выберите заказ для отслеживания:", reply_markup=markup)
-
-@bot.message_handler(func=lambda message: message.text.startswith("Заказ #"))
-def show_order_details(message):
-    order_id = int(message.text.split()[1].strip('#'))
-    order = get_order(order_id)
-    if order:
-        photos = order[4].split(',') if order[4] else []
-        comments = json.loads(order[5]) if order[5] else []
-        photos_text = ", ".join(photos) if photos else "Нет"
-        comments_text = "\n".join([f"{c['text']} (от {c['manager_id']})" for c in comments]) if comments else "Нет"
-        bot.send_message(message.chat.id, f"Детали заказа #{order_id}:\nСтатус: {order[3]}\nФото: {photos_text}\nКомментарии:\n{comments_text}")
-    else:
-        bot.send_message(message.chat.id, "Заказ не найден")
-
-@bot.message_handler(commands=['edit_status'])
-def edit_status(message):
-    if is_manager(message.from_user.id):
-        bot.send_message(message.chat.id, "Введите ID заказа:")
-        bot.register_next_step_handler(message, process_order_id)
-    else:
-        bot.send_message(message.chat.id, "Нет прав для выполнения этой команды.")
-
-def process_order_id(message):
-    try:
-        order_id = int(message.text)
-        bot.send_message(message.chat.id, "Введите новый статус:")
-        bot.register_next_step_handler(message, update_status, order_id)
-    except:
-        bot.send_message(message.chat.id, "Ошибка ID заказа")
-
-def update_status(message, order_id):
-    new_status = message.text
-    update_order_status(order_id, new_status)
-    bot.send_message(message.chat.id, f"Статус заказа {order_id} изменен на '{new_status}'")
-
-@bot.message_handler(commands=['check_user'])
-def check_user(message):
-    user_id = message.from_user.id
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM users WHERE telegram_id = ?", (user_id,))
-    user = cursor.fetchone()
-    conn.close()
-    if user:
-        bot.send_message(
-            message.chat.id,
-            f"Вы в базе данных! Ваш статус:\n"
-            f"ID в базе: {user[0]}\n"
-            f"Telegram ID: {user[1]}\n"
-            f"Менеджер: {'Да' if user[2] else 'Нет'}\n"
-        )
-    else:
-        bot.send_message(message.chat.id, "Вы не добавлены в базу данных.")
-
-@bot.message_handler(func=lambda message: message.text == "Назад")
-def handle_back_after_quantity(message):
-    return_to_main_menu(message)
-
-@bot.message_handler(func=lambda message: message.text.upper() == "📈КУРСЫ ВАЛЮТ📈")
-def show_currency(message):
-    chat_id = message.chat.id
-    bot.send_message(chat_id, f"КУРСЫ ВАЛЮТ:\n1 CNY - {yuan} руб.\n1 USD - {dollar} руб.\n1 EUR - {euro} руб.\n1 JPY - {yen} руб.", parse_mode='HTML')
-
-@bot.message_handler(func=lambda message: message.text.upper() == "❗️ИНФОРМАЦИЯ❗️")
-def company_info(message):
-    info_text = """
-Мы — <i><b>VOLT Logistics🚀</b></i>
-Один из лучших сервисов Выкупа и доставки, предоставляющих услуги сотрудничества с Китаем, Японией, Европой и США под ключ 🔑"""
-    bot.send_message(message.chat.id, info_text, parse_mode='HTML')
-
-@bot.message_handler(commands=['order'])
-def handle_order_command(message):
-    user_id = message.from_user.id
-    order_id = create_order(user_id, status="Новый")
-    send_order_notification(user_id, order_id, "Заказ успешно создан.")
-    markup = types.InlineKeyboardMarkup()
-    web_app_button = types.InlineKeyboardButton(text="Открыть Калькулятор", web_app=types.WebAppInfo(url="https://m37avolt.github.io/volt-logistics/"))
-    markup.add(web_app_button)
-    bot.send_message(user_id, "Калькулятор доступен здесь:", reply_markup=markup)
-
-def return_to_main_menu(message):
-    markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
-    btn1 = types.KeyboardButton("🧮КАЛЬКУЛЯТОР🧮")
-    btn2 = types.KeyboardButton("❗️ИНФОРМАЦИЯ❗️")
-    if is_manager(message.from_user.id):
-        manager_button = types.KeyboardButton("ПАНЕЛЬ МЕНЕДЖЕРА")
-        markup.add(btn1, btn2, manager_button)
-    else:
-        markup.add(btn1, btn2)
-    bot.send_message(message.chat.id, "Вы вернулись в главное меню", reply_markup=markup)
-
-# Обработчик любых сообщений для добавления пользователя в базу данных
+# --- Обработчик обычных сообщений ---
 @bot.message_handler(func=lambda message: True)
 def any_message_handler(message):
-    user_id = message.from_user.id
-    add_user(user_id)  # Добавляем пользователя в базу
     send_options(message)
 
+# --- Синхронизация с GitHub ---
+def sync_db_with_github():
+    update_github_file("volt_logistics.db", db_path, "Обновлена база данных")
+
+# --- Запуск бота ---
 if __name__ == "__main__":
-    print("Бот запущен...")
+    print("🟢 Бот запущен...")
     bot.polling(none_stop=True)
