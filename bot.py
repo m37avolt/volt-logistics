@@ -15,7 +15,7 @@ import logging
 load_dotenv()
 
 # --- Настройки бота ---
-BOT_TOKEN = os.getenv("6425282545:AAHv28Q5sWLgMpMnn-9FLrASUYITQNMDFkM")
+BOT_TOKEN = os.getenv("BOT_TOKEN")
 if not BOT_TOKEN:
     raise ValueError("❌ Не найден BOT_TOKEN в .env")
 
