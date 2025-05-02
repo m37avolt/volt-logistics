@@ -30,7 +30,7 @@ currency_rates = {
 }
 
 # --- Настройки GitHub ---
-GITHUB_REPO = os.getenv("GITHUB_REPO", "m37avolt/volt-orders")
+GITHUB_REPO = os.getenv("GITHUB_REPO", "m37avolt/volt-logistics")
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 if not GITHUB_TOKEN:
     print("⚠️ GitHub Token не найден — синхронизация с GitHub отключена.")
