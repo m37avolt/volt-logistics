@@ -22,8 +22,8 @@ currency_rates = {
 }
 
 # --- Настройки GitHub ---
-GITHUB_REPO = "m37avolt/volt-orders"  # замените на ваш username/repo
-GITHUB_TOKEN = "ghp_ваш_токен_здесь"  # замените на ваш Personal Access Token
+GITHUB_REPO = "m37avolt/volt-logistics"  # замените на ваш username/repo
+GITHUB_TOKEN = "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"  # замените на ваш Personal Access Token
 
 GITHUB_API_URL = f"https://api.github.com/repos/{GITHUB_REPO}/contents/"
 
