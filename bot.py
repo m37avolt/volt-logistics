@@ -7,24 +7,31 @@ import pandas as pd
 import json
 import base64
 import requests
-from dotenv import load_dotenv
 from telebot import types
 
-load_dotenv()
+# --- Настройки бота ---
+BOT_TOKEN = '6425282545:AAHv28Q5sWLgMpMnn-9FLrASUYITQNMDFkM'
+bot = telebot.TeleBot(BOT_TOKEN)
 
-# --- Настройки ---
-BOT_TOKEN = os.getenv("BOT_TOKEN")
-GITHUB_REPO = os.getenv("GITHUB_REPO", "m37avolt/volt-logistics")
-GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
+# --- Курсы валют ---
+currency_rates = {
+    "CNY": 14.5,
+    "JPY": 0.72,
+    "USD": 98.1,
+    "EUR": 105.3
+}
+
+# --- Настройки GitHub ---
+GITHUB_REPO = "m37avolt/volt-logistics"  # замените на ваш username/repo
+GITHUB_TOKEN = "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"  # замените на ваш Personal Access Token
 
 GITHUB_API_URL = f"https://api.github.com/repos/{GITHUB_REPO}/contents/"
 
+# --- Пути к файлам ---
 script_dir = os.path.dirname(os.path.abspath(__file__))
 db_path = os.path.join(script_dir, 'volt_logistics.db')
 orders_dir = os.path.join(script_dir, 'orders')
-logs_dir = os.path.join(script_dir, 'logs')
-
-os.makedirs(orders_dir, exist_ok=True)
+logs_dir = os.path.os.makedirs(orders_dir, exist_ok=True)
 os.makedirs(logs_dir, exist_ok=True)
 
 log_file_path = os.path.join(logs_dir, f"volt_log_{datetime.now().strftime('%Y-%m-%d')}.txt")
@@ -40,26 +47,35 @@ def log_event(event_type, user_id, message=None):
         f.write(line)
     print(f"[LOG] {event_type} | User: {user_id} | Message: {message}")
 
-# --- Инициализация БД ---
+# --- Инициализация базы данных ---
 def init_db():
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
+
+    # Таблица пользователей
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS users (
             telegram_id INTEGER PRIMARY KEY,
             full_name TEXT,
-            telegram_username TEXT
+            telegram_username TEXT,
+            is_manager BOOLEAN DEFAULT FALSE
         )
     ''')
+
+    # Таблица заказов
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS orders (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER,
             full_name TEXT,
+            telegram_username TEXT,
             country TEXT,
+            status TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
+
+    # Таблица товаров внутри заказа
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS order_items (
             item_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -70,9 +86,11 @@ def init_db():
             size TEXT,
             price REAL,
             quantity INTEGER,
-            comment TEXT
+            comment TEXT,
+            FOREIGN KEY(order_id) REFERENCES orders(id)
         )
     ''')
+
     conn.commit()
     conn.close()
     log_event("init_db", "system", "База данных инициализирована.")
@@ -106,7 +124,7 @@ def create_order(user_id, full_name, telegram_username, country):
     log_event("order_created", user_id, f"Заказ #{order_id}, страна: {country}")
     return order_id
 
-# --- Добавление товара ---
+# --- Сохранение товара в заказе ---
 def add_item_to_order(order_id, photo, link_or_id, color, size, price, quantity, comment=''):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
@@ -117,9 +135,19 @@ def add_item_to_order(order_id, photo, link_or_id, color, size, price, quantity,
     ''', (order_id, photo, link_or_id, color, size, price, quantity, comment))
     conn.commit()
     conn.close()
-    log_event("item_added", order_id, f"Фото: {photo}, Цена: {price}, Кол-во: {quantity}")
+    log_event("item_added", order_id,
+              f"Фото: {photo}, Ссылка: {link_or_id}, Цена: {price}, Кол-во: {quantity}")
 
-# --- Формирование пути к Excel-файлу ---
+# --- Получение всех заказов ---
+def get_all_orders():
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, status, country FROM orders")
+    result = cursor.fetchall()
+    conn.close()
+    return result
+
+# --- Создание дневного Excel-файла ---
 def get_daily_excel_path():
     today = datetime.now().strftime("%Y-%m-%d")
     return os.path.join(orders_dir, f"{today}.xlsx")
@@ -148,16 +176,12 @@ def save_to_excel(item_data):
     df_combined.to_excel(daily_excel_path, index=False)
     log_event("excel_saved", "system", f"Данные записаны в {daily_excel_path}")
 
-    # Синхронизация с GitHub
+    # Отправляем файл в GitHub
     github_path = f"orders/{os.path.basename(daily_excel_path)}"
     update_github_file(github_path, daily_excel_path, "Обновлён дневной заказ")
 
 # --- Обновление файла на GitHub ---
 def update_github_file(path_in_repo, file_path, commit_message="Update file"):
-    if not GITHUB_TOKEN:
-        log_event("github_error", "system", "Токен не задан.")
-        return
-
     with open(file_path, "rb") as f:
         content = f.read()
 
@@ -168,27 +192,33 @@ def update_github_file(path_in_repo, file_path, commit_message="Update file"):
 
     url = GITHUB_API_URL + path_in_repo
 
-    # Получаем SHA текущего файла (если он есть)
-    response = requests.get(url, headers=headers)
-    sha = None
-    if response.status_code == 200:
-        sha = response.json()["sha"]
+    # Получаем SHA файла (если существует)
+    try:
+        response = requests.get(url, headers=headers)
+        sha = response.json()["sha"] if response.status_code == 200 else None
+    except Exception:
+        sha = None
 
-    data = {
+    payload = {
         "message": commit_message,
         "content": base64.b64encode(content).decode("utf-8"),
         "branch": "main"
     }
     if sha:
-        data["sha"] = sha
+        payload["sha"] = sha
 
-    response = requests.put(url, headers=headers, json=data)
+    response = requests.put(url, headers=headers, json=payload)
     if response.status_code in [200, 201]:
-        log_event("github_sync", "system", f"{path_in_repo} успешно обновлён на GitHub.")
+        log_event("github_sync", "system", f"{path_in_repo} успешно обновлен на GitHub.")
     else:
-        log_event("github_error", "system", f"{response.status_code}: {response.text[:200]}")
+        log_event("github_error", "system", f"{response.status_code}: {response.text}")
 
-# --- Приём данных из Web App ---
+# --- Обновление SQLite в GitHub ---
+def sync_db_with_github():
+    db_dest_path = "volt_logistics.db"
+    update_github_file(db_dest_path, db_path, "Обновлена база данных")
+
+# --- Обработчик web_app_data ---
 @bot.message_handler(content_types=['web_app_data'])
 def handle_web_app_data(message):
     try:
@@ -229,7 +259,7 @@ def handle_web_app_data(message):
                     'ID / Ссылка': link_or_id,
                     'Цвет': color,
                     'Размер': size,
-                    'Цена за единицу': round(price, 2),
+                    'Цена за единицу': round(price * currency_rates.get(country.upper(), 1), 2),
                     'Кол-во/шт': quantity,
                     'tg контакт': telegram_username,
                     'Страна выкупа': country.upper(),
@@ -237,6 +267,9 @@ def handle_web_app_data(message):
                 }
 
                 save_to_excel(excel_data)
+
+            # Синхронизация базы данных с GitHub
+            sync_db_with_github()
 
             bot.send_message(message.chat.id, f"✅ Ваш заказ #{order_id} создан!")
 
@@ -276,35 +309,41 @@ def send_options(message):
     markup.add(btn1, btn2, manager_btn)
     bot.send_message(message.chat.id, "Выберите действие:", reply_markup=markup)
 
+# --- Является ли пользователь менеджером ---
+def is_manager(user_id):
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute("SELECT is_manager FROM users WHERE telegram_id = ?", (user_id,))
+    result = cursor.fetchone()
+    conn.close()
+    return bool(result[0]) if result else False
+
 # --- Менеджерская панель ---
 @bot.message_handler(func=lambda m: m.text == "🔒 Панель менеджера")
 def manager_panel(message):
-    if is_registered(message.from_user.id):
+    if is_manager(message.from_user.id):
         markup = types.InlineKeyboardMarkup(row_width=2)
         view_orders = types.InlineKeyboardButton("📊 Все заказы", callback_data="view_all_orders")
         back = types.InlineKeyboardButton("⬅ Назад", callback_data="back_main")
         markup.add(view_orders, back)
         bot.send_message(message.chat.id, "Добро пожаловать в панель менеджера.", reply_markup=markup)
     else:
-        bot.send_message(message.chat.id, "🚫 Только авторизованные пользователи могут использовать эту функцию.")
+        bot.send_message(message.chat.id, "Нет доступа к панели.")
 
 # --- Callback handler ---
 @bot.callback_query_handler(func=lambda call: True)
 def handle_callback(call):
     if call.data == "view_all_orders":
         all_orders = get_all_orders()
-        response = "📦 Все заказы:\n\n"
-        if all_orders:
-            for order in all_orders:
-                response += f"• Заказ #{order[0]} | Статус: {order[3]} | Страна: {order[4]}\n"
-        else:
-            response += "Нет активных заказов."
+        response = "📦 Все заказы:\n\n" + ("\n".join([
+            f"• Заказ #{o[0]} | Статус: {o[1]} | Страна: {o[2]}"
+            for o in all_orders
+        ]) if all_orders else "Нет активных заказов.")
         bot.send_message(call.message.chat.id, response)
-
     elif call.data == "back_main":
         send_options(call.message)
 
-# --- Получение всех заказов ---
+# --- Вывод всех заказов ---
 def get_all_orders():
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
@@ -313,29 +352,14 @@ def get_all_orders():
     conn.close()
     return result
 
-# --- Вывод деталей заказа ---
-@bot.message_handler(func=lambda m: m.text.startswith("Заказ #"))
-def show_order_details(message):
-    try:
-        order_id = int(message.text.split('#')[1].split()[0])
-        order = get_order(order_id)
-        if order and order[1] == message.from_user.id:
-            bot.send_message(message.chat.id, f"Детали заказа #{order_id}:\n"
-                                              f"Статус: {order[3]},\n"
-                                              f"Страна: {order[4]}")
-        else:
-            bot.send_message(message.chat.id, "Заказ не найден или недоступен.")
-    except ValueError:
-        bot.send_message(message.chat.id, "Ошибка: укажите корректный номер заказа.")
+# --- Обработчик обычных сообщений ---
+@bot.message_handler(func=lambda message: True)
+def any_message_handler(message):
+    send_options(message)
 
-# --- Получить один заказ ---
-def get_order(order_id):
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM orders WHERE id = ?", (order_id,))
-    result = cursor.fetchone()
-    conn.close()
-    return result
+# --- Синхронизация с GitHub ---
+def sync_db_with_github():
+    update_github_file("volt_logistics.db", db_path, "Обновлена база данных")
 
 # --- Запуск бота ---
 if __name__ == "__main__":
