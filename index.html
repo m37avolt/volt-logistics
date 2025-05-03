@@ -1,15 +1,12 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>VOLT Logistics</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- Bootstrap -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-
-    <!-- SheetJS для чтения Excel -->
-    <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/xlsx.full.min.js"></script>
 
     <style>
         body {
@@ -18,7 +15,6 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            text-align: center;
             height: 100vh;
             margin: 0;
             background-color: #f0f0f0;
@@ -30,7 +26,8 @@
             padding: 20px;
             background: #fff;
             border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            text-align: center;
         }
 
         .button {
@@ -62,7 +59,7 @@
             text-align: left;
         }
 
-        input, select {
+        input, select, textarea {
             width: 100%;
             padding: 8px;
             margin-bottom: 10px;
@@ -74,6 +71,7 @@
             flex-wrap: wrap;
             gap: 10px;
             margin-top: 10px;
+            justify-content: center;
         }
 
         img.preview-img {
@@ -83,48 +81,11 @@
             border-radius: 5px;
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        th, td {
-            padding: 10px;
+        .item-row {
             border: 1px solid #ccc;
-            text-align: left;
-        }
-
-        .order-number {
-            color: #0088cc;
-            text-decoration: underline;
-            cursor: pointer;
-        }
-
-        .modal {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 90%;
-            max-width: 400px;
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            z-index: 1000;
-            display: none;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 999;
+            padding: 10px;
+            margin-bottom: 15px;
+            background-color: #fafafa;
         }
     </style>
 </head>
@@ -132,22 +93,23 @@
     <div class="container">
         <h1>🛍 VOLT Logistics</h1>
         <button class="button" onclick="toggleSection('calculator')">🧮 Калькулятор</button>
-        <button class="button" onclick="toggleSection('create-order')">📝 Создать новый заказ</button>
+        <button class="button" onclick="toggleSection('create-order')">📝 Создать заказ</button>
         <button class="button" onclick="toggleSection('my-orders')">📦 Мои заказы</button>
-        <button id="manager-button" class="button" style="display: none;" onclick="toggleSection('manager')">🔒 Панель менеджера</button>
-    </div>
+        <button id="manager-button" class="button" style="display: none;" onclick="toggleSection('manager')">🔒 Менеджер</button>
 
-    <!-- Секция: Создать заказ -->
-    <div id="create-order" class="section active">
-        <div class="container">
+        <!-- Секция: Создать заказ -->
+        <div id="create-order" class="section">
             <label for="country">Страна выкупа:</label>
-            <select id="country" onchange="handleCountryChange()" class="form-control">
+            <select id="country" class="form-control" onchange="handleCountryChange()">
                 <option value="" selected disabled>Выберите страну</option>
                 <option value="china">🇨🇳 Китай</option>
                 <option value="japan">🇯🇵 Япония</option>
+                <option value="europe" disabled style="color: gray;">🇪🇺 Европа (временно недоступна)</option>
+                <option value="usa" disabled style="color: gray;">🇺🇸 США (временно недоступны)</option>
             </select>
 
-            <div id="marketplace-section" style="display: none;">
+            <div id="marketplace-section" class="marketplace-select" style="display: none;">
+                <br>
                 <label for="marketplace">Маркетплейс:</label>
                 <select id="marketplace" class="form-control">
                     <option value="poizon_taobao_weidan">POIZON / TAOBAO / WEIDAN И ДР.</option>
@@ -155,68 +117,35 @@
                 </select>
             </div>
 
-            <div id="order-form" style="display: none; margin-top: 20px;">
+            <div id="order-form" class="order-form" style="display: none; margin-top: 20px;">
                 <h3>Добавьте товар(ы)</h3>
                 <div id="items-container"></div>
                 <button type="button" class="button" onclick="addItem()">➕ Добавить товар</button><br><br>
 
                 <label for="full-name">ФИО:</label>
-                <input type="text" id="full-name" required placeholder="Пример: Иванов Иван"><br>
+                <input type="text" id="full-name" required placeholder="Пример: Иванов Иван">
 
                 <label for="telegram-username">Telegram username:</label>
-                <input type="text" id="telegram-username" required placeholder="@ivanov или +79001234567"><br>
+                <input type="text" id="telegram-username" required placeholder="@ivanov или +79001234567">
 
                 <button class="button" onclick="submitOrder()">✅ Создать заказ</button>
             </div>
         </div>
-    </div>
 
-    <!-- Секция: Мои заказы -->
-    <div id="my-orders" class="section">
-        <div class="container">
-            <h2>📦 Мои заказы</h2>
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Номер заказа</th>
-                        <th>Статус</th>
-                    </tr>
-                </thead>
-                <tbody id="user-orders-container"></tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- Секция: Панель менеджера -->
-    <div id="manager" class="section">
-        <div class="container">
-            <h2>🔒 Панель менеджера</h2>
-            <p>Все заказы:</p>
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Номер заказа</th>
-                        <th>Статус</th>
-                        <th>Действие</th>
-                    </tr>
-                </thead>
-                <tbody id="manager-orders-container"></tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- Секция: Калькулятор -->
-    <div id="calculator" class="section">
-        <div class="container">
+        <!-- Секция: Калькулятор -->
+        <div id="calculator" class="section">
             <h2>🧮 Калькулятор стоимости</h2>
             <label for="calc-country">Страна выкупа:</label>
-            <select id="calc-country" onchange="updateCalculatorFields()" class="form-control">
+            <select id="calc-country" class="form-control" onchange="updateCalculatorFields()">
                 <option value="" selected disabled>Выберите страну</option>
                 <option value="china">Китай 🇨🇳</option>
                 <option value="japan">Япония 🗼</option>
+                <option value="europe" disabled style="color: gray;">Европа 🇪🇺</option>
+                <option value="usa" disabled style="color: gray;">США 🇺🇸</option>
             </select>
 
             <div id="calc-marketplace-section" style="display: none;">
+                <br>
                 <label for="calc-marketplace">Маркетплейс:</label>
                 <select id="calc-marketplace" class="form-control">
                     <option value="poizon_taobao_weidan">POIZON / TAOBAO / WEIDAN И ДР.</option>
@@ -231,22 +160,42 @@
             <button class="button" onclick="calculate()">Рассчитать</button>
             <div id="result" style="margin-top: 20px;"></div>
         </div>
-    </div>
 
-    <!-- Модальное окно с деталями заказа -->
-    <div class="overlay" id="overlay"></div>
-    <div class="modal" id="order-details-modal">
-        <h3>Детали заказа</h3>
-        <div id="order-details-content"></div>
-        <button class="button" onclick="closeModal()">❌ Закрыть</button>
+        <!-- Секция: Мои заказы -->
+        <div id="my-orders" class="section">
+            <h2>📦 Мои заказы</h2>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Номер заказа</th>
+                        <th>Статус</th>
+                    </tr>
+                </thead>
+                <tbody id="user-orders-container"></tbody>
+            </table>
+        </div>
+
+        <!-- Секция: Панель менеджера -->
+        <div id="manager" class="section">
+            <h2>🔒 Панель менеджера</h2>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Номер заказа</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody id="manager-orders-container"></tbody>
+            </table>
+        </div>
     </div>
 
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
         const tg = window.Telegram.WebApp;
 
-        // Получаем ID пользователя из initDataUnsafe
-        const userId = tg.initDataUnsafe.user?.id || null;
+        // Получаем ID текущего пользователя
+        const userId = tg.initDataUnsafe.user?.id || 0;
         const isManager = [919034275, 372145026, 6432717873].includes(userId);
 
         if (isManager) {
@@ -254,8 +203,8 @@
         }
 
         function toggleSection(sectionId) {
-            document.querySelectorAll('.section').forEach(sec => sec.classList.remove("active"));
-            document.getElementById(sectionId).classList.add("active");
+            document.querySelectorAll('.section').forEach(sec => sec.style.display = 'none');
+            document.getElementById(sectionId).style.display = 'block';
         }
 
         function handleCountryChange() {
@@ -264,21 +213,19 @@
             const orderForm = document.getElementById("order-form");
 
             const itemsContainer = document.getElementById("items-container");
-            itemsContainer.innerHTML = "";
+            itemsContainer.innerHTML = ""; // очищаем предыдущие товары
 
-            const country = countrySelect.value;
-
-            if (country === "china") {
+            if (countrySelect.value === "china") {
                 marketplaceSection.style.display = "block";
+                orderForm.style.display = "block";
                 addItem();
-            } else if (country === "japan") {
+            } else if (countrySelect.value === "japan") {
                 marketplaceSection.style.display = "none";
+                orderForm.style.display = "block";
                 addJapanItem();
             } else {
                 alert("Пока доступны только Китай и Япония.");
             }
-
-            orderForm.style.display = "block";
         }
 
         function addItem() {
@@ -292,9 +239,9 @@
                 <h4>Товар #${index}</h4>
                 <label>Загрузите фото:</label>
                 <input type="file" class="item-photo" accept="image/*" multiple onchange="previewPhotos(this)">
-                <div class="photo-preview" style="display:flex;flex-wrap:wrap;gap:10px;"></div>
+                <div class="photo-preview"></div>
 
-                <label for="item-link-${index}">Ссылка / ID:</label>
+                <label for="item-link-${index}">Ссылка на товар:</label>
                 <input type="text" id="item-link-${index}" placeholder="https://taobao.com/item123">
 
                 <label for="item-price-${index}">Цена (CNY):</label>
@@ -304,15 +251,15 @@
                 <input type="text" id="item-color-${index}" placeholder="Черный / White">
 
                 <label for="item-size-${index}">Размер:</label>
-                <input type="text" id="item-size-${index}" placeholder="M / 42 / EU40">
+                <input type="text" id="item-size-${index}" placeholder="Пример: M / 42 / EU40">
 
                 <label for="item-quantity-${index}">Количество:</label>
                 <input type="number" id="item-quantity-${index}" min="1" value="1">
 
-                <label for="item-comment-${index}">Комментарий:</label>
+                <label for="item-comment-${index}">Комментарий к товару:</label>
                 <input type="text" id="item-comment-${index}" placeholder="Батч A1 | Упаковать аккуратно">
-                
-                <button type="button" class="button" onclick="removeItem(this)" style="margin-top: 10px;">🗑 Удалить товар</button>
+
+                <button type="button" onclick="removeItem(this)" style="margin-top: 10px;">🗑 Удалить товар</button>
             `;
             itemsContainer.appendChild(newItem);
         }
@@ -328,7 +275,7 @@
                 <h4>Товар #${index}</h4>
                 <label>Загрузите фото:</label>
                 <input type="file" class="item-photo" accept="image/*" multiple onchange="previewPhotos(this)">
-                <div class="photo-preview" style="display:flex;flex-wrap:wrap;gap:10px;"></div>
+                <div class="photo-preview"></div>
 
                 <label for="item-link-${index}">Ссылка на товар:</label>
                 <input type="text" id="item-link-${index}" placeholder="https://yame.co.jp/item123">
@@ -347,22 +294,21 @@
 
                 <label for="item-comment-${index}">Комментарий:</label>
                 <input type="text" id="item-comment-${index}" placeholder="Батч, особые условия...">
-                
-                <button type="button" class="button" onclick="removeItem(this)" style="margin-top: 10px;">🗑 Удалить товар</button>
+
+                <button type="button" onclick="removeItem(this)" style="margin-top: 10px;">🗑 Удалить товар</button>
             `;
             itemsContainer.appendChild(newItem);
         }
 
         function removeItem(button) {
-            const itemRow = button.parentElement;
-            itemRow.remove();
+            button.parentElement.remove();
         }
 
         function previewPhotos(input) {
             const preview = input.nextElementSibling;
             preview.innerHTML = "";
-            const files = Array.from(input.files).slice(0, 5); // до 5 файлов
 
+            const files = Array.from(input.files).slice(0, 5); // до 5 файлов
             files.forEach(file => {
                 const reader = new FileReader();
                 reader.onload = function(e) {
@@ -377,7 +323,6 @@
 
         function calculate() {
             const country = document.getElementById("calc-country").value;
-            const marketplace = document.getElementById("calc-marketplace").value;
             const priceInput = document.getElementById("price").value.trim();
 
             if (!country || !priceInput) {
@@ -390,6 +335,7 @@
 
             switch(country) {
                 case "china":
+                    const marketplace = document.getElementById("calc-marketplace").value;
                     if (marketplace === "poizon_taobao_weidan") {
                         result = price * 14.5 * 1.08;
                     } else {
@@ -400,7 +346,7 @@
                     result = price * 0.72 * 1.03;
                     break;
                 default:
-                    alert("Ошибка: выберите корректную страну.");
+                    alert("Выберите корректную страну.");
                     return;
             }
 
@@ -411,7 +357,6 @@
             const full_name = document.getElementById("full-name").value.trim();
             const telegram_username = document.getElementById("telegram-username").value.trim();
             const country = document.getElementById("country").value;
-            const marketplace = document.getElementById("marketplace").value;
 
             const itemsContainer = document.getElementById("items-container");
             const items = Array.from(itemsContainer.children).map((itemRow, idx) => {
@@ -424,7 +369,7 @@
                 const commentInput = itemRow.querySelector(`#item-comment-${idx + 1}`);
 
                 return {
-                    photos: [...Array.from(photoInput?.files || [])].map(f => f.name),
+                    photos: [...Array.from(photoInput.files)].map(f => f.name),
                     link_or_id: linkOrIdInput?.value || '',
                     price: parseFloat(priceInput?.value || 0),
                     color: colorInput?.value || '',
@@ -435,7 +380,7 @@
             });
 
             if (!full_name || !telegram_username || !country || items.length === 0) {
-                alert("⚠️ Заполните все поля формы.");
+                alert("⚠️ Заполните все поля формы перед отправкой.");
                 return;
             }
 
@@ -444,134 +389,39 @@
                 full_name: full_name,
                 telegram_username: telegram_username,
                 country: country,
-                marketplace: marketplace,
                 items: items
             };
 
-            console.log("Отправляемые данные:", JSON.stringify(requestData, null, 2));
+            console.log("[DEBUG] Отправляемые данные:", requestData);
             tg.sendData(JSON.stringify(requestData));
             alert("✅ Ваш заказ успешно создан!");
-            toggleSection("my-orders");
+            toggleSection("calculator");
         }
 
-        function showOrderDetails(orderId) {
-            tg.sendData(JSON.stringify({ command: "get_order_details", order_id: orderId }));
-            toggleSection("order-details");
-        }
-
-        function closeModal() {
-            document.getElementById("overlay").style.display = "none";
-            document.getElementById("order-details-modal").style.display = "none";
-        }
-
-        // --- Обработка ответов от бота ---
+        // Обработка ответов от бота
         tg.onEvent("web_app_data", function(data) {
             try {
                 const response = JSON.parse(data.data);
 
                 if (response.command === "create_order") {
-                    alert(`✅ Заказ #${response.order_id} создан!`);
-                    updateMyOrders(response.orders);
+                    alert(`✅ Заказ #${response.order_id} создан.`);
+                    toggleSection("calculator");
                 } else if (response.command === "track_order") {
-                    updateMyOrders(response.orders);
-                } else if (response.command === "get_order_details") {
-                    const order = response.order;
-                    document.getElementById("order-details-content").innerHTML = `
-                        <p><b>Статус:</b> ${order.status}</p>
-                        <p><b>Страна:</b> ${order.country}</p>
-                        <p><b>Товары:</b></p>
-                        <ul>${order.items.map(i => `<li>ID / Ссылка: ${i.link_or_id}, Цвет: ${i.color}, Размер: ${i.size}, Кол-во: ${i.quantity} шт.</li>`).join("")}</ul>
-                        <p><b>Комментарий:</b> ${order.comment || "-"}</p>
-                        <p><b>Фотоотчет:</b> ${response.report_photos ? response.report_photos.map(p => `<img src="${p}" width="100%" style="margin-top: 10px;">`).join("") : "Нет фотоотчёта."}</p>
-                    `;
-                    document.getElementById("overlay").style.display = "block";
-                    document.getElementById("order-details-modal").style.display = "block";
-                } else if (response.command === "update_status") {
-                    alert(`Статус изменён на "${response.status}"`);
-                    updateMyOrders(response.orders);
-                } else if (response.command === "attach_report") {
-                    alert("Фотоотчёт отправлен клиенту.");
+                    document.getElementById("order-status").innerText = `Статус: ${response.status}`;
+                } else if (response.command === "edit_order_status") {
+                    alert(`Статус изменён на: ${response.status}`);
+                    toggleSection("manager");
+                } else if (response.command === "add_comment") {
+                    alert(`Комментарий добавлен.`);
+                } else if (response.command === "attach_photo") {
+                    alert("Фотография прикреплена.");
+                } else if (response.command === "send_requisites") {
+                    alert("Реквизиты отправлены.");
                 }
             } catch (e) {
                 alert("Ошибка при получении данных от бота.");
             }
         });
-
-        function updateMyOrders(orders) {
-            const container = document.getElementById("user-orders-container");
-            container.innerHTML = ""; // очищаем предыдущие заказы
-
-            orders.forEach(order => {
-                const tr = document.createElement("tr");
-                const td1 = document.createElement("td");
-                const td2 = document.createElement("td");
-
-                td1.innerHTML = `<span class="order-number" onclick="showOrderDetails('${order.id}')">#${order.id}</span>`;
-                td2.innerText = order.status;
-                tr.appendChild(td1);
-                tr.appendChild(td2);
-                container.appendChild(tr);
-            });
-        }
-
-        // --- Менеджерская логика ---
-        function renderManagerOrders(orders) {
-            const container = document.getElementById("manager-orders-container");
-            container.innerHTML = "";
-
-            orders.forEach(order => {
-                const row = document.createElement("tr");
-
-                const cell1 = document.createElement("td");
-                cell1.innerHTML = `<span class="order-number" onclick="showOrderDetails('${order.id}')">#${order.id}</span>`;
-                row.appendChild(cell1);
-
-                const cell2 = document.createElement("td");
-                const statusSelect = document.createElement("select");
-                statusSelect.innerHTML = `
-                    <option>Ожидает проверки</option>
-                    <option>Ожидает выкупа</option>
-                    <option>Ожидает отправки на склад в Китае</option>
-                    <option>Отправлено на склад в Китае</option>
-                    <option>В Китае (фотоотчет)</option>
-                    <option>Отправлено в Москву</option>
-                    <option>в москве. ожидает отправки в ваш нп</option>
-                    <option>СДЕК (номер накладной)</option>
-                `;
-                statusSelect.value = order.status;
-                statusSelect.onchange = () => {
-                    tg.sendData(JSON.stringify({
-                        command: "edit_order_status",
-                        order_id: order.id,
-                        status: statusSelect.value
-                    }));
-                };
-                cell2.appendChild(statusSelect);
-                row.appendChild(cell2);
-
-                const cell3 = document.createElement("td");
-                const uploadBtn = document.createElement("input");
-                uploadBtn.type = "file";
-                uploadBtn.accept = "image/*";
-                uploadBtn.onchange = function(event) {
-                    const file = event.target.files[0];
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        tg.sendData(JSON.stringify({
-                            command: "attach_report",
-                            order_id: order.id,
-                            report_photo: e.target.result
-                        }));
-                        alert("Фотоотчет отправлен клиенту.");
-                    };
-                    reader.readAsDataURL(file);
-                };
-                cell3.appendChild(uploadBtn);
-                row.appendChild(cell3);
-
-                container.appendChild(row);
-            });
-        }
 
         tg.ready();
     </script>
