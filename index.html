@@ -8,6 +8,9 @@
     <!-- Bootstrap -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 
+    <!-- SheetJS для чтения Excel -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/xlsx.full.min.js"></script>
+
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -59,11 +62,8 @@
             text-align: left;
         }
 
-        input, select, textarea {
-            width: 100%;
-            padding: 8px;
-            margin-bottom: 10px;
-            box-sizing: border-box;
+        input[type="file"] {
+            margin-top: 10px;
         }
 
         .photo-preview {
@@ -92,6 +92,17 @@
             text-align: left;
         }
 
+        .excel-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .excel-table th, .excel-table td {
+            padding: 8px;
+            border: 1px solid #999;
+        }
+
         .marketplace-select {
             display: none;
         }
@@ -99,13 +110,15 @@
 </head>
 <body>
     <div class="container">
-        <h1>🛍 VOLT Logistics</h1>
+        <h1>VOLT Logistics</h1>
         <button class="button" onclick="toggleSection('calculator')">🧮 Калькулятор</button>
-        <button class="button" onclick="toggleSection('create-order')">📝 Создать заказ</button>
+        <button class="button" onclick="toggleSection('create-order')">📝 Создать новый заказ</button>
         <button class="button" onclick="toggleSection('my-orders')">📦 Мои заказы</button>
+        <button class="button" id="manager-button" style="display: none;" onclick="toggleSection('manager')">🔒 Панель менеджера</button>
 
         <!-- Секция: Создать заказ -->
-        <div id="create-order" class="section active">
+        <div id="create-order" class="section">
+            <h2>Создать новый заказ</h2>
             <label for="country">Страна выкупа:</label>
             <select id="country" class="form-control" onchange="handleCountryChange()">
                 <option value="" selected disabled>Выберите страну</option>
@@ -130,10 +143,10 @@
                 <button type="button" class="button" onclick="addItem()">➕ Добавить товар</button><br><br>
 
                 <label for="full-name">ФИО:</label>
-                <input type="text" id="full-name" required class="form-control"><br>
+                <input type="text" id="full-name" required class="form-control"><br><br>
 
                 <label for="telegram-username">Telegram username:</label>
-                <input type="text" id="telegram-username" required class="form-control"><br>
+                <input type="text" id="telegram-username" required class="form-control"><br><br>
 
                 <button class="button" onclick="submitOrder()">✅ Создать заказ</button>
             </div>
@@ -142,19 +155,8 @@
         <!-- Секция: Мои заказы -->
         <div id="my-orders" class="section">
             <h2>📦 Мои заказы</h2>
-            <table id="user-orders-table" class="table">
-                <thead>
-                    <tr>
-                        <th>Номер</th>
-                        <th>Статус</th>
-                        <th>Страна</th>
-                        <th>Цена</th>
-                        <th>Кол-во</th>
-                        <th>Комментарий</th>
-                    </tr>
-                </thead>
-                <tbody id="user-orders-container"></tbody>
-            </table>
+            <button class="button" onclick="loadOrdersFromGitHub()">🔄 Загрузить мои заказы</button>
+            <div id="excel-table-container" style="margin-top: 20px;"></div>
         </div>
 
         <!-- Секция: Калькулятор -->
@@ -201,8 +203,9 @@
             const marketplaceSection = document.getElementById("marketplace-section");
             const orderForm = document.getElementById("order-form");
 
+            // Очищаем предыдущие товары
             const itemsContainer = document.getElementById("items-container");
-            itemsContainer.innerHTML = ""; // очищаем при смене страны
+            itemsContainer.innerHTML = "";
 
             if (countrySelect.value === "china") {
                 marketplaceSection.style.display = "block";
@@ -224,63 +227,62 @@
             const newItem = document.createElement("div");
             newItem.className = "item-row";
             newItem.innerHTML = `
-                <hr>
-                <h4>Товар #${rowCount}</h4>
+                <div style="margin-top: 10px;">
+                    <hr>
+                    <h4>Товар #${rowCount}</h4>
+                    <!-- Фото товара -->
+                    <label>Загрузите фото:</label>
+                    <input type="file" class="form-control-file item-photo" accept="image/*" multiple onchange="previewPhotos(this)">
+                    <div class="photo-preview" style="display:flex;flex-wrap:wrap;gap:10px;"></div>
 
-                <!-- Загрузка фото -->
-                <label>Загрузите фото:</label>
-                <input type="file" class="form-control-file item-photo" accept="image/*" multiple onchange="previewPhotos(this)">
-                <div class="photo-preview" style="display:flex;flex-wrap:wrap;gap:10px;"></div>
+                    <!-- Маркетплейс -->
+                    <label for="item-marketplace-${rowCount}">Маркетплейс:</label>
+                    <select id="item-marketplace-${rowCount}" class="form-control" onchange="updateMarketplace(${rowCount})">
+                        <option value="poizon_taobao_weidan">POIZON / TAOBAO / WEIDAN И ДР.</option>
+                        <option value="weechat_yupoo_goofish">WEECHAT / YUPOO / GOOFISH</option>
+                    </select>
 
-                <!-- Маркетплейс -->
-                <label for="item-marketplace-${rowCount}">Маркетплейс:</label>
-                <select id="item-marketplace-${rowCount}" class="form-control">
-                    <option value="poizon_taobao_weidan">POIZON / TAOBAO / WEIDAN И ДР.</option>
-                    <option value="weechat_yupoo_goofish">WEECHAT / YUPOO / GOOFISH</option>
-                </select>
+                    <!-- Ссылка или WeeChat ID -->
+                    <div id="item-link-container-${rowCount}">
+                        <label for="item-link-${rowCount}">Ссылка на товар:</label>
+                        <input type="text" id="item-link-${rowCount}" class="form-control" placeholder="https://taobao.com/item123">
+                    </div>
+                    <div id="item-weechat-info-${rowCount}" style="display: none;">
+                        <label for="item-weechat-id-${rowCount}">WeeChat ID / QR-код:</label>
+                        <input type="text" id="item-weechat-id-${rowCount}" class="form-control" placeholder="Пример: 123456789">
+                        <input type="file" id="item-qr-code-${rowCount}" accept="image/*" class="form-control-file" placeholder="QR-код">
+                    </div>
 
-                <!-- Ссылка или WeeChat ID -->
-                <div id="item-link-container-${rowCount}">
-                    <label for="item-link-${rowCount}">Ссылка на товар:</label>
-                    <input type="text" id="item-link-${rowCount}" class="form-control" placeholder="https://taobao.com/item123">
+                    <!-- Цена -->
+                    <label for="item-price-${rowCount}">Цена за единицу без учета скидок:</label>
+                    <input type="number" id="item-price-${rowCount}" class="form-control" step="any" placeholder="¥ 800">
+
+                    <!-- Цвет -->
+                    <label for="item-color-${rowCount}">Цвет:</label>
+                    <input type="text" id="item-color-${rowCount}" class="form-control" placeholder="Чёрный / Black">
+
+                    <!-- Размер -->
+                    <label for="item-size-${rowCount}">Размер:</label>
+                    <input type="text" id="item-size-${rowCount}" class="form-control" placeholder="Пример: M / 42 / EU40">
+
+                    <!-- Количество -->
+                    <label for="item-quantity-${rowCount}">Количество:</label>
+                    <input type="number" id="item-quantity-${rowCount}" min="1" class="form-control" value="1">
+
+                    <!-- Комментарий к товару -->
+                    <label for="item-comment-${rowCount}">Комментарий:</label>
+                    <input type="text" id="item-comment-${rowCount}" class="form-control" placeholder="Батч A1 | Упаковать аккуратно...">
+
+                    <!-- Удаление товара -->
+                    <button type="button" class="button" onclick="removeItem(this)" style="margin-top: 10px;">🗑 Удалить товар</button>
                 </div>
-
-                <div id="item-weechat-info-${rowCount}" style="display: none;">
-                    <label for="item-weechat-id-${rowCount}">WeeChat ID / QR-код:</label>
-                    <input type="text" id="item-weechat-id-${rowCount}" class="form-control" placeholder="Пример: 123456789">
-                    <input type="file" id="item-qr-code-${rowCount}" accept="image/*" class="form-control-file" placeholder="QR-код">
-                </div>
-
-                <!-- Цена -->
-                <label for="item-price-${rowCount}">Цена за единицу без учета скидок:</label>
-                <input type="number" id="item-price-${rowCount}" class="form-control" step="any" placeholder="¥ 800">
-
-                <!-- Цвет -->
-                <label for="item-color-${rowCount}">Цвет:</label>
-                <input type="text" id="item-color-${rowCount}" class="form-control" placeholder="Чёрный / Black">
-
-                <!-- Размер -->
-                <label for="item-size-${rowCount}">Размер:</label>
-                <input type="text" id="item-size-${rowCount}" class="form-control" placeholder="M / 42 / EU40">
-
-                <!-- Количество -->
-                <label for="item-quantity-${rowCount}">Количество:</label>
-                <input type="number" id="item-quantity-${rowCount}" min="1" class="form-control" value="1">
-
-                <!-- Комментарий к товару -->
-                <label for="item-comment-${rowCount}">Комментарий:</label>
-                <input type="text" id="item-comment-${rowCount}" class="form-control" placeholder="Батч A1 | Упаковать аккуратно">
-
-                <!-- Удаление товара -->
-                <button type="button" class="button" onclick="removeItem(this)" style="margin-top: 10px;">🗑 Удалить товар</button>
             `;
             itemsContainer.appendChild(newItem);
 
-            // Обработчик изменения маркетплейса
+            // По умолчанию показываем "Ссылка", если не WEECHAT
             newItem.querySelector(`#item-marketplace-${rowCount}`).addEventListener("change", () => {
                 updateMarketplace(rowCount);
             });
-
             updateMarketplace(rowCount);
         }
 
@@ -291,40 +293,42 @@
             const newItem = document.createElement("div");
             newItem.className = "item-row";
             newItem.innerHTML = `
-                <hr>
-                <h4>Товар #${rowCount}</h4>
+                <div style="margin-top: 10px;">
+                    <hr>
+                    <h4>Товар #${rowCount}</h4>
 
-                <!-- Фото товара -->
-                <label>Загрузите фото:</label>
-                <input type="file" class="form-control-file item-photo" accept="image/*" multiple onchange="previewPhotos(this)">
-                <div class="photo-preview" style="display:flex;flex-wrap:wrap;gap:10px;"></div>
+                    <!-- Фото товара -->
+                    <label>Загрузите фото:</label>
+                    <input type="file" class="form-control-file item-photo" accept="image/*" multiple onchange="previewPhotos(this)">
+                    <div class="photo-preview" style="display:flex;flex-wrap:wrap;gap:10px;"></div>
 
-                <!-- Ссылка на товар -->
-                <label for="item-link-${rowCount}">Ссылка на товар:</label>
-                <input type="text" id="item-link-${rowCount}" class="form-control" placeholder="https://yame.co.jp/item123">
+                    <!-- Ссылка на товар -->
+                    <label for="item-link-${rowCount}">Ссылка на товар:</label>
+                    <input type="text" id="item-link-${rowCount}" class="form-control" placeholder="https://yame.co.jp/item123">
 
-                <!-- Цена -->
-                <label for="item-price-${rowCount}">Цена за единицу (JPY):</label>
-                <input type="number" id="item-price-${rowCount}" class="form-control" step="any" placeholder="¥ 2000">
+                    <!-- Цена -->
+                    <label for="item-price-${rowCount}">Цена за единицу (JPY):</label>
+                    <input type="number" id="item-price-${rowCount}" class="form-control" step="any" placeholder="¥ 2000">
 
-                <!-- Цвет -->
-                <label for="item-color-${rowCount}">Цвет:</label>
-                <input type="text" id="item-color-${rowCount}" class="form-control" placeholder="Черный / Noir">
+                    <!-- Цвет -->
+                    <label for="item-color-${rowCount}">Цвет:</label>
+                    <input type="text" id="item-color-${rowCount}" class="form-control" placeholder="Черный / Noir">
 
-                <!-- Размер -->
-                <label for="item-size-${rowCount}">Размер:</label>
-                <input type="text" id="item-size-${rowCount}" class="form-control" placeholder="M / 42 / EU40">
+                    <!-- Размер -->
+                    <label for="item-size-${rowCount}">Размер:</label>
+                    <input type="text" id="item-size-${rowCount}" class="form-control" placeholder="M / 42 / EU40">
 
-                <!-- Количество -->
-                <label for="item-quantity-${rowCount}">Количество:</label>
-                <input type="number" id="item-quantity-${rowCount}" min="1" class="form-control" value="1">
+                    <!-- Количество -->
+                    <label for="item-quantity-${rowCount}">Количество:</label>
+                    <input type="number" id="item-quantity-${rowCount}" min="1" class="form-control" value="1">
 
-                <!-- Комментарий -->
-                <label for="item-comment-${rowCount}">Комментарий:</label>
-                <input type="text" id="item-comment-${rowCount}" class="form-control" placeholder="Батч A1 | Примечание">
+                    <!-- Комментарий -->
+                    <label for="item-comment-${rowCount}">Комментарий:</label>
+                    <input type="text" id="item-comment-${rowCount}" class="form-control" placeholder="Батч A1 | Примечание">
 
-                <!-- Удаление товара -->
-                <button type="button" class="button" onclick="removeItem(this)">🗑 Удалить товар</button>
+                    <!-- Удаление товара -->
+                    <button type="button" class="button" onclick="removeItem(this)">🗑 Удалить товар</button>
+                </div>
             `;
             itemsContainer.appendChild(newItem);
         }
@@ -358,7 +362,10 @@
                 reader.onload = function(e) {
                     const img = document.createElement("img");
                     img.src = e.target.result;
-                    img.className = "preview-img";
+                    img.style.width = "50px";
+                    img.style.height = "50px";
+                    img.style.objectFit = "cover";
+                    img.style.borderRadius = "5px";
                     preview.appendChild(img);
                 };
                 reader.readAsDataURL(file);
@@ -404,7 +411,7 @@
             const itemsContainer = document.getElementById("items-container");
 
             if (!full_name || !telegram_username || !country || itemsContainer.childElementCount === 0) {
-                alert("⚠️ Заполните все поля перед отправкой.");
+                alert("⚠️ Заполните все поля перед созданием заказа.");
                 return;
             }
 
@@ -419,7 +426,7 @@
                 const commentInput = itemRow.querySelector(`#item-comment-${idx + 1}`);
 
                 return {
-                    photos: [...Array.from(photoInput.files)].map(f => f.name),
+                    photos: [...Array.from(photoInput?.files || [])].map(f => f.name),
                     link_or_id: linkOrIdInput?.value || "",
                     price: parseFloat(priceInput?.value || 0),
                     color: colorInput?.value || "",
@@ -439,13 +446,71 @@
 
             console.log("Отправляемые данные:", JSON.stringify(requestData, null, 2));
             tg.sendData(JSON.stringify(requestData));
-            alert("✅ Ваш заказ успешно создан!");
-            fetchMyOrders(); // запрашиваем обновление "мои заказы"
-            toggleSection("my-orders");
+            alert("✅ Ваш заказ успешно отправлен!");
+            toggleSection("calculator");
         }
 
-        function fetchMyOrders() {
-            tg.sendData(JSON.stringify({ command: "track_order" }));
+        // --- Загрузка Excel с GitHub ---
+        async function loadOrdersFromGitHub() {
+            const today = new Date().toISOString().split("T")[0]; // текущая дата YYYY-MM-DD
+            const excelUrl = `https://raw.githubusercontent.com/m37avolt/volt-logistics/main/orders/${today}.xlsx`;
+
+            try {
+                const response = await fetch(excelUrl);
+                if (!response.ok) throw new Error("Файл не найден на GitHub.");
+
+                const data = await response.arrayBuffer();
+                const workbook = XLSX.read(data, { type: 'array' });
+                const sheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[sheetName];
+
+                const json = XLSX.utils.sheet_to_json(worksheet);
+
+                showExcelTable(json);
+            } catch (error) {
+                alert("Не удалось загрузить Excel с GitHub: " + error.message);
+                console.error(error);
+            }
+        }
+
+        function showExcelTable(data) {
+            const container = document.getElementById("excel-table-container");
+            container.innerHTML = "<h3>Ваши заказы (из Excel)</h3>";
+
+            if (!data.length) {
+                container.innerHTML += "<p>Нет данных</p>";
+                return;
+            }
+
+            const table = document.createElement("table");
+            const thead = document.createElement("thead");
+            const tbody = document.createElement("tbody");
+
+            // Заголовки таблицы
+            const headerRow = document.createElement("tr");
+            Object.keys(data[0]).forEach(key => {
+                const th = document.createElement("th");
+                th.innerText = key;
+                headerRow.appendChild(th);
+            });
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
+
+            // Тело таблицы
+            data.forEach(row => {
+                const tr = document.createElement("tr");
+                Object.values(row).forEach(value => {
+                    const td = document.createElement("td");
+                    td.innerText = value;
+                    tr.appendChild(td);
+                });
+                tbody.appendChild(tr);
+            });
+            table.appendChild(tbody);
+            table.className = "excel-table";
+
+            container.innerHTML = ""; // очищаем
+            container.appendChild(table);
         }
 
         // --- Обработка ответов от бота ---
@@ -456,46 +521,23 @@
                 if (response.command === "create_order") {
                     alert(`✅ Заказ #${response.order_id} создан.`);
                     toggleSection("calculator");
-                } else if (response.command === "track_order" && response.orders) {
-                    const container = document.getElementById("user-orders-container");
-                    container.innerHTML = "";
-
-                    response.orders.forEach(order => {
-                        const row = document.createElement("tr");
-                        row.innerHTML = `
-                            <td>#${order.id}</td>
-                            <td>${order.status}</td>
-                            <td>${order.country}</td>
-                            <td>${order.price} ₽</td>
-                            <td>${order.quantity}</td>
-                            <td>${order.comment}</td>
-                        `;
-                        container.appendChild(row);
-                    });
-                } else if (response.command === "order_details") {
-                    alert("Детали заказа: " + JSON.stringify(response.order, null, 2));
+                } else if (response.command === "track_order") {
+                    document.getElementById("order-status").innerText = `Статус: ${response.status}`;
                 } else if (response.command === "edit_order_status") {
                     alert(`Статус изменён на: ${response.status}`);
                     toggleSection("manager");
                 } else if (response.command === "add_comment") {
-                    alert(`Комментарий добавлен.`);
+                    alert(`Комментарий к заказу #${response.order_id} добавлен.`);
                 } else if (response.command === "attach_photo") {
-                    alert('Фотография прикреплена.');
+                    alert(`Фотография к заказу #${response.order_id} прикреплена.`);
                 } else if (response.command === "send_requisites") {
-                    alert('Реквизиты отправлены.');
+                    alert(`Реквизиты к заказу #${response.order_id} отправлены.`);
                 }
             } catch (e) {
                 console.error("Ошибка обработки данных от бота.", e);
-                alert("Ошибка при получении данных от бота.");
             }
         });
 
-        // --- Получение списка всех своих заказов ---
-        function getMyOrdersFromBot() {
-            tg.sendData(JSON.stringify({ command: "get_my_orders" }));
-        }
-
-        // --- Принудительное подключение к боту ---
         tg.ready();
     </script>
 </body>
