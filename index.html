@@ -55,8 +55,8 @@
 
         label {
             margin-top: 10px;
-            display: block;
             text-align: left;
+            display: block;
         }
 
         input, select, textarea {
@@ -95,10 +95,9 @@
         <button class="button" onclick="toggleSection('calculator')">🧮 Калькулятор</button>
         <button class="button" onclick="toggleSection('create-order')">📝 Создать заказ</button>
         <button class="button" onclick="toggleSection('my-orders')">📦 Мои заказы</button>
-        <button id="manager-button" class="button" style="display: none;" onclick="toggleSection('manager')">🔒 Менеджер</button>
 
         <!-- Секция: Создать заказ -->
-        <div id="create-order" class="section">
+        <div id="create-order" class="section active">
             <label for="country">Страна выкупа:</label>
             <select id="country" class="form-control" onchange="handleCountryChange()">
                 <option value="" selected disabled>Выберите страну</option>
@@ -117,7 +116,7 @@
                 </select>
             </div>
 
-            <div id="order-form" class="order-form" style="display: none; margin-top: 20px;">
+            <div id="order-form" style="display: none; margin-top: 20px;">
                 <h3>Добавьте товар(ы)</h3>
                 <div id="items-container"></div>
                 <button type="button" class="button" onclick="addItem()">➕ Добавить товар</button><br><br>
@@ -194,17 +193,9 @@
     <script>
         const tg = window.Telegram.WebApp;
 
-        // Получаем ID текущего пользователя
-        const userId = tg.initDataUnsafe.user?.id || 0;
-        const isManager = [919034275, 372145026, 6432717873].includes(userId);
-
-        if (isManager) {
-            document.getElementById("manager-button").style.display = "block";
-        }
-
         function toggleSection(sectionId) {
-            document.querySelectorAll('.section').forEach(sec => sec.style.display = 'none');
-            document.getElementById(sectionId).style.display = 'block';
+            document.querySelectorAll('.section').forEach(sec => sec.classList.remove("active"));
+            document.getElementById(sectionId).classList.add("active");
         }
 
         function handleCountryChange() {
@@ -217,15 +208,16 @@
 
             if (countrySelect.value === "china") {
                 marketplaceSection.style.display = "block";
-                orderForm.style.display = "block";
                 addItem();
             } else if (countrySelect.value === "japan") {
                 marketplaceSection.style.display = "none";
-                orderForm.style.display = "block";
                 addJapanItem();
             } else {
                 alert("Пока доступны только Китай и Япония.");
+                return;
             }
+
+            orderForm.style.display = "block";
         }
 
         function addItem() {
@@ -369,7 +361,7 @@
                 const commentInput = itemRow.querySelector(`#item-comment-${idx + 1}`);
 
                 return {
-                    photos: [...Array.from(photoInput.files)].map(f => f.name),
+                    photos: [...Array.from(photoInput?.files || [])].map(f => f.name),
                     link_or_id: linkOrIdInput?.value || '',
                     price: parseFloat(priceInput?.value || 0),
                     color: colorInput?.value || '',
@@ -392,9 +384,9 @@
                 items: items
             };
 
-            console.log("[DEBUG] Отправляемые данные:", requestData);
+            console.log("[DEBUG] Отправляемые данные:", JSON.stringify(requestData, null, 2));
             tg.sendData(JSON.stringify(requestData));
-            alert("✅ Ваш заказ успешно создан!");
+            alert("✅ Ваш заказ успешно отправлен!");
             toggleSection("calculator");
         }
 
@@ -412,14 +404,14 @@
                     alert(`Статус изменён на: ${response.status}`);
                     toggleSection("manager");
                 } else if (response.command === "add_comment") {
-                    alert(`Комментарий добавлен.`);
+                    alert(`Комментарий добавлен: ${response.comment}`);
                 } else if (response.command === "attach_photo") {
                     alert("Фотография прикреплена.");
                 } else if (response.command === "send_requisites") {
                     alert("Реквизиты отправлены.");
                 }
             } catch (e) {
-                alert("Ошибка при получении данных от бота.");
+                alert("Ошибка при получении данных.");
             }
         });
 
