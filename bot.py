@@ -9,35 +9,16 @@ import base64
 import requests
 from dotenv import load_dotenv
 from telebot import types
-import logging
 
-# --- Загрузка переменных окружения ---
 load_dotenv()
 
-# --- Настройки бота ---
+# --- Настройки ---
 BOT_TOKEN = os.getenv("BOT_TOKEN")
-if not BOT_TOKEN:
-    raise ValueError("❌ Не найден BOT_TOKEN в .env")
-
-bot = telebot.TeleBot(BOT_TOKEN)
-
-# --- Курсы валют ---
-currency_rates = {
-    "CNY": 14.5,
-    "JPY": 0.72,
-    "USD": 98.1,
-    "EUR": 105.3
-}
-
-# --- Настройки GitHub ---
 GITHUB_REPO = os.getenv("GITHUB_REPO", "m37avolt/volt-logistics")
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
-if not GITHUB_TOKEN:
-    print("⚠️ GitHub Token не найден — синхронизация с GitHub отключена.")
 
 GITHUB_API_URL = f"https://api.github.com/repos/{GITHUB_REPO}/contents/"
 
-# --- Пути к файлам ---
 script_dir = os.path.dirname(os.path.abspath(__file__))
 db_path = os.path.join(script_dir, 'volt_logistics.db')
 orders_dir = os.path.join(script_dir, 'orders')
@@ -59,11 +40,10 @@ def log_event(event_type, user_id, message=None):
         f.write(line)
     print(f"[LOG] {event_type} | User: {user_id} | Message: {message}")
 
-# --- Инициализация базы данных ---
+# --- Инициализация БД ---
 def init_db():
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
-    
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS users (
             telegram_id INTEGER PRIMARY KEY,
@@ -71,18 +51,15 @@ def init_db():
             telegram_username TEXT
         )
     ''')
-
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS orders (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER,
             full_name TEXT,
             country TEXT,
-            status TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
-
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS order_items (
             item_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -93,11 +70,9 @@ def init_db():
             size TEXT,
             price REAL,
             quantity INTEGER,
-            comment TEXT,
-            FOREIGN KEY(order_id) REFERENCES orders(id)
+            comment TEXT
         )
     ''')
-
     conn.commit()
     conn.close()
     log_event("init_db", "system", "База данных инициализирована.")
@@ -131,7 +106,7 @@ def create_order(user_id, full_name, telegram_username, country):
     log_event("order_created", user_id, f"Заказ #{order_id}, страна: {country}")
     return order_id
 
-# --- Добавление товара в заказ ---
+# --- Добавление товара ---
 def add_item_to_order(order_id, photo, link_or_id, color, size, price, quantity, comment=''):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
@@ -144,7 +119,7 @@ def add_item_to_order(order_id, photo, link_or_id, color, size, price, quantity,
     conn.close()
     log_event("item_added", order_id, f"Фото: {photo}, Цена: {price}, Кол-во: {quantity}")
 
-# --- Сохранение в Excel ---
+# --- Формирование пути к Excel-файлу ---
 def get_daily_excel_path():
     today = datetime.now().strftime("%Y-%m-%d")
     return os.path.join(orders_dir, f"{today}.xlsx")
@@ -160,6 +135,7 @@ def ensure_daily_excel_exists():
         df.to_excel(daily_excel_path, index=False)
     return daily_excel_path
 
+# --- Сохранение в Excel ---
 def save_to_excel(item_data):
     daily_excel_path = get_daily_excel_path()
     try:
@@ -172,14 +148,14 @@ def save_to_excel(item_data):
     df_combined.to_excel(daily_excel_path, index=False)
     log_event("excel_saved", "system", f"Данные записаны в {daily_excel_path}")
 
-    # Отправляем файл в GitHub
+    # Синхронизация с GitHub
     github_path = f"orders/{os.path.basename(daily_excel_path)}"
     update_github_file(github_path, daily_excel_path, "Обновлён дневной заказ")
 
 # --- Обновление файла на GitHub ---
 def update_github_file(path_in_repo, file_path, commit_message="Update file"):
     if not GITHUB_TOKEN:
-        log_event("github_error", "system", "Токен GitHub не задан.")
+        log_event("github_error", "system", "Токен не задан.")
         return
 
     with open(file_path, "rb") as f:
@@ -190,13 +166,13 @@ def update_github_file(path_in_repo, file_path, commit_message="Update file"):
         "Accept": "application/vnd.github.v3+json"
     }
 
-    url = f"{GITHUB_API_URL}{path_in_repo}?ref=main"
+    url = GITHUB_API_URL + path_in_repo
 
     # Получаем SHA текущего файла (если он есть)
     response = requests.get(url, headers=headers)
     sha = None
     if response.status_code == 200:
-        sha = response.json()['sha']
+        sha = response.json()["sha"]
 
     data = {
         "message": commit_message,
@@ -206,15 +182,13 @@ def update_github_file(path_in_repo, file_path, commit_message="Update file"):
     if sha:
         data["sha"] = sha
 
-    response = requests.put(GITHUB_API_URL + path_in_repo, headers=headers, json=data)
-
+    response = requests.put(url, headers=headers, json=data)
     if response.status_code in [200, 201]:
-        log_event("github_sync", "system", f"{path_in_repo} успешно обновлён на GitHub")
+        log_event("github_sync", "system", f"{path_in_repo} успешно обновлён на GitHub.")
     else:
-        log_event("github_error", "system",
-                  f"Не удалось обновить {path_in_repo}: {response.status_code} - {response.text[:200]}")
+        log_event("github_error", "system", f"{response.status_code}: {response.text[:200]}")
 
-# --- Обработчик web_app_data ---
+# --- Приём данных из Web App ---
 @bot.message_handler(content_types=['web_app_data'])
 def handle_web_app_data(message):
     try:
@@ -255,7 +229,7 @@ def handle_web_app_data(message):
                     'ID / Ссылка': link_or_id,
                     'Цвет': color,
                     'Размер': size,
-                    'Цена за единицу': round(price * currency_rates.get(country.upper(), 1), 2),
+                    'Цена за единицу': round(price, 2),
                     'Кол-во/шт': quantity,
                     'tg контакт': telegram_username,
                     'Страна выкупа': country.upper(),
@@ -266,10 +240,6 @@ def handle_web_app_data(message):
 
             bot.send_message(message.chat.id, f"✅ Ваш заказ #{order_id} создан!")
 
-            # Синхронизируем базу данных с GitHub
-            github_db_path = "volt_logistics.db"
-            update_github_file(github_db_path, db_path, "Обновлена база данных")
-
         elif data.get('command') == 'preview_order':
             bot.send_message(message.chat.id, "Вы предпросмотрели заказ.")
             log_event("preview_order", user_id)
@@ -277,7 +247,7 @@ def handle_web_app_data(message):
     except Exception as e:
         error_msg = str(e).replace("\n", "\\n")
         log_event("error", user_id, error_msg)
-        bot.send_message(message.chat.id, f"❌ Ошибка: {error_msg}")
+        bot.send_message(message.chat.id, f"❌ Ошибка при обработке данных: {error_msg}")
 
 # --- Проверка регистрации ---
 def is_registered(user_id):
@@ -316,7 +286,7 @@ def manager_panel(message):
         markup.add(view_orders, back)
         bot.send_message(message.chat.id, "Добро пожаловать в панель менеджера.", reply_markup=markup)
     else:
-        bot.send_message(message.chat.id, "Нет доступа к панели.")
+        bot.send_message(message.chat.id, "🚫 Только авторизованные пользователи могут использовать эту функцию.")
 
 # --- Callback handler ---
 @bot.callback_query_handler(func=lambda call: True)
@@ -343,10 +313,6 @@ def get_all_orders():
     conn.close()
     return result
 
-# --- Синхронизация базы данных с GitHub ---
-def sync_db_with_github():
-    update_github_file("volt_logistics.db", db_path, "Обновлена база данных")
-
 # --- Вывод деталей заказа ---
 @bot.message_handler(func=lambda m: m.text.startswith("Заказ #"))
 def show_order_details(message):
@@ -355,14 +321,14 @@ def show_order_details(message):
         order = get_order(order_id)
         if order and order[1] == message.from_user.id:
             bot.send_message(message.chat.id, f"Детали заказа #{order_id}:\n"
-                                              f"Статус: {order[3]}\n"
+                                              f"Статус: {order[3]},\n"
                                               f"Страна: {order[4]}")
         else:
             bot.send_message(message.chat.id, "Заказ не найден или недоступен.")
     except ValueError:
         bot.send_message(message.chat.id, "Ошибка: укажите корректный номер заказа.")
 
-# --- Получение одного заказа из БД ---
+# --- Получить один заказ ---
 def get_order(order_id):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
