@@ -20,14 +20,14 @@
             flex-direction: column;
             position: relative;
         }
-        /* Меню сверху */
+        /* Верхнее меню */
         .top-menu {
             background-color: white;
-            padding: 15px 10px;
+            padding: 15px 20px;
             box-shadow: 0 2px 6px rgba(0,0,0,0.1);
             display: flex;
             justify-content: center;
-            gap: 10px;
+            gap: 15px;
             z-index: 10;
         }
         .top-menu button {
@@ -47,12 +47,12 @@
         .content {
             flex: 1;
             overflow-y: auto;
-            padding: 15px;
+            padding: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
-        /* Секции (калькулятор, создать заказ, мои заказы, панель менеджера) */
+        /* Секции */
         .section {
             display: none;
             width: 100%;
@@ -68,23 +68,21 @@
         /* Форма создания заказа */
         .order-form {
             width: 100%;
-            max-width: 400px;
+            max-width: 500px;
             background: white;
-            padding: 20px;
+            padding: 25px;
             border-radius: 12px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
         }
-        /* Кнопка "Закрыть" в правом верхнем углу */
         .close-btn {
             position: absolute;
-            top: 10px;
-            right: 10px;
-            font-size: 20px;
+            top: 15px;
+            right: 15px;
+            font-size: 24px;
             color: #999;
             cursor: pointer;
             z-index: 1001;
         }
-        /* Превью фото */
         .photo-preview {
             display: flex;
             flex-wrap: wrap;
@@ -97,7 +95,6 @@
             object-fit: cover;
             border-radius: 5px;
         }
-        /* Таблица заказов */
         table {
             width: 100%;
             border-collapse: collapse;
@@ -113,17 +110,16 @@
             text-decoration: underline;
             cursor: pointer;
         }
-        /* Модальное окно */
         .modal {
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             width: 90%;
-            max-width: 400px;
+            max-width: 500px;
             background: white;
             border-radius: 12px;
-            padding: 20px;
+            padding: 25px;
             z-index: 1000;
             display: none;
             box-shadow: 0 0 15px rgba(0,0,0,0.2);
@@ -179,7 +175,6 @@
             margin-top: 10px;
         }
 
-        /* Мобильная оптимизация */
         @media (max-width: 600px) {
             .top-menu {
                 flex-direction: column;
@@ -195,10 +190,6 @@
             .photo-preview img {
                 width: 40px;
                 height: 40px;
-            }
-            .button {
-                font-size: 14px;
-                padding: 8px 16px;
             }
         }
     </style>
@@ -220,10 +211,10 @@
                 <label for="calc-country">Страна выкупа:</label>
                 <select id="calc-country" onchange="updateCalculatorFields()" class="form-control">
                     <option value="" selected disabled>Выберите страну</option>
-                    <option value="china">Китай 🇨🇳</option>
-                    <option value="japan">Япония 🗼</option>
-                    <option value="europe" disabled style="color: gray;">Европа 🇪🇺</option>
-                    <option value="usa" disabled style="color: gray;">США 🇺🇸</option>
+                    <option value="china">🇨🇳 Китай</option>
+                    <option value="japan">🇯🇵 Япония</option>
+                    <option value="europe" disabled style="color: gray;">🇪🇺 Европа</option>
+                    <option value="usa" disabled style="color: gray;">🇺🇸 США</option>
                 </select>
                 <div id="calc-marketplace-section" style="display: none;">
                     <label for="calc-marketplace">Маркетплейс:</label>
@@ -234,8 +225,7 @@
                 </div>
                 <br>
                 <label for="price">Цена за единицу:</label>
-                <input type="number" id="price" step="any" placeholder="Введите цену" required class="form-control">
-                <br>
+                <input type="number" id="price" step="any" placeholder="Введите цену" required class="form-control"><br>
                 <button class="button" onclick="calculate()">Рассчитать</button>
                 <div id="result" style="margin-top: 20px;"></div>
             </div>
@@ -249,8 +239,8 @@
                         <option value="" selected disabled>Выберите страну</option>
                         <option value="china">🇨🇳 Китай</option>
                         <option value="japan">🇯🇵 Япония</option>
-                        <option value="europe" disabled style="color: gray;">🇪🇺 Европа (временно недоступна)</option>
-                        <option value="usa" disabled style="color: gray;">🇺🇸 США (временно недоступны)</option>
+                        <option value="europe" disabled style="color: gray;">🇪🇺 Европа</option>
+                        <option value="usa" disabled style="color: gray;">🇺🇸 США</option>
                     </select>
                     <div id="marketplace-section" style="display: none;">
                         <label for="marketplace">Маркетплейс:</label>
@@ -618,36 +608,25 @@
             toggleSection('calculator');
         }
 
-                tg.onEvent("web_app_data", function(data) {
-            try {
-                const response = JSON.parse(data.data);
-                if (response.command === "create_order") {
-                    alert(`✅ Заказ #${response.order_id} создан!`);
-                    updateMyOrders(response.orders);
-                } else if (response.command === "track_order") {
-                    updateMyOrders(response.orders);
-                } else if (response.command === "get_order_details") {
-                    const order = response.order;
-                    document.getElementById("order-details-content").innerHTML = `
-                        <p><b>Статус:</b> ${order.status}</p>
-                        <p><b>Страна:</b> ${order.country}</p>
-                        <p><b>Товары:</b></p>
-                        <ul>${order.items.map(i => `<li>ID / Ссылка: ${i.link_or_id}, Цвет: ${i.color}, Размер: ${i.size}, Кол-во: ${i.quantity} шт.</li>`).join("")}</ul>
-                        <p><b>Комментарий:</b> ${order.comment || "-"}</p>
-                        <p><b>Фотоотчет:</b> ${response.report_photos ? response.report_photos.map(p => `<img src="${p}" width="100%" style="margin-top: 10px;">`).join("") : "Нет фотоотчёта."}</p>
-                    `;
-                    document.getElementById("overlay").style.display = "block";
-                    document.getElementById("order-details-modal").style.display = "block";
-                } else if (response.command === "update_status") {
-                    alert(`Статус изменён на "${response.status}"`);
-                    updateMyOrders(response.orders);
-                } else if (response.command === "attach_report") {
-                    alert("Фотоотчёт отправлен клиенту.");
-                }
-            } catch (e) {
-                alert("Ошибка при получении данных от бота.");
-            }
-        });
+        function updateMyOrders(orders) {
+            const container = document.getElementById("user-orders-container");
+            container.innerHTML = "";
+            orders.forEach(order => {
+                const tr = document.createElement("tr");
+                const td1 = document.createElement("td");
+                const td2 = document.createElement("td");
+                td1.innerHTML = `<span class="order-number" onclick="showOrderDetails('${order.id}')">#${order.id}</span>`;
+                td2.innerText = order.status;
+                tr.appendChild(td1);
+                tr.appendChild(td2);
+                container.appendChild(tr);
+            });
+        }
+
+        function closeModal() {
+            document.getElementById("overlay").style.display = "none";
+            document.getElementById("order-details-modal").style.display = "none";
+        }
 
         function updateMyOrders(orders) {
             const container = document.getElementById("user-orders-container");
@@ -664,9 +643,45 @@
             });
         }
 
+        function showOrderDetails(orderId) {
+            tg.sendData(JSON.stringify({ command: "get_order_details", order_id: orderId }));
+            toggleSection("order-details");
+        }
+
         function closeSection() {
             toggleSection('calculator');
         }
+
+        tg.onEvent("web_app_data", function(data) {
+            try {
+                const response = JSON.parse(data.data);
+                if (response.command === "create_order") {
+                    alert(`✅ Заказ #${response.order_id} создан!`);
+                    updateMyOrders(response.orders);
+                } else if (response.command === "track_order") {
+                    updateMyOrders(response.orders);
+                } else if (response.command === "get_order_details") {
+                    const order = response.order;
+                    document.getElementById("order-details-content").innerHTML = `
+                        <p><b>Статус:</b> ${order.status}</p>
+                        <p><b>Страна:</b> ${order.country}</p>
+                        <p><b>Товары:</b></p>
+                        <ul>${order.items.map(i => `<li>ID / Ссылка: ${i.link_or_id}, Цвет: ${i.color}, Размер: ${i.size}, Кол-во: ${i.quantity} шт.</li>`).join("")}</ul>
+                        <p><b>Комментарий:</b> ${order.comment || "-"}</p>
+                        <p><b>Фотоотчет:</b> ${response.report_photos ? response.report_photos.map(p => `<img src="${p}" width="100%" style="margin-top: 10px;"></p>`).join("") : "Нет фотоотчёта."}</p>
+                    `;
+                    document.getElementById("overlay").style.display = "block";
+                    document.getElementById("order-details-modal").style.display = "block";
+                } else if (response.command === "update_status") {
+                    alert(`Статус изменён на "${response.status}"`);
+                    updateMyOrders(response.orders);
+                } else if (response.command === "attach_report") {
+                    alert("Фотоотчёт отправлен клиенту.");
+                }
+            } catch (e) {
+                alert("Ошибка при получении данных от бота.");
+            }
+        });
 
         tg.ready();
     </script>
