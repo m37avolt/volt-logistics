@@ -4,8 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>VOLT Logistics</title>
+
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
     <style>
         body {
             margin: 0;
@@ -13,23 +15,24 @@
             background-color: #f8f9fa;
             overflow-x: hidden;
         }
+
         .main-container {
             width: 100%;
             height: 100vh;
             display: flex;
             flex-direction: column;
-            position: relative;
         }
-        /* Верхнее меню */
+
         .top-menu {
             background-color: white;
             padding: 15px 20px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
             display: flex;
             justify-content: center;
             gap: 15px;
             z-index: 10;
         }
+
         .top-menu button {
             padding: 10px 20px;
             font-size: 16px;
@@ -40,10 +43,11 @@
             cursor: pointer;
             transition: background-color 0.3s ease;
         }
+
         .top-menu button:hover {
             background-color: #0056b3;
         }
-        /* Основной контент */
+
         .content {
             flex: 1;
             overflow-y: auto;
@@ -52,28 +56,31 @@
             flex-direction: column;
             align-items: center;
         }
-        /* Секции */
+
         .section {
             display: none;
             width: 100%;
             animation: slideUp 0.3s ease;
         }
+
         .section.active {
             display: block;
         }
+
         @keyframes slideUp {
             from { transform: translateY(100%); }
             to { transform: translateY(0); }
         }
-        /* Форма создания заказа */
+
         .order-form {
             width: 100%;
             max-width: 500px;
             background: white;
             padding: 25px;
             border-radius: 12px;
-            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
         }
+
         .close-btn {
             position: absolute;
             top: 15px;
@@ -83,33 +90,39 @@
             cursor: pointer;
             z-index: 1001;
         }
+
         .photo-preview {
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
             margin-top: 10px;
         }
-        img.preview-img {
+
+        .preview-img {
             width: 60px;
             height: 60px;
             object-fit: cover;
             border-radius: 5px;
         }
+
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
         }
+
         th, td {
             padding: 12px;
             border: 1px solid #ddd;
             text-align: left;
         }
+
         .order-number {
             color: #007bff;
             text-decoration: underline;
             cursor: pointer;
         }
+
         .modal {
             position: fixed;
             top: 50%;
@@ -124,6 +137,7 @@
             display: none;
             box-shadow: 0 0 15px rgba(0,0,0,0.2);
         }
+
         .overlay {
             display: none;
             position: fixed;
@@ -131,9 +145,10 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0, 0, 0, 0.5);
             z-index: 999;
         }
+
         .button {
             margin: 10px 0;
             padding: 10px 20px;
@@ -144,35 +159,32 @@
             border: none;
             border-radius: 8px;
         }
+
         .button:hover {
             background-color: #0056b3;
         }
-        .section-title {
-            margin-bottom: 20px;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
+
         label {
             display: block;
             margin-bottom: 5px;
             font-weight: 500;
         }
+
         input, select {
             width: 100%;
             padding: 10px;
             box-sizing: border-box;
             border: 1px solid #ccc;
             border-radius: 8px;
+            margin-bottom: 15px;
         }
+
         .item-row {
             margin-bottom: 15px;
         }
-        .item-row hr {
+
+        hr {
             margin: 10px 0;
-        }
-        .item-row button {
-            margin-top: 10px;
         }
 
         @media (max-width: 600px) {
@@ -187,7 +199,7 @@
             .order-form {
                 padding: 15px;
             }
-            .photo-preview img {
+            .preview-img {
                 width: 40px;
                 height: 40px;
             }
@@ -203,6 +215,7 @@
             <button onclick="toggleSection('my-orders')">📦 Мои заказы</button>
             <button id="manager-button" style="display:none;" onclick="toggleSection('manager')">🔒 Панель менеджера</button>
         </div>
+
         <!-- Основной контент -->
         <div class="content">
             <!-- Секция: Калькулятор -->
@@ -216,6 +229,7 @@
                     <option value="europe" disabled style="color: gray;">🇪🇺 Европа</option>
                     <option value="usa" disabled style="color: gray;">🇺🇸 США</option>
                 </select>
+
                 <div id="calc-marketplace-section" style="display: none;">
                     <label for="calc-marketplace">Маркетплейс:</label>
                     <select id="calc-marketplace" class="form-control">
@@ -223,12 +237,14 @@
                         <option value="weechat_yupoo_goofish">WEECHAT / YUPOO / GOOFISH</option>
                     </select>
                 </div>
+
                 <br>
                 <label for="price">Цена за единицу:</label>
                 <input type="number" id="price" step="any" placeholder="Введите цену" required class="form-control"><br>
                 <button class="button" onclick="calculate()">Рассчитать</button>
                 <div id="result" style="margin-top: 20px;"></div>
             </div>
+
             <!-- Секция: Создать заказ -->
             <div id="create-order" class="section">
                 <h2>📝 Создать новый заказ</h2>
@@ -242,6 +258,7 @@
                         <option value="europe" disabled style="color: gray;">🇪🇺 Европа</option>
                         <option value="usa" disabled style="color: gray;">🇺🇸 США</option>
                     </select>
+
                     <div id="marketplace-section" style="display: none;">
                         <label for="marketplace">Маркетплейс:</label>
                         <select id="marketplace" class="form-control">
@@ -249,6 +266,7 @@
                             <option value="weechat_yupoo_goofish">WEECHAT / YUPOO / GOOFISH</option>
                         </select>
                     </div>
+
                     <div id="order-form" style="display: none; margin-top: 20px;">
                         <h3>Добавьте товар(ы)</h3>
                         <div id="items-container"></div>
@@ -261,6 +279,7 @@
                     </div>
                 </div>
             </div>
+
             <!-- Секция: Мои заказы -->
             <div id="my-orders" class="section">
                 <h2>📦 Мои заказы</h2>
@@ -275,6 +294,7 @@
                     <tbody id="user-orders-container"></tbody>
                 </table>
             </div>
+
             <!-- Секция: Панель менеджера -->
             <div id="manager" class="section">
                 <h2>🔒 Панель менеджера</h2>
@@ -290,6 +310,7 @@
                     <tbody id="manager-orders-container"></tbody>
                 </table>
             </div>
+
             <!-- Модальное окно с деталями заказа -->
             <div class="overlay" id="overlay"></div>
             <div class="modal" id="order-details-modal">
@@ -301,13 +322,15 @@
         </div>
     </div>
 
+    <!-- Telegram WebApp API -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
         const tg = window.Telegram.WebApp;
 
-        // Получаем ID текущего пользователя
+        // Получаем ID пользователя из Telegram
         const userId = tg.initDataUnsafe.user?.id || null;
         const isManager = [919034275, 372145026, 6432717873].includes(userId);
+
         if (isManager) {
             document.getElementById("manager-button").style.display = "block";
         }
@@ -328,8 +351,10 @@
             const marketplaceSection = document.getElementById("marketplace-section");
             const orderForm = document.getElementById("order-form");
             const itemsContainer = document.getElementById("items-container");
+
             itemsContainer.innerHTML = "";
             const country = countrySelect.value;
+
             if (country === "china") {
                 marketplaceSection.style.display = "block";
                 addItem();
@@ -340,6 +365,7 @@
                 alert("Пока доступны только Китай и Япония.");
                 return;
             }
+
             orderForm.style.display = "block";
         }
 
@@ -348,6 +374,7 @@
             const index = itemsContainer.childElementCount + 1;
             const newItem = document.createElement("div");
             newItem.className = "item-row";
+
             newItem.innerHTML = `
                 <hr>
                 <h4>Товар #${index}</h4>
@@ -368,6 +395,7 @@
                 <input type="text" id="item-comment-${index}" placeholder="Батч A1 | Упаковать аккуратно">
                 <button type="button" class="button" onclick="removeItem(this)" style="margin-top: 10px;">🗑 Удалить товар</button>
             `;
+
             itemsContainer.appendChild(newItem);
         }
 
@@ -376,6 +404,7 @@
             const index = itemsContainer.childElementCount + 1;
             const newItem = document.createElement("div");
             newItem.className = "item-row";
+
             newItem.innerHTML = `
                 <hr>
                 <h4>Товар #${index}</h4>
@@ -396,6 +425,7 @@
                 <input type="text" id="item-comment-${index}" placeholder="Батч, особые условия...">
                 <button type="button" class="button" onclick="removeItem(this)" style="margin-top: 10px;">🗑 Удалить товар</button>
             `;
+
             itemsContainer.appendChild(newItem);
         }
 
@@ -407,16 +437,13 @@
         function previewPhotos(input) {
             const preview = input.nextElementSibling;
             preview.innerHTML = "";
-            const files = Array.from(input.files).slice(0, 5);
-            files.forEach(file => {
+
+            Array.from(input.files).slice(0, 5).forEach(file => {
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     const img = document.createElement("img");
                     img.src = e.target.result;
-                    img.style.width = "50px";
-                    img.style.height = "50px";
-                    img.style.objectFit = "cover";
-                    img.style.borderRadius = "5px";
+                    img.className = "preview-img";
                     preview.appendChild(img);
                 };
                 reader.readAsDataURL(file);
@@ -427,19 +454,20 @@
             const country = document.getElementById("calc-country").value;
             const marketplace = document.getElementById("calc-marketplace").value;
             const priceInput = document.getElementById("price").value.trim();
+
             if (!country || !priceInput) {
                 alert("Выберите страну и введите цену.");
                 return;
             }
+
             const price = parseFloat(priceInput);
             let result = 0;
+
             switch(country) {
                 case "china":
-                    if (marketplace === "poizon_taobao_weidan") {
-                        result = price * 14.5 * 1.08;
-                    } else {
-                        result = price * 14.5 * 1.13;
-                    }
+                    result = marketplace === "poizon_taobao_weidan"
+                        ? price * 14.5 * 1.08
+                        : price * 14.5 * 1.13;
                     break;
                 case "japan":
                     result = price * 0.72 * 1.03;
@@ -448,6 +476,7 @@
                     alert("Ошибка: выберите корректную страну.");
                     return;
             }
+
             document.getElementById("result").innerText = `Итоговая стоимость: ${result.toFixed(2)} ₽`;
         }
 
@@ -464,6 +493,7 @@
                 const sizeInput = itemRow.querySelector(`#item-size-${idx + 1}`);
                 const quantityInput = itemRow.querySelector(`#item-quantity-${idx + 1}`);
                 const commentInput = itemRow.querySelector(`#item-comment-${idx + 1}`);
+
                 return {
                     photos: [...Array.from(photoInput?.files || [])].map(f => f.name),
                     link_or_id: linkOrIdInput?.value || "",
@@ -540,6 +570,7 @@
                 const cell1 = document.createElement("td");
                 cell1.innerHTML = `<span class="order-number" onclick="showOrderDetails('${order.id}')">#${order.id}</span>`;
                 row.appendChild(cell1);
+
                 const cell2 = document.createElement("td");
                 const statusSelect = document.createElement("select");
                 statusSelect.innerHTML = `
@@ -561,6 +592,7 @@
                 };
                 cell2.appendChild(statusSelect);
                 row.appendChild(cell2);
+
                 const cell3 = document.createElement("td");
                 const uploadBtn = document.createElement("input");
                 uploadBtn.type = "file";
@@ -580,6 +612,7 @@
                 };
                 cell3.appendChild(uploadBtn);
                 row.appendChild(cell3);
+
                 container.appendChild(row);
             });
         }
@@ -599,62 +632,10 @@
             });
         }
 
-        function showOrderDetails(orderId) {
-            tg.sendData(JSON.stringify({ command: "get_order_details", order_id: orderId }));
-            toggleSection("order-details");
-        }
-
-        function closeSection() {
-            toggleSection('calculator');
-        }
-
-        function updateMyOrders(orders) {
-            const container = document.getElementById("user-orders-container");
-            container.innerHTML = "";
-            orders.forEach(order => {
-                const tr = document.createElement("tr");
-                const td1 = document.createElement("td");
-                const td2 = document.createElement("td");
-                td1.innerHTML = `<span class="order-number" onclick="showOrderDetails('${order.id}')">#${order.id}</span>`;
-                td2.innerText = order.status;
-                tr.appendChild(td1);
-                tr.appendChild(td2);
-                container.appendChild(tr);
-            });
-        }
-
-        function closeModal() {
-            document.getElementById("overlay").style.display = "none";
-            document.getElementById("order-details-modal").style.display = "none";
-        }
-
-        function updateMyOrders(orders) {
-            const container = document.getElementById("user-orders-container");
-            container.innerHTML = "";
-            orders.forEach(order => {
-                const tr = document.createElement("tr");
-                const td1 = document.createElement("td");
-                const td2 = document.createElement("td");
-                td1.innerHTML = `<span class="order-number" onclick="showOrderDetails('${order.id}')">#${order.id}</span>`;
-                td2.innerText = order.status;
-                tr.appendChild(td1);
-                tr.appendChild(td2);
-                container.appendChild(tr);
-            });
-        }
-
-        function showOrderDetails(orderId) {
-            tg.sendData(JSON.stringify({ command: "get_order_details", order_id: orderId }));
-            toggleSection("order-details");
-        }
-
-        function closeSection() {
-            toggleSection('calculator');
-        }
-
         tg.onEvent("web_app_data", function(data) {
             try {
                 const response = JSON.parse(data.data);
+
                 if (response.command === "create_order") {
                     alert(`✅ Заказ #${response.order_id} создан!`);
                     updateMyOrders(response.orders);
@@ -668,7 +649,7 @@
                         <p><b>Товары:</b></p>
                         <ul>${order.items.map(i => `<li>ID / Ссылка: ${i.link_or_id}, Цвет: ${i.color}, Размер: ${i.size}, Кол-во: ${i.quantity} шт.</li>`).join("")}</ul>
                         <p><b>Комментарий:</b> ${order.comment || "-"}</p>
-                        <p><b>Фотоотчет:</b> ${response.report_photos ? response.report_photos.map(p => `<img src="${p}" width="100%" style="margin-top: 10px;"></p>`).join("") : "Нет фотоотчёта."}</p>
+                        <p><b>Фотоотчет:</b> ${response.report_photos ? response.report_photos.map(p => `<img src="${p}" width="100%" style="margin-top: 10px;">`).join("") : "Нет фотоотчёта."}</p>
                     `;
                     document.getElementById("overlay").style.display = "block";
                     document.getElementById("order-details-modal").style.display = "block";
