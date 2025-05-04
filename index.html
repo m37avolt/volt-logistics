@@ -2,191 +2,312 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>VOLT Logistics</title>
-
-    <!-- Bootstrap -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
-            font-family: Arial, sans-serif;
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            overflow-x: hidden;
+        }
+        .main-container {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        /* Меню сверху */
+        .top-menu {
+            background-color: white;
+            padding: 15px 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            z-index: 10;
+        }
+        .top-menu button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .top-menu button:hover {
+            background-color: #0056b3;
+        }
+        /* Основной контент */
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #f0f0f0;
         }
-
-        .container {
-            width: 100%;
-            max-width: 400px;
-            padding: 20px;
-            background: #fff;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            text-align: center;
-        }
-
-        .button {
-            margin: 10px;
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            background-color: #0088cc;
-            color: white;
-            border: none;
-            border-radius: 5px;
-        }
-
-        .button:hover {
-            background-color: #007bb5;
-        }
-
+        /* Секции (калькулятор, создать заказ, мои заказы, панель менеджера) */
         .section {
             display: none;
+            width: 100%;
+            animation: slideUp 0.3s ease;
         }
-
         .section.active {
             display: block;
         }
-
-        label {
-            margin-top: 10px;
-            display: block;
-            text-align: left;
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
         }
-
-        input, select, textarea {
+        /* Форма создания заказа */
+        .order-form {
             width: 100%;
-            padding: 8px;
-            margin-bottom: 10px;
-            box-sizing: border-box;
+            max-width: 400px;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
-
+        /* Кнопка "Закрыть" в правом верхнем углу */
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 20px;
+            color: #999;
+            cursor: pointer;
+            z-index: 1001;
+        }
+        /* Превью фото */
         .photo-preview {
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
             margin-top: 10px;
-            justify-content: center;
         }
-
         img.preview-img {
             width: 60px;
             height: 60px;
             object-fit: cover;
             border-radius: 5px;
         }
-
-        .item-row {
-            border: 1px solid #ccc;
-            padding: 10px;
+        /* Таблица заказов */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        .order-number {
+            color: #007bff;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+        /* Модальное окно */
+        .modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 400px;
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+        }
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+        .button {
+            margin: 10px 0;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+        .section-title {
+            margin-bottom: 20px;
+        }
+        .form-group {
             margin-bottom: 15px;
-            background-color: #fafafa;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+        .item-row {
+            margin-bottom: 15px;
+        }
+        .item-row hr {
+            margin: 10px 0;
+        }
+        .item-row button {
+            margin-top: 10px;
+        }
+
+        /* Мобильная оптимизация */
+        @media (max-width: 600px) {
+            .top-menu {
+                flex-direction: column;
+                align-items: center;
+            }
+            .top-menu button {
+                width: 100%;
+                margin: 5px 0;
+            }
+            .order-form {
+                padding: 15px;
+            }
+            .photo-preview img {
+                width: 40px;
+                height: 40px;
+            }
+            .button {
+                font-size: 14px;
+                padding: 8px 16px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🛍 VOLT Logistics</h1>
-        <button class="button" onclick="toggleSection('calculator')">🧮 Калькулятор</button>
-        <button class="button" onclick="toggleSection('create-order')">📝 Создать заказ</button>
-        <button class="button" onclick="toggleSection('my-orders')">📦 Мои заказы</button>
-        <button id="manager-button" class="button" style="display: none;" onclick="toggleSection('manager')">🔒 Менеджер</button>
-
-        <!-- Секция: Создать заказ -->
-        <div id="create-order" class="section">
-            <label for="country">Страна выкупа:</label>
-            <select id="country" class="form-control" onchange="handleCountryChange()">
-                <option value="" selected disabled>Выберите страну</option>
-                <option value="china">🇨🇳 Китай</option>
-                <option value="japan">🇯🇵 Япония</option>
-                <option value="europe" disabled style="color: gray;">🇪🇺 Европа (временно недоступна)</option>
-                <option value="usa" disabled style="color: gray;">🇺🇸 США (временно недоступны)</option>
-            </select>
-
-            <div id="marketplace-section" class="marketplace-select" style="display: none;">
-                <br>
-                <label for="marketplace">Маркетплейс:</label>
-                <select id="marketplace" class="form-control">
-                    <option value="poizon_taobao_weidan">POIZON / TAOBAO / WEIDAN И ДР.</option>
-                    <option value="weechat_yupoo_goofish">WEECHAT / YUPOO / GOOFISH</option>
+    <div class="main-container">
+        <!-- Верхнее меню -->
+        <div class="top-menu">
+            <button onclick="toggleSection('calculator')">🧮 Калькулятор</button>
+            <button onclick="toggleSection('create-order')">📝 Создать заказ</button>
+            <button onclick="toggleSection('my-orders')">📦 Мои заказы</button>
+            <button id="manager-button" style="display:none;" onclick="toggleSection('manager')">🔒 Панель менеджера</button>
+        </div>
+        <!-- Основной контент -->
+        <div class="content">
+            <!-- Секция: Калькулятор -->
+            <div id="calculator" class="section active">
+                <h2>🧮 Калькулятор стоимости</h2>
+                <label for="calc-country">Страна выкупа:</label>
+                <select id="calc-country" onchange="updateCalculatorFields()" class="form-control">
+                    <option value="" selected disabled>Выберите страну</option>
+                    <option value="china">Китай 🇨🇳</option>
+                    <option value="japan">Япония 🗼</option>
+                    <option value="europe" disabled style="color: gray;">Европа 🇪🇺</option>
+                    <option value="usa" disabled style="color: gray;">США 🇺🇸</option>
                 </select>
-            </div>
-
-            <div id="order-form" class="order-form" style="display: none; margin-top: 20px;">
-                <h3>Добавьте товар(ы)</h3>
-                <div id="items-container"></div>
-                <button type="button" class="button" onclick="addItem()">➕ Добавить товар</button><br><br>
-
-                <label for="full-name">ФИО:</label>
-                <input type="text" id="full-name" required placeholder="Пример: Иванов Иван">
-
-                <label for="telegram-username">Telegram username:</label>
-                <input type="text" id="telegram-username" required placeholder="@ivanov или +79001234567">
-
-                <button class="button" onclick="submitOrder()">✅ Создать заказ</button>
-            </div>
-        </div>
-
-        <!-- Секция: Калькулятор -->
-        <div id="calculator" class="section">
-            <h2>🧮 Калькулятор стоимости</h2>
-            <label for="calc-country">Страна выкупа:</label>
-            <select id="calc-country" class="form-control" onchange="updateCalculatorFields()">
-                <option value="" selected disabled>Выберите страну</option>
-                <option value="china">Китай 🇨🇳</option>
-                <option value="japan">Япония 🗼</option>
-                <option value="europe" disabled style="color: gray;">Европа 🇪🇺</option>
-                <option value="usa" disabled style="color: gray;">США 🇺🇸</option>
-            </select>
-
-            <div id="calc-marketplace-section" style="display: none;">
+                <div id="calc-marketplace-section" style="display: none;">
+                    <label for="calc-marketplace">Маркетплейс:</label>
+                    <select id="calc-marketplace" class="form-control">
+                        <option value="poizon_taobao_weidan">POIZON / TAOBAO / WEIDAN И ДР.</option>
+                        <option value="weechat_yupoo_goofish">WEECHAT / YUPOO / GOOFISH</option>
+                    </select>
+                </div>
                 <br>
-                <label for="calc-marketplace">Маркетплейс:</label>
-                <select id="calc-marketplace" class="form-control">
-                    <option value="poizon_taobao_weidan">POIZON / TAOBAO / WEIDAN И ДР.</option>
-                    <option value="weechat_yupoo_goofish">WEECHAT / YUPOO / GOOFISH</option>
-                </select>
+                <label for="price">Цена за единицу:</label>
+                <input type="number" id="price" step="any" placeholder="Введите цену" required class="form-control">
+                <br>
+                <button class="button" onclick="calculate()">Рассчитать</button>
+                <div id="result" style="margin-top: 20px;"></div>
             </div>
-
-            <br>
-            <label for="price">Цена за единицу:</label>
-            <input type="number" id="price" step="any" placeholder="Введите цену" required class="form-control">
-            <br>
-            <button class="button" onclick="calculate()">Рассчитать</button>
-            <div id="result" style="margin-top: 20px;"></div>
-        </div>
-
-        <!-- Секция: Мои заказы -->
-        <div id="my-orders" class="section">
-            <h2>📦 Мои заказы</h2>
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Номер заказа</th>
-                        <th>Статус</th>
-                    </tr>
-                </thead>
-                <tbody id="user-orders-container"></tbody>
-            </table>
-        </div>
-
-        <!-- Секция: Панель менеджера -->
-        <div id="manager" class="section">
-            <h2>🔒 Панель менеджера</h2>
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Номер заказа</th>
-                        <th>Действия</th>
-                    </tr>
-                </thead>
-                <tbody id="manager-orders-container"></tbody>
-            </table>
+            <!-- Секция: Создать заказ -->
+            <div id="create-order" class="section">
+                <h2>📝 Создать новый заказ</h2>
+                <span class="close-btn" onclick="toggleSection('calculator')">✕</span>
+                <div class="order-form">
+                    <label for="country">Страна выкупа:</label>
+                    <select id="country" onchange="handleCountryChange()" class="form-control">
+                        <option value="" selected disabled>Выберите страну</option>
+                        <option value="china">🇨🇳 Китай</option>
+                        <option value="japan">🇯🇵 Япония</option>
+                        <option value="europe" disabled style="color: gray;">🇪🇺 Европа (временно недоступна)</option>
+                        <option value="usa" disabled style="color: gray;">🇺🇸 США (временно недоступны)</option>
+                    </select>
+                    <div id="marketplace-section" style="display: none;">
+                        <label for="marketplace">Маркетплейс:</label>
+                        <select id="marketplace" class="form-control">
+                            <option value="poizon_taobao_weidan">POIZON / TAOBAO / WEIDAN И ДР.</option>
+                            <option value="weechat_yupoo_goofish">WEECHAT / YUPOO / GOOFISH</option>
+                        </select>
+                    </div>
+                    <div id="order-form" style="display: none; margin-top: 20px;">
+                        <h3>Добавьте товар(ы)</h3>
+                        <div id="items-container"></div>
+                        <button type="button" class="button" onclick="addItem()">➕ Добавить товар</button><br><br>
+                        <label for="full-name">ФИО:</label>
+                        <input type="text" id="full-name" required class="form-control"><br>
+                        <label for="telegram-username">Telegram username:</label>
+                        <input type="text" id="telegram-username" required class="form-control"><br>
+                        <button class="button" onclick="submitOrder()">✅ Создать заказ</button>
+                    </div>
+                </div>
+            </div>
+            <!-- Секция: Мои заказы -->
+            <div id="my-orders" class="section">
+                <h2>📦 Мои заказы</h2>
+                <span class="close-btn" onclick="toggleSection('calculator')">✕</span>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Номер заказа</th>
+                            <th>Статус</th>
+                        </tr>
+                    </thead>
+                    <tbody id="user-orders-container"></tbody>
+                </table>
+            </div>
+            <!-- Секция: Панель менеджера -->
+            <div id="manager" class="section">
+                <h2>🔒 Панель менеджера</h2>
+                <span class="close-btn" onclick="toggleSection('calculator')">✕</span>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Номер заказа</th>
+                            <th>Статус</th>
+                            <th>Действие</th>
+                        </tr>
+                    </thead>
+                    <tbody id="manager-orders-container"></tbody>
+                </table>
+            </div>
+            <!-- Модальное окно с деталями заказа -->
+            <div class="overlay" id="overlay"></div>
+            <div class="modal" id="order-details-modal">
+                <span class="close-btn" onclick="closeModal()">✕</span>
+                <h3>Детали заказа</h3>
+                <div id="order-details-content"></div>
+                <button class="button" onclick="closeModal()">❌ Закрыть</button>
+            </div>
         </div>
     </div>
 
@@ -195,43 +316,46 @@
         const tg = window.Telegram.WebApp;
 
         // Получаем ID текущего пользователя
-        const userId = tg.initDataUnsafe.user?.id || 0;
+        const userId = tg.initDataUnsafe.user?.id || null;
         const isManager = [919034275, 372145026, 6432717873].includes(userId);
-
         if (isManager) {
             document.getElementById("manager-button").style.display = "block";
         }
 
         function toggleSection(sectionId) {
-            document.querySelectorAll('.section').forEach(sec => sec.style.display = 'none');
-            document.getElementById(sectionId).style.display = 'block';
+            const sections = document.querySelectorAll('.section');
+            sections.forEach(sec => sec.classList.remove("active"));
+            const section = document.getElementById(sectionId);
+            if (section.classList.contains("active")) {
+                section.classList.remove("active");
+            } else {
+                section.classList.add("active");
+            }
         }
 
         function handleCountryChange() {
             const countrySelect = document.getElementById("country");
             const marketplaceSection = document.getElementById("marketplace-section");
             const orderForm = document.getElementById("order-form");
-
             const itemsContainer = document.getElementById("items-container");
-            itemsContainer.innerHTML = ""; // очищаем предыдущие товары
-
-            if (countrySelect.value === "china") {
+            itemsContainer.innerHTML = "";
+            const country = countrySelect.value;
+            if (country === "china") {
                 marketplaceSection.style.display = "block";
-                orderForm.style.display = "block";
                 addItem();
-            } else if (countrySelect.value === "japan") {
+            } else if (country === "japan") {
                 marketplaceSection.style.display = "none";
-                orderForm.style.display = "block";
                 addJapanItem();
             } else {
                 alert("Пока доступны только Китай и Япония.");
+                return;
             }
+            orderForm.style.display = "block";
         }
 
         function addItem() {
             const itemsContainer = document.getElementById("items-container");
             const index = itemsContainer.childElementCount + 1;
-
             const newItem = document.createElement("div");
             newItem.className = "item-row";
             newItem.innerHTML = `
@@ -239,27 +363,20 @@
                 <h4>Товар #${index}</h4>
                 <label>Загрузите фото:</label>
                 <input type="file" class="item-photo" accept="image/*" multiple onchange="previewPhotos(this)">
-                <div class="photo-preview"></div>
-
-                <label for="item-link-${index}">Ссылка на товар:</label>
+                <div class="photo-preview" style="display:flex;flex-wrap:wrap;gap:10px;"></div>
+                <label for="item-link-${index}">Ссылка / ID:</label>
                 <input type="text" id="item-link-${index}" placeholder="https://taobao.com/item123">
-
                 <label for="item-price-${index}">Цена (CNY):</label>
                 <input type="number" id="item-price-${index}" step="any" placeholder="¥ 800">
-
                 <label for="item-color-${index}">Цвет:</label>
                 <input type="text" id="item-color-${index}" placeholder="Черный / White">
-
                 <label for="item-size-${index}">Размер:</label>
-                <input type="text" id="item-size-${index}" placeholder="Пример: M / 42 / EU40">
-
+                <input type="text" id="item-size-${index}" placeholder="M / 42 / EU40">
                 <label for="item-quantity-${index}">Количество:</label>
                 <input type="number" id="item-quantity-${index}" min="1" value="1">
-
-                <label for="item-comment-${index}">Комментарий к товару:</label>
+                <label for="item-comment-${index}">Комментарий:</label>
                 <input type="text" id="item-comment-${index}" placeholder="Батч A1 | Упаковать аккуратно">
-
-                <button type="button" onclick="removeItem(this)" style="margin-top: 10px;">🗑 Удалить товар</button>
+                <button type="button" class="button" onclick="removeItem(this)" style="margin-top: 10px;">🗑 Удалить товар</button>
             `;
             itemsContainer.appendChild(newItem);
         }
@@ -267,7 +384,6 @@
         function addJapanItem() {
             const itemsContainer = document.getElementById("items-container");
             const index = itemsContainer.childElementCount + 1;
-
             const newItem = document.createElement("div");
             newItem.className = "item-row";
             newItem.innerHTML = `
@@ -275,46 +391,42 @@
                 <h4>Товар #${index}</h4>
                 <label>Загрузите фото:</label>
                 <input type="file" class="item-photo" accept="image/*" multiple onchange="previewPhotos(this)">
-                <div class="photo-preview"></div>
-
+                <div class="photo-preview" style="display:flex;flex-wrap:wrap;gap:10px;"></div>
                 <label for="item-link-${index}">Ссылка на товар:</label>
                 <input type="text" id="item-link-${index}" placeholder="https://yame.co.jp/item123">
-
                 <label for="item-price-${index}">Цена (JPY):</label>
                 <input type="number" id="item-price-${index}" step="any" placeholder="¥ 2000">
-
                 <label for="item-color-${index}">Цвет:</label>
                 <input type="text" id="item-color-${index}" placeholder="Черный / Noir">
-
                 <label for="item-size-${index}">Размер:</label>
                 <input type="text" id="item-size-${index}" placeholder="M / 42 / EU40">
-
                 <label for="item-quantity-${index}">Количество:</label>
                 <input type="number" id="item-quantity-${index}" min="1" value="1">
-
                 <label for="item-comment-${index}">Комментарий:</label>
                 <input type="text" id="item-comment-${index}" placeholder="Батч, особые условия...">
-
-                <button type="button" onclick="removeItem(this)" style="margin-top: 10px;">🗑 Удалить товар</button>
+                <button type="button" class="button" onclick="removeItem(this)" style="margin-top: 10px;">🗑 Удалить товар</button>
             `;
             itemsContainer.appendChild(newItem);
         }
 
         function removeItem(button) {
-            button.parentElement.remove();
+            const itemRow = button.parentElement;
+            itemRow.remove();
         }
 
         function previewPhotos(input) {
             const preview = input.nextElementSibling;
             preview.innerHTML = "";
-
-            const files = Array.from(input.files).slice(0, 5); // до 5 файлов
+            const files = Array.from(input.files).slice(0, 5);
             files.forEach(file => {
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     const img = document.createElement("img");
                     img.src = e.target.result;
-                    img.className = "preview-img";
+                    img.style.width = "50px";
+                    img.style.height = "50px";
+                    img.style.objectFit = "cover";
+                    img.style.borderRadius = "5px";
                     preview.appendChild(img);
                 };
                 reader.readAsDataURL(file);
@@ -323,19 +435,16 @@
 
         function calculate() {
             const country = document.getElementById("calc-country").value;
+            const marketplace = document.getElementById("calc-marketplace").value;
             const priceInput = document.getElementById("price").value.trim();
-
             if (!country || !priceInput) {
                 alert("Выберите страну и введите цену.");
                 return;
             }
-
             const price = parseFloat(priceInput);
             let result = 0;
-
             switch(country) {
                 case "china":
-                    const marketplace = document.getElementById("calc-marketplace").value;
                     if (marketplace === "poizon_taobao_weidan") {
                         result = price * 14.5 * 1.08;
                     } else {
@@ -346,10 +455,9 @@
                     result = price * 0.72 * 1.03;
                     break;
                 default:
-                    alert("Выберите корректную страну.");
+                    alert("Ошибка: выберите корректную страну.");
                     return;
             }
-
             document.getElementById("result").innerText = `Итоговая стоимость: ${result.toFixed(2)} ₽`;
         }
 
@@ -357,7 +465,6 @@
             const full_name = document.getElementById("full-name").value.trim();
             const telegram_username = document.getElementById("telegram-username").value.trim();
             const country = document.getElementById("country").value;
-
             const itemsContainer = document.getElementById("items-container");
             const items = Array.from(itemsContainer.children).map((itemRow, idx) => {
                 const photoInput = itemRow.querySelector(".item-photo");
@@ -367,20 +474,19 @@
                 const sizeInput = itemRow.querySelector(`#item-size-${idx + 1}`);
                 const quantityInput = itemRow.querySelector(`#item-quantity-${idx + 1}`);
                 const commentInput = itemRow.querySelector(`#item-comment-${idx + 1}`);
-
                 return {
-                    photos: [...Array.from(photoInput.files)].map(f => f.name),
-                    link_or_id: linkOrIdInput?.value || '',
+                    photos: [...Array.from(photoInput?.files || [])].map(f => f.name),
+                    link_or_id: linkOrIdInput?.value || "",
                     price: parseFloat(priceInput?.value || 0),
-                    color: colorInput?.value || '',
-                    size: sizeInput?.value || '',
+                    color: colorInput?.value || "",
+                    size: sizeInput?.value || "",
                     quantity: parseInt(quantityInput?.value || 1),
-                    comment: commentInput?.value || ''
+                    comment: commentInput?.value || ""
                 };
             });
 
             if (!full_name || !telegram_username || !country || items.length === 0) {
-                alert("⚠️ Заполните все поля формы перед отправкой.");
+                alert("⚠️ Заполните все обязательные поля.");
                 return;
             }
 
@@ -392,36 +498,175 @@
                 items: items
             };
 
-            console.log("[DEBUG] Отправляемые данные:", requestData);
-            tg.sendData(JSON.stringify(requestData));
-            alert("✅ Ваш заказ успешно создан!");
-            toggleSection("calculator");
+            console.log("Отправляемые данные:", JSON.stringify(requestData, null, 2));
+
+            fetch('http://localhost:5000/submit_order', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "success") {
+                    alert("✅ Ваш заказ успешно создан!");
+                    toggleSection("my-orders");
+                } else {
+                    alert("❌ Ошибка при отправке заказа: " + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                alert("❌ Ошибка при отправке заказа.");
+            });
         }
 
-        // Обработка ответов от бота
-        tg.onEvent("web_app_data", function(data) {
+        function showOrderDetails(orderId) {
+            tg.sendData(JSON.stringify({ command: "get_order_details", order_id: orderId }));
+            toggleSection("order-details");
+        }
+
+        function closeModal() {
+            document.getElementById("overlay").style.display = "none";
+            document.getElementById("order-details-modal").style.display = "none";
+        }
+
+        function updateCalculatorFields() {
+            const calcCountry = document.getElementById("calc-country").value;
+            const calcMarketplace = document.getElementById("calc-marketplace");
+            if (calcCountry === "china") {
+                calcMarketplace.style.display = "block";
+            } else {
+                calcMarketplace.style.display = "none";
+            }
+        }
+
+        function renderManagerOrders(orders) {
+            const container = document.getElementById("manager-orders-container");
+            container.innerHTML = "";
+            orders.forEach(order => {
+                const row = document.createElement("tr");
+                const cell1 = document.createElement("td");
+                cell1.innerHTML = `<span class="order-number" onclick="showOrderDetails('${order.id}')">#${order.id}</span>`;
+                row.appendChild(cell1);
+                const cell2 = document.createElement("td");
+                const statusSelect = document.createElement("select");
+                statusSelect.innerHTML = `
+                    <option>Ожидает проверки</option>
+                    <option>Ожидает выкупа</option>
+                    <option>Ожидает отправки на склад в Китае</option>
+                    <option>Отправлено на склад в Китае</option>
+                    <option>В Китае (фотоотчет)</option>
+                    <option>Отправлено в Москву</option>
+                    <option>в москве. ожидает отправки в ваш НП</option>
+                    <option>СДЕК (номер накладной)</option>
+                `;
+                statusSelect.onchange = () => {
+                    tg.sendData(JSON.stringify({
+                        command: "edit_order_status",
+                        order_id: order.id,
+                        status: statusSelect.value
+                    }));
+                };
+                cell2.appendChild(statusSelect);
+                row.appendChild(cell2);
+                const cell3 = document.createElement("td");
+                const uploadBtn = document.createElement("input");
+                uploadBtn.type = "file";
+                uploadBtn.accept = "image/*";
+                uploadBtn.onchange = function(event) {
+                    const file = event.target.files[0];
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        tg.sendData(JSON.stringify({
+                            command: "attach_report",
+                            order_id: order.id,
+                            report_photo: e.target.result
+                        }));
+                        alert("Фотоотчёт отправлен клиенту.");
+                    };
+                    reader.readAsDataURL(file);
+                };
+                cell3.appendChild(uploadBtn);
+                row.appendChild(cell3);
+                container.appendChild(row);
+            });
+        }
+
+        function updateMyOrders(orders) {
+            const container = document.getElementById("user-orders-container");
+            container.innerHTML = "";
+            orders.forEach(order => {
+                const tr = document.createElement("tr");
+                const td1 = document.createElement("td");
+                const td2 = document.createElement("td");
+                td1.innerHTML = `<span class="order-number" onclick="showOrderDetails('${order.id}')">#${order.id}</span>`;
+                td2.innerText = order.status;
+                tr.appendChild(td1);
+                tr.appendChild(td2);
+                container.appendChild(tr);
+            });
+        }
+
+        function showOrderDetails(orderId) {
+            tg.sendData(JSON.stringify({ command: "get_order_details", order_id: orderId }));
+            toggleSection("order-details");
+        }
+
+        function closeSection() {
+            toggleSection('calculator');
+        }
+
+                tg.onEvent("web_app_data", function(data) {
             try {
                 const response = JSON.parse(data.data);
-
                 if (response.command === "create_order") {
-                    alert(`✅ Заказ #${response.order_id} создан.`);
-                    toggleSection("calculator");
+                    alert(`✅ Заказ #${response.order_id} создан!`);
+                    updateMyOrders(response.orders);
                 } else if (response.command === "track_order") {
-                    document.getElementById("order-status").innerText = `Статус: ${response.status}`;
-                } else if (response.command === "edit_order_status") {
-                    alert(`Статус изменён на: ${response.status}`);
-                    toggleSection("manager");
-                } else if (response.command === "add_comment") {
-                    alert(`Комментарий добавлен.`);
-                } else if (response.command === "attach_photo") {
-                    alert("Фотография прикреплена.");
-                } else if (response.command === "send_requisites") {
-                    alert("Реквизиты отправлены.");
+                    updateMyOrders(response.orders);
+                } else if (response.command === "get_order_details") {
+                    const order = response.order;
+                    document.getElementById("order-details-content").innerHTML = `
+                        <p><b>Статус:</b> ${order.status}</p>
+                        <p><b>Страна:</b> ${order.country}</p>
+                        <p><b>Товары:</b></p>
+                        <ul>${order.items.map(i => `<li>ID / Ссылка: ${i.link_or_id}, Цвет: ${i.color}, Размер: ${i.size}, Кол-во: ${i.quantity} шт.</li>`).join("")}</ul>
+                        <p><b>Комментарий:</b> ${order.comment || "-"}</p>
+                        <p><b>Фотоотчет:</b> ${response.report_photos ? response.report_photos.map(p => `<img src="${p}" width="100%" style="margin-top: 10px;">`).join("") : "Нет фотоотчёта."}</p>
+                    `;
+                    document.getElementById("overlay").style.display = "block";
+                    document.getElementById("order-details-modal").style.display = "block";
+                } else if (response.command === "update_status") {
+                    alert(`Статус изменён на "${response.status}"`);
+                    updateMyOrders(response.orders);
+                } else if (response.command === "attach_report") {
+                    alert("Фотоотчёт отправлен клиенту.");
                 }
             } catch (e) {
                 alert("Ошибка при получении данных от бота.");
             }
         });
+
+        function updateMyOrders(orders) {
+            const container = document.getElementById("user-orders-container");
+            container.innerHTML = "";
+            orders.forEach(order => {
+                const tr = document.createElement("tr");
+                const td1 = document.createElement("td");
+                const td2 = document.createElement("td");
+                td1.innerHTML = `<span class="order-number" onclick="showOrderDetails('${order.id}')">#${order.id}</span>`;
+                td2.innerText = order.status;
+                tr.appendChild(td1);
+                tr.appendChild(td2);
+                container.appendChild(tr);
+            });
+        }
+
+        function closeSection() {
+            toggleSection('calculator');
+        }
 
         tg.ready();
     </script>
