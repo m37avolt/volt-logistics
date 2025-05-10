@@ -481,66 +481,51 @@
         }
 
         function submitOrder() {
-            const full_name = document.getElementById("full-name").value.trim();
-            const telegram_username = document.getElementById("telegram-username").value.trim();
-            const country = document.getElementById("country").value;
-            const itemsContainer = document.getElementById("items-container");
-            const items = Array.from(itemsContainer.children).map((itemRow, idx) => {
-                const photoInput = itemRow.querySelector(".item-photo");
-                const linkOrIdInput = itemRow.querySelector(`#item-link-${idx + 1}`);
-                const priceInput = itemRow.querySelector(`#item-price-${idx + 1}`);
-                const colorInput = itemRow.querySelector(`#item-color-${idx + 1}`);
-                const sizeInput = itemRow.querySelector(`#item-size-${idx + 1}`);
-                const quantityInput = itemRow.querySelector(`#item-quantity-${idx + 1}`);
-                const commentInput = itemRow.querySelector(`#item-comment-${idx + 1}`);
+    const full_name = document.getElementById("full-name").value.trim();
+    const telegram_username = document.getElementById("telegram-username").value.trim();
+    const country = document.getElementById("country").value;
+    const itemsContainer = document.getElementById("items-container");
+    
+    const items = Array.from(itemsContainer.children).map((itemRow, idx) => {
+        const photoInput = itemRow.querySelector(".item-photo");
+        const linkOrIdInput = itemRow.querySelector(`#item-link-${idx + 1}`);
+        const priceInput = itemRow.querySelector(`#item-price-${idx + 1}`);
+        const colorInput = itemRow.querySelector(`#item-color-${idx + 1}`);
+        const sizeInput = itemRow.querySelector(`#item-size-${idx + 1}`);
+        const quantityInput = itemRow.querySelector(`#item-quantity-${idx + 1}`);
+        const commentInput = itemRow.querySelector(`#item-comment-${idx + 1}`);
 
-                return {
-                    photos: [...Array.from(photoInput?.files || [])].map(f => f.name),
-                    link_or_id: linkOrIdInput?.value || "",
-                    price: parseFloat(priceInput?.value || 0),
-                    color: colorInput?.value || "",
-                    size: sizeInput?.value || "",
-                    quantity: parseInt(quantityInput?.value || 1),
-                    comment: commentInput?.value || ""
-                };
-            });
+        return {
+            photos: [...Array.from(photoInput?.files || [])].map(f => f.name),
+            link_or_id: linkOrIdInput?.value || "",
+            price: parseFloat(priceInput?.value || 0),
+            color: colorInput?.value || "",
+            size: sizeInput?.value || "",
+            quantity: parseInt(quantityInput?.value || 1),
+            comment: commentInput?.value || ""
+        };
+    });
 
-            if (!full_name || !telegram_username || !country || items.length === 0) {
-                alert("⚠️ Заполните все обязательные поля.");
-                return;
-            }
+    if (!full_name || !telegram_username || !country || items.length === 0) {
+        alert("⚠️ Заполните все обязательные поля.");
+        return;
+    }
 
-            const requestData = {
-                command: "create_order",
-                full_name: full_name,
-                telegram_username: telegram_username,
-                country: country,
-                items: items
-            };
+    const requestData = {
+        command: "create_order",
+        full_name: full_name,
+        telegram_username: telegram_username,
+        country: country,
+        items: items
+    };
 
-            console.log("Отправляемые данные:", JSON.stringify(requestData, null, 2));
+    console.log("Отправляемые данные:", JSON.stringify(requestData, null, 2));
 
-            fetch('http://localhost:5000/submit_order', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(requestData)
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === "success") {
-                    alert("✅ Ваш заказ успешно создан!");
-                    toggleSection("my-orders");
-                } else {
-                    alert("❌ Ошибка при отправке заказа: " + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Ошибка:', error);
-                alert("❌ Ошибка при отправке заказа.");
-            });
-        }
+    // ОТПРАВКА ЧЕРЕЗ TELEGRAM WEBAPP API (БЕЗ ЛОКАЛЬНОГО СЕРВЕРА!)
+    tg.sendData(JSON.stringify(requestData));
+    alert("✅ Ваш заказ отправлен в бота!");
+    toggleSection("my-orders");
+}
 
         function showOrderDetails(orderId) {
             tg.sendData(JSON.stringify({ command: "get_order_details", order_id: orderId }));
