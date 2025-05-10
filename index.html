@@ -4,10 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>VOLT Logistics</title>
-
-    <!-- Bootstrap 5 -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
+    <!-- Telegram SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js "></script>
     <style>
         body {
             margin: 0;
@@ -15,14 +13,12 @@
             background-color: #f8f9fa;
             overflow-x: hidden;
         }
-
         .main-container {
             width: 100%;
             height: 100vh;
             display: flex;
             flex-direction: column;
         }
-
         .top-menu {
             background-color: white;
             padding: 15px 20px;
@@ -32,7 +28,6 @@
             gap: 15px;
             z-index: 10;
         }
-
         .top-menu button {
             padding: 10px 20px;
             font-size: 16px;
@@ -43,11 +38,9 @@
             cursor: pointer;
             transition: background-color 0.3s ease;
         }
-
         .top-menu button:hover {
             background-color: #0056b3;
         }
-
         .content {
             flex: 1;
             overflow-y: auto;
@@ -56,31 +49,26 @@
             flex-direction: column;
             align-items: center;
         }
-
         .section {
             display: none;
             width: 100%;
             animation: slideUp 0.3s ease;
         }
-
         .section.active {
             display: block;
         }
-
         @keyframes slideUp {
             from { transform: translateY(100%); }
             to { transform: translateY(0); }
         }
-
         .order-form {
             width: 100%;
             max-width: 500px;
             background: white;
             padding: 25px;
             border-radius: 12px;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
         }
-
         .close-btn {
             position: absolute;
             top: 15px;
@@ -90,39 +78,33 @@
             cursor: pointer;
             z-index: 1001;
         }
-
         .photo-preview {
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
             margin-top: 10px;
         }
-
         .preview-img {
             width: 60px;
             height: 60px;
             object-fit: cover;
             border-radius: 5px;
         }
-
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
         }
-
         th, td {
             padding: 12px;
             border: 1px solid #ddd;
             text-align: left;
         }
-
         .order-number {
             color: #007bff;
             text-decoration: underline;
             cursor: pointer;
         }
-
         .modal {
             position: fixed;
             top: 50%;
@@ -137,7 +119,6 @@
             display: none;
             box-shadow: 0 0 15px rgba(0,0,0,0.2);
         }
-
         .overlay {
             display: none;
             position: fixed;
@@ -148,7 +129,6 @@
             background: rgba(0, 0, 0, 0.5);
             z-index: 999;
         }
-
         .button {
             margin: 10px 0;
             padding: 10px 20px;
@@ -159,17 +139,14 @@
             border: none;
             border-radius: 8px;
         }
-
         .button:hover {
             background-color: #0056b3;
         }
-
         label {
             display: block;
             margin-bottom: 5px;
             font-weight: 500;
         }
-
         input, select {
             width: 100%;
             padding: 10px;
@@ -178,15 +155,12 @@
             border-radius: 8px;
             margin-bottom: 15px;
         }
-
         .item-row {
             margin-bottom: 15px;
         }
-
         hr {
             margin: 10px 0;
         }
-
         @media (max-width: 600px) {
             .top-menu {
                 flex-direction: column;
@@ -212,12 +186,13 @@
         <div class="top-menu">
             <button onclick="toggleSection('calculator')">🧮 Калькулятор</button>
             <button onclick="toggleSection('create-order')">📝 Создать заказ</button>
-            <button onclick="toggleSection('my-orders')">📦 Мои заказы</button>
+            <button onclick="fetchOrders()">📦 Мои заказы</button>
             <button id="manager-button" style="display:none;" onclick="toggleSection('manager')">🔒 Панель менеджера</button>
         </div>
 
         <!-- Основной контент -->
         <div class="content">
+
             <!-- Секция: Калькулятор -->
             <div id="calculator" class="section active">
                 <h2>🧮 Калькулятор стоимости</h2>
@@ -229,7 +204,6 @@
                     <option value="europe" disabled style="color: gray;">🇪🇺 Европа</option>
                     <option value="usa" disabled style="color: gray;">🇺🇸 США</option>
                 </select>
-
                 <div id="calc-marketplace-section" style="display: none;">
                     <label for="calc-marketplace">Маркетплейс:</label>
                     <select id="calc-marketplace" class="form-control">
@@ -237,7 +211,6 @@
                         <option value="weechat_yupoo_goofish">WEECHAT / YUPOO / GOOFISH</option>
                     </select>
                 </div>
-
                 <br>
                 <label for="price">Цена за единицу:</label>
                 <input type="number" id="price" step="any" placeholder="Введите цену" required class="form-control"><br>
@@ -255,10 +228,9 @@
                         <option value="" selected disabled>Выберите страну</option>
                         <option value="china">🇨🇳 Китай</option>
                         <option value="japan">🇯🇵 Япония</option>
-                        <option value="europe" disabled style="color: gray;">🇪🇺 Европа</option>
-                        <option value="usa" disabled style="color: gray;">🇺🇸 США</option>
+                        <option value="europe" disabled style="color: gray;">ᵉᵁ Европа</option>
+                        <option value="usa" disabled style="color: gray;">ᵘˢˢ США</option>
                     </select>
-
                     <div id="marketplace-section" style="display: none;">
                         <label for="marketplace">Маркетплейс:</label>
                         <select id="marketplace" class="form-control">
@@ -266,7 +238,6 @@
                             <option value="weechat_yupoo_goofish">WEECHAT / YUPOO / GOOFISH</option>
                         </select>
                     </div>
-
                     <div id="order-form" style="display: none; margin-top: 20px;">
                         <h3>Добавьте товар(ы)</h3>
                         <div id="items-container"></div>
@@ -322,28 +293,20 @@
         </div>
     </div>
 
-    <!-- Telegram WebApp API -->
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- JavaScript -->
     <script>
         const tg = window.Telegram.WebApp;
 
         // Получаем ID пользователя из Telegram
         const userId = tg.initDataUnsafe.user?.id || null;
         const isManager = [919034275, 372145026, 6432717873].includes(userId);
-
         if (isManager) {
             document.getElementById("manager-button").style.display = "block";
         }
 
         function toggleSection(sectionId) {
-            const sections = document.querySelectorAll('.section');
-            sections.forEach(sec => sec.classList.remove("active"));
-            const section = document.getElementById(sectionId);
-            if (section.classList.contains("active")) {
-                section.classList.remove("active");
-            } else {
-                section.classList.add("active");
-            }
+            document.querySelectorAll('.section').forEach(sec => sec.classList.remove("active"));
+            document.getElementById(sectionId).classList.add("active");
         }
 
         function handleCountryChange() {
@@ -351,10 +314,8 @@
             const marketplaceSection = document.getElementById("marketplace-section");
             const orderForm = document.getElementById("order-form");
             const itemsContainer = document.getElementById("items-container");
-
             itemsContainer.innerHTML = "";
             const country = countrySelect.value;
-
             if (country === "china") {
                 marketplaceSection.style.display = "block";
                 addItem();
@@ -365,67 +326,63 @@
                 alert("Пока доступны только Китай и Япония.");
                 return;
             }
-
             orderForm.style.display = "block";
         }
 
+        let itemIndex = 0;
         function addItem() {
+            itemIndex++;
             const itemsContainer = document.getElementById("items-container");
-            const index = itemsContainer.childElementCount + 1;
             const newItem = document.createElement("div");
             newItem.className = "item-row";
-
             newItem.innerHTML = `
                 <hr>
-                <h4>Товар #${index}</h4>
+                <h4>Товар #${itemIndex}</h4>
                 <label>Загрузите фото:</label>
                 <input type="file" class="item-photo" accept="image/*" multiple onchange="previewPhotos(this)">
                 <div class="photo-preview" style="display:flex;flex-wrap:wrap;gap:10px;"></div>
-                <label for="item-link-${index}">Ссылка / ID:</label>
-                <input type="text" id="item-link-${index}" placeholder="https://taobao.com/item123">
-                <label for="item-price-${index}">Цена (CNY):</label>
-                <input type="number" id="item-price-${index}" step="any" placeholder="¥ 800">
-                <label for="item-color-${index}">Цвет:</label>
-                <input type="text" id="item-color-${index}" placeholder="Черный / White">
-                <label for="item-size-${index}">Размер:</label>
-                <input type="text" id="item-size-${index}" placeholder="M / 42 / EU40">
-                <label for="item-quantity-${index}">Количество:</label>
-                <input type="number" id="item-quantity-${index}" min="1" value="1">
-                <label for="item-comment-${index}">Комментарий:</label>
-                <input type="text" id="item-comment-${index}" placeholder="Батч A1 | Упаковать аккуратно">
-                <button type="button" class="button" onclick="removeItem(this)" style="margin-top: 10px;">🗑 Удалить товар</button>
+                <label for="item-link-${itemIndex}">Ссылка / ID:</label>
+                <input type="text" id="item-link-${itemIndex}" placeholder="https://taobao.com/item123 ">
+                <label for="item-price-${itemIndex}">Цена (CNY):</label>
+                <input type="number" id="item-price-${itemIndex}" step="any" placeholder="¥ 800">
+                <label for="item-color-${itemIndex}">Цвет:</label>
+                <input type="text" id="item-color-${itemIndex}" placeholder="Черный / White">
+                <label for="item-size-${itemIndex}">Размер:</label>
+                <input type="text" id="item-size-${itemIndex}" placeholder="M / 42 / EU40">
+                <label for="item-quantity-${itemIndex}">Количество:</label>
+                <input type="number" id="item-quantity-${itemIndex}" min="1" value="1">
+                <label for="item-comment-${itemIndex}">Комментарий:</label>
+                <input type="text" id="item-comment-${itemIndex}" placeholder="Батч A1 | Упаковать аккуратно">
+                <button type="button" class="button" onclick="removeItem(this)">🗑 Удалить товар</button>
             `;
-
             itemsContainer.appendChild(newItem);
         }
 
         function addJapanItem() {
+            itemIndex++;
             const itemsContainer = document.getElementById("items-container");
-            const index = itemsContainer.childElementCount + 1;
             const newItem = document.createElement("div");
             newItem.className = "item-row";
-
             newItem.innerHTML = `
                 <hr>
-                <h4>Товар #${index}</h4>
+                <h4>Товар #${itemIndex}</h4>
                 <label>Загрузите фото:</label>
                 <input type="file" class="item-photo" accept="image/*" multiple onchange="previewPhotos(this)">
                 <div class="photo-preview" style="display:flex;flex-wrap:wrap;gap:10px;"></div>
-                <label for="item-link-${index}">Ссылка на товар:</label>
-                <input type="text" id="item-link-${index}" placeholder="https://yame.co.jp/item123">
-                <label for="item-price-${index}">Цена (JPY):</label>
-                <input type="number" id="item-price-${index}" step="any" placeholder="¥ 2000">
-                <label for="item-color-${index}">Цвет:</label>
-                <input type="text" id="item-color-${index}" placeholder="Черный / Noir">
-                <label for="item-size-${index}">Размер:</label>
-                <input type="text" id="item-size-${index}" placeholder="M / 42 / EU40">
-                <label for="item-quantity-${index}">Количество:</label>
-                <input type="number" id="item-quantity-${index}" min="1" value="1">
-                <label for="item-comment-${index}">Комментарий:</label>
-                <input type="text" id="item-comment-${index}" placeholder="Батч, особые условия...">
-                <button type="button" class="button" onclick="removeItem(this)" style="margin-top: 10px;">🗑 Удалить товар</button>
+                <label for="item-link-${itemIndex}">Ссылка на товар:</label>
+                <input type="text" id="item-link-${itemIndex}" placeholder="https://yame.co.jp/item123 ">
+                <label for="item-price-${itemIndex}">Цена (JPY):</label>
+                <input type="number" id="item-price-${itemIndex}" step="any" placeholder="¥ 2000">
+                <label for="item-color-${itemIndex}">Цвет:</label>
+                <input type="text" id="item-color-${itemIndex}" placeholder="Черный / Noir">
+                <label for="item-size-${itemIndex}">Размер:</label>
+                <input type="text" id="item-size-${itemIndex}" placeholder="M / 42 / EU40">
+                <label for="item-quantity-${itemIndex}">Количество:</label>
+                <input type="number" id="item-quantity-${itemIndex}" min="1" value="1">
+                <label for="item-comment-${itemIndex}">Комментарий:</label>
+                <input type="text" id="item-comment-${itemIndex}" placeholder="Батч, особые условия...">
+                <button type="button" class="button" onclick="removeItem(this)">🗑 Удалить товар</button>
             `;
-
             itemsContainer.appendChild(newItem);
         }
 
@@ -437,7 +394,6 @@
         function previewPhotos(input) {
             const preview = input.nextElementSibling;
             preview.innerHTML = "";
-
             Array.from(input.files).slice(0, 5).forEach(file => {
                 const reader = new FileReader();
                 reader.onload = function(e) {
@@ -454,15 +410,12 @@
             const country = document.getElementById("calc-country").value;
             const marketplace = document.getElementById("calc-marketplace").value;
             const priceInput = document.getElementById("price").value.trim();
-
             if (!country || !priceInput) {
                 alert("Выберите страну и введите цену.");
                 return;
             }
-
             const price = parseFloat(priceInput);
             let result = 0;
-
             switch(country) {
                 case "china":
                     result = marketplace === "poizon_taobao_weidan"
@@ -476,56 +429,65 @@
                     alert("Ошибка: выберите корректную страну.");
                     return;
             }
-
             document.getElementById("result").innerText = `Итоговая стоимость: ${result.toFixed(2)} ₽`;
         }
 
+        function updateCalculatorFields() {
+            const calcCountry = document.getElementById("calc-country").value;
+            const calcMarketplace = document.getElementById("calc-marketplace");
+            calcMarketplace.style.display = calcCountry === "china" ? "block" : "none";
+        }
+
         function submitOrder() {
-    const full_name = document.getElementById("full-name").value.trim();
-    const telegram_username = document.getElementById("telegram-username").value.trim();
-    const country = document.getElementById("country").value;
-    const itemsContainer = document.getElementById("items-container");
-    
-    const items = Array.from(itemsContainer.children).map((itemRow, idx) => {
-        const photoInput = itemRow.querySelector(".item-photo");
-        const linkOrIdInput = itemRow.querySelector(`#item-link-${idx + 1}`);
-        const priceInput = itemRow.querySelector(`#item-price-${idx + 1}`);
-        const colorInput = itemRow.querySelector(`#item-color-${idx + 1}`);
-        const sizeInput = itemRow.querySelector(`#item-size-${idx + 1}`);
-        const quantityInput = itemRow.querySelector(`#item-quantity-${idx + 1}`);
-        const commentInput = itemRow.querySelector(`#item-comment-${idx + 1}`);
+            const full_name = document.getElementById("full-name").value.trim();
+            const telegram_username = document.getElementById("telegram-username").value.trim();
+            const country = document.getElementById("country").value;
+            const itemsContainer = document.getElementById("items-container");
 
-        return {
-            photos: [...Array.from(photoInput?.files || [])].map(f => f.name),
-            link_or_id: linkOrIdInput?.value || "",
-            price: parseFloat(priceInput?.value || 0),
-            color: colorInput?.value || "",
-            size: sizeInput?.value || "",
-            quantity: parseInt(quantityInput?.value || 1),
-            comment: commentInput?.value || ""
-        };
-    });
+            const items = Array.from(itemsContainer.children).map((itemRow, idx) => {
+                const photoInput = itemRow.querySelector(".item-photo");
+                const linkOrIdInput = itemRow.querySelector(`#item-link-${idx + 1}`);
+                const priceInput = itemRow.querySelector(`#item-price-${idx + 1}`);
+                const colorInput = itemRow.querySelector(`#item-color-${idx + 1}`);
+                const sizeInput = itemRow.querySelector(`#item-size-${idx + 1}`);
+                const quantityInput = itemRow.querySelector(`#item-quantity-${idx + 1}`);
+                const commentInput = itemRow.querySelector(`#item-comment-${idx + 1}`);
 
-    if (!full_name || !telegram_username || !country || items.length === 0) {
-        alert("⚠️ Заполните все обязательные поля.");
-        return;
-    }
+                return {
+                    photos: [...Array.from(photoInput?.files || [])].map(f => f.name),
+                    link_or_id: linkOrIdInput?.value || "",
+                    price: parseFloat(priceInput?.value || 0),
+                    color: colorInput?.value || "",
+                    size: sizeInput?.value || "",
+                    quantity: parseInt(quantityInput?.value || 1),
+                    comment: commentInput?.value || ""
+                };
+            });
 
-    const requestData = {
-        command: "create_order",
-        full_name: full_name,
-        telegram_username: telegram_username,
-        country: country,
-        items: items
-    };
+            if (!full_name || !telegram_username || !country || items.length === 0) {
+                alert("⚠️ Заполните все обязательные поля.");
+                return;
+            }
 
-    console.log("Отправляемые данные:", JSON.stringify(requestData, null, 2));
+            const requestData = {
+                command: "create_order",
+                full_name: full_name,
+                telegram_username: telegram_username,
+                country: country,
+                items: items
+            };
 
-    // ОТПРАВКА ЧЕРЕЗ TELEGRAM WEBAPP API (БЕЗ ЛОКАЛЬНОГО СЕРВЕРА!)
-    tg.sendData(JSON.stringify(requestData));
-    alert("✅ Ваш заказ отправлен в бота!");
-    toggleSection("my-orders");
-}
+            console.log("Отправляемые данные:", JSON.stringify(requestData, null, 2));
+
+            // Отправляем данные через Telegram WebApp API
+            tg.sendData(JSON.stringify(requestData));
+            alert("✅ Ваш заказ отправлен в бота!");
+            toggleSection("my-orders");
+        }
+
+        function fetchOrders() {
+            tg.sendData(JSON.stringify({ command: "track_order" }));
+        }
 
         function showOrderDetails(orderId) {
             tg.sendData(JSON.stringify({ command: "get_order_details", order_id: orderId }));
@@ -537,16 +499,6 @@
             document.getElementById("order-details-modal").style.display = "none";
         }
 
-        function updateCalculatorFields() {
-            const calcCountry = document.getElementById("calc-country").value;
-            const calcMarketplace = document.getElementById("calc-marketplace");
-            if (calcCountry === "china") {
-                calcMarketplace.style.display = "block";
-            } else {
-                calcMarketplace.style.display = "none";
-            }
-        }
-
         function renderManagerOrders(orders) {
             const container = document.getElementById("manager-orders-container");
             container.innerHTML = "";
@@ -555,7 +507,6 @@
                 const cell1 = document.createElement("td");
                 cell1.innerHTML = `<span class="order-number" onclick="showOrderDetails('${order.id}')">#${order.id}</span>`;
                 row.appendChild(cell1);
-
                 const cell2 = document.createElement("td");
                 const statusSelect = document.createElement("select");
                 statusSelect.innerHTML = `
@@ -577,7 +528,6 @@
                 };
                 cell2.appendChild(statusSelect);
                 row.appendChild(cell2);
-
                 const cell3 = document.createElement("td");
                 const uploadBtn = document.createElement("input");
                 uploadBtn.type = "file";
@@ -597,7 +547,6 @@
                 };
                 cell3.appendChild(uploadBtn);
                 row.appendChild(cell3);
-
                 container.appendChild(row);
             });
         }
@@ -617,13 +566,14 @@
             });
         }
 
+        // Обработка ответов от бота
         tg.onEvent("web_app_data", function(data) {
             try {
                 const response = JSON.parse(data.data);
-
                 if (response.command === "create_order") {
                     alert(`✅ Заказ #${response.order_id} создан!`);
                     updateMyOrders(response.orders);
+                    toggleSection("my-orders");
                 } else if (response.command === "track_order") {
                     updateMyOrders(response.orders);
                 } else if (response.command === "get_order_details") {
@@ -634,22 +584,22 @@
                         <p><b>Товары:</b></p>
                         <ul>${order.items.map(i => `<li>ID / Ссылка: ${i.link_or_id}, Цвет: ${i.color}, Размер: ${i.size}, Кол-во: ${i.quantity} шт.</li>`).join("")}</ul>
                         <p><b>Комментарий:</b> ${order.comment || "-"}</p>
-                        <p><b>Фотоотчет:</b> ${response.report_photos ? response.report_photos.map(p => `<img src="${p}" width="100%" style="margin-top: 10px;">`).join("") : "Нет фотоотчёта."}</p>
+                        <p><b>Фотоотчет:</b> ${response.report_photos 
+                            ? response.report_photos.map(p => `<img src="${p}" width="100%" style="margin-top: 10px;">`).join("")
+                            : "Нет фотоотчёта."
+                        }</p>
                     `;
                     document.getElementById("overlay").style.display = "block";
                     document.getElementById("order-details-modal").style.display = "block";
-                } else if (response.command === "update_status") {
-                    alert(`Статус изменён на "${response.status}"`);
-                    updateMyOrders(response.orders);
-                } else if (response.command === "attach_report") {
-                    alert("Фотоотчёт отправлен клиенту.");
                 }
             } catch (e) {
                 alert("Ошибка при получении данных от бота.");
             }
         });
 
+        // Готовность Web App
         tg.ready();
+
     </script>
 </body>
 </html>
