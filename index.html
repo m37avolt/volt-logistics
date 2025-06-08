@@ -551,10 +551,15 @@
     }
 
     function submitOrder() {
+    try {
+        console.log("🟩 Начало отправки заказа");
+
         const full_name = document.getElementById("full-name").value.trim();
         const telegram_username = document.getElementById("telegram-username").value.trim();
         const country = document.getElementById("country").value;
         const itemsContainer = document.getElementById("items-container");
+
+        console.log("🟨 Получены поля формы", { full_name, telegram_username, country });
 
         const items = Array.from(itemsContainer.children).map((itemRow, idx) => {
             const photoInput = itemRow.querySelector(".item-photo");
@@ -576,6 +581,8 @@
             };
         });
 
+        console.log("🟦 Сформирован объект items", items);
+
         if (!full_name || !telegram_username || !country || items.length === 0) {
             alert("⚠️ Заполните все обязательные поля.");
             return;
@@ -590,10 +597,16 @@
         };
 
         console.log("Отправляемые данные:", JSON.stringify(requestData, null, 2));
+
         tg.sendData(JSON.stringify(requestData));
         alert("✅ Ваш заказ отправлен в бота!");
         toggleSection("my-orders");
+
+    } catch (error) {
+        console.error("🟥 Ошибка при формировании заказа:", error);
+        alert("❌ Произошла ошибка при подготовке заказа. Откройте консоль для деталей.");
     }
+    }   
 
     function fetchOrders() {
         tg.sendData(JSON.stringify({ command: "track_order" }));
