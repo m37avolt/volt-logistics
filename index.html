@@ -1,680 +1,743 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>VOLT Logistics</title>
-  <!-- Telegram SDK -->
-  <script src="https://telegram.org/js/telegram-web-app.js"></script> 
-  <style>
-    :root {
-      --primary-color: #00DBFF;
-      --dark-accent: #141414;
-      --black: #000000;
-      --white: #FFFFFF;
-      --font-family: 'Montserrat', sans-serif;
-    }
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>VOLT Logistics</title>
+    <!-- Telegram SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script> 
+    <style>
+        :root {
+            --primary-color: #00DBFF;
+            --dark-accent: #141414;
+            --black: #000000;
+            --white: #FFFFFF;
+            --font-family: 'Montserrat', sans-serif;
+        }
 
-    body {
-      margin: 0;
-      font-family: var(--font-family);
-      background-color: var(--black);
-      color: var(--white);
-    }
+        body {
+            margin: 0;
+            font-family: var(--font-family);
+            background-color: var(--black);
+            color: var(--white);
+        }
 
-    .main-container {
-      width: 100%;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      position: relative;
-    }
+        .main-container {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
 
-    /* Верхнее меню */
-    .top-menu {
-      background-color: var(--dark-accent);
-      padding: 15px 20px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      z-index: 10;
-    }
+        /* Верхнее меню */
+        .top-menu {
+            background-color: var(--dark-accent);
+            padding: 15px 20px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+        }
 
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 1.2rem;
-      font-weight: bold;
-      color: var(--white);
-    }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--white);
+        }
 
-    .logo svg {
-      width: 24px;
-      height: 24px;
-      fill: var(--primary-color);
-    }
+        .logo svg {
+            width: 24px;
+            height: 24px;
+            fill: var(--primary-color);
+        }
 
-    /* Бургер-меню */
-    .burger {
-      cursor: pointer;
-      width: 30px;
-      height: 24px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      border: 2px solid var(--primary-color);
-      border-radius: 6px;
-      padding: 4px;
-      transition: transform 0.3s ease;
-    }
+        /* Бургер-меню */
+        .burger {
+            cursor: pointer;
+            width: 30px;
+            height: 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            border: 2px solid var(--primary-color);
+            border-radius: 6px;
+            padding: 4px;
+            transition: transform 0.3s ease;
+        }
 
-    .burger div {
-      height: 4px;
-      background-color: var(--primary-color);
-      border-radius: 2px;
-      transition: all 0.3s ease;
-    }
+        .burger div {
+            height: 4px;
+            background-color: var(--primary-color);
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
 
-    .burger.active div:nth-child(1) {
-      transform: translateY(8px) rotate(45deg);
-    }
+        .burger.active div:nth-child(1) {
+            transform: translateY(8px) rotate(45deg);
+        }
 
-    .burger.active div:nth-child(2) {
-      opacity: 0;
-    }
+        .burger.active div:nth-child(2) {
+            opacity: 0;
+        }
 
-    .burger.active div:nth-child(3) {
-      transform: translateY(-8px) rotate(-45deg);
-    }
+        .burger.active div:nth-child(3) {
+            transform: translateY(-8px) rotate(-45deg);
+        }
 
-    /* Боковое меню */
-    .sidebar {
-      position: fixed;
-      top: 0;
-      right: -250px;
-      width: 250px;
-      height: 100vh;
-      background-color: var(--black);
-      padding-top: 70px;
-      box-shadow: -2px 0 10px rgba(0, 0, 0, 0.5);
-      transition: right 0.3s ease;
-      z-index: 999;
-    }
+        /* Боковое меню */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            right: -250px;
+            width: 250px;
+            height: 100vh;
+            background-color: var(--black);
+            padding-top: 70px;
+            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.5);
+            transition: right 0.3s ease;
+            z-index: 999;
+        }
 
-    .sidebar.active {
-      right: 0;
-    }
+        .sidebar.active {
+            right: 0;
+        }
 
-    .sidebar button {
-      display: block;
-      width: 100%;
-      text-align: left;
-      padding: 15px 20px;
-      background-color: transparent;
-      color: var(--white);
-      border: none;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: background-color 0.3s;
-    }
+        .sidebar button {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 15px 20px;
+            background-color: transparent;
+            color: var(--white);
+            border: none;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
 
-    .sidebar button:hover {
-      background-color: var(--dark-accent);
-    }
+        .sidebar button:hover {
+            background-color: var(--dark-accent);
+        }
 
-    /* Основной контент */
-    .content {
-      flex: 1;
-      overflow-y: auto;
-      padding: 20px;
-      transition: filter 0.3s ease;
-    }
+        /* Основной контент */
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            transition: filter 0.3s ease;
+        }
 
-    .content.dimmed {
-      filter: brightness(0.5);
-      pointer-events: none;
-    }
+        .content.dimmed {
+            filter: brightness(0.5);
+            pointer-events: none;
+        }
 
-    /* Секции */
-    .section {
-      display: none;
-      animation: slideUp 0.3s ease;
-    }
+        /* Секции */
+        .section {
+            display: none;
+            animation: slideUp 0.3s ease;
+        }
 
-    .section.active {
-      display: block;
-    }
+        .section.active {
+            display: block;
+        }
 
-    @keyframes slideUp {
-      from { transform: translateY(100%); }
-      to { transform: translateY(0); }
-    }
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
 
-    /* Контент в секциях */
-    .order-form {
-      width: 100%;
-      max-width: 500px;
-      background-color: var(--dark-accent);
-      padding: 25px;
-      border-radius: 12px;
-    }
+        /* Контент в секциях */
+        .order-form {
+            width: 100%;
+            max-width: 500px;
+            background-color: var(--dark-accent);
+            padding: 25px;
+            border-radius: 12px;
+        }
 
-    label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: 600;
-      color: var(--white);
-    }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--white);
+        }
 
-    input,
-    select,
-    button.button-primary {
-      width: 100%;
-      padding: 12px;
-      border: none;
-      border-radius: 8px;
-      font-size: 1rem;
-      margin-bottom: 16px;
-      font-family: var(--font-family);
-    }
+        input,
+        select,
+        button.button-primary {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-bottom: 16px;
+            font-family: var(--font-family);
+        }
 
-    .button-primary {
-      background-color: var(--primary-color);
-      color: var(--black);
-      font-weight: bold;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
+        .button-primary {
+            background-color: var(--primary-color);
+            color: var(--black);
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
 
-    .button-primary:hover {
-      background-color: #00aacc;
-    }
+        .button-primary:hover {
+            background-color: #00aacc;
+        }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-    }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
 
-    th,
-    td {
-      padding: 12px;
-      border-bottom: 1px solid #333;
-      color: var(--white);
-    }
+        th,
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #333;
+            color: var(--white);
+        }
 
-    .order-number {
-      color: var(--primary-color);
-      cursor: pointer;
-      text-decoration: underline;
-    }
+        .order-number {
+            color: var(--primary-color);
+            cursor: pointer;
+            text-decoration: underline;
+        }
 
-    /* Футер */
-    .footer {
-      margin-top: 40px;
-      text-align: center;
-      font-size: 0.9rem;
-      color: #555;
-    }
+        /* Футер */
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #555;
+        }
 
-    @media (min-width: 768px) {
-      .sidebar {
-        display: none;
-      }
-    }
+        @media (min-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+        }
 
-    /* Отладка */
-    #debug-log {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      max-height: 200px;
-      overflow-y: auto;
-      background-color: #111;
-      color: #0f0;
-      font-family: monospace;
-      font-size: 12px;
-      padding: 10px;
-      box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.5);
-      z-index: 9999;
-      display: none;
-    }
-  </style>
+        /* Модальное окно */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .modal {
+            background: var(--dark-accent);
+            padding: 20px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal h3 {
+            margin-top: 0;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .button-secondary {
+            background-color: #555;
+        }
+
+        .photo-preview img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            margin: 5px;
+        }
+    </style>
 </head>
 <body>
-  <div class="main-container">
+<div class="main-container">
     <!-- Верхняя шапка -->
     <div class="top-menu">
-      <div class="logo">
-        <!-- SVG молния -->
-        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="var(--primary-color)" fill="none"
-            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-        </svg>
-        VOLT Logistics
-      </div>
-      <!-- Бургер-меню -->
-      <div class="burger" id="burger" onclick="toggleMenu()">
-        <div></div>
-        <div></div>
-        <div></div>
-      </div>
+        <div class="logo">
+            <!-- SVG молния -->
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="var(--primary-color)" fill="none"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            VOLT Logistics
+        </div>
+        <!-- Бургер-меню -->
+        <div class="burger" id="burger" onclick="toggleMenu()">
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
     </div>
 
     <!-- Боковое меню -->
     <div class="sidebar" id="sidebar">
-      <button onclick="navigateTo('calculator')">🧮 Калькулятор</button>
-      <button onclick="navigateTo('create-order')">📝 Создать заказ</button>
-      <button onclick="navigateTo('my-orders')">📦 Мои заказы</button>
-      <button id="manager-button" style="display:none;" onclick="navigateTo('manager')">🔒 Панель менеджера</button>
+        <button onclick="navigateTo('calculator')">🧮 Калькулятор</button>
+        <button onclick="navigateTo('create-order')">📝 Создать заказ</button>
+        <button onclick="navigateTo('my-orders')">📦 Мои заказы</button>
+        <button id="manager-button" style="display:none;" onclick="navigateTo('manager')">🔒 Панель менеджера</button>
     </div>
 
     <!-- Основной контент -->
     <div class="content" id="mainContent">
-      <!-- Приветственная секция -->
-      <div class="section active">
-        <h2>Добро пожаловать!</h2>
-        <p>Выберите действие из бургер-меню.</p>
-      </div>
-
-      <!-- Секция: Калькулятор -->
-      <div id="calculator" class="section">
-        <h2>🧮 Калькулятор стоимости</h2>
-        <label for="calc-country">Страна выкупа:</label>
-        <select id="calc-country" onchange="updateCalculatorFields()" class="form-control">
-          <option value="" selected disabled>Выберите страну</option>
-          <option value="china">🇨🇳 Китай</option>
-          <option value="japan">🇯🇵 Япония</option>
-          <option value="europe" disabled style="color: gray;">🇪🇺 Европа (временно недоступна)</option>
-          <option value="usa" disabled style="color: gray;">🇺🇸 США (временно недоступны)</option>
-        </select>
-        <div id="calc-marketplace-section" style="display: none;">
-          <label for="calc-marketplace">Маркетплейс:</label>
-          <select id="calc-marketplace" class="form-control">
-            <option value="poizon_taobao_weidan">POIZON / TAOBAO / WEIDAN И ДР.</option>
-            <option value="weechat_yupoo_goofish">WEECHAT / YUPOO / GOOFISH</option>
-          </select>
+        <!-- Приветственная секция -->
+        <div class="section active">
+            <h2>Добро пожаловать!</h2>
+            <p>Выберите действие из бургер-меню.</p>
         </div>
-        <br>
-        <label for="price">Цена за единицу:</label>
-        <input type="number" id="price" placeholder="Введите цену" required><br><br>
-        <button class="button-primary" onclick="calculate()">Рассчитать</button>
-        <div id="result" style="margin-top: 20px;"></div>
-      </div>
 
-      <!-- Секция: Создать заказ -->
-      <div id="create-order" class="section">
-        <h2>📝 Создать новый заказ</h2>
-        <label for="country">Страна выкупа:</label>
-        <select id="country" onchange="handleCountryChange()" class="form-control">
-          <option value="" selected disabled>Выберите страну</option>
-          <option value="china">🇨🇳 Китай</option>
-          <option value="japan">🇯🇵 Япония</option>
-          <option value="europe" disabled style="color: gray;">🇪🇺 Европа (временно недоступна)</option>
-          <option value="usa" disabled style="color: gray;">🇺🇸 США (временно недоступны)</option>
-        </select>
-        <div id="marketplace-section" style="display: none;">
-          <label for="marketplace">Маркетплейс:</label>
-          <select id="marketplace" class="form-control">
-            <option value="poizon_taobao_weidan">POIZON / TAOBAO / WEIDAN И ДР.</option>
-            <option value="weechat_yupoo_goofish">WEECHAT / YUPOO / GOOFISH</option>
-          </select>
+        <!-- Секция: Калькулятор -->
+        <div id="calculator" class="section">
+            <h2>🧮 Калькулятор стоимости</h2>
+            <label for="calc-country">Страна выкупа:</label>
+            <select id="calc-country" onchange="updateCalculatorFields()" class="form-control">
+                <option value="" selected disabled>Выберите страну</option>
+                <option value="china">🇨🇳 Китай</option>
+                <option value="japan">🇯🇵 Япония</option>
+                <option value="europe" disabled style="color: gray;">🇪🇺 Европа (временно недоступна)</option>
+                <option value="usa" disabled style="color: gray;">🇺🇸 США (временно недоступны)</option>
+            </select>
+            <div id="calc-marketplace-section" style="display: none;">
+                <label for="calc-marketplace">Маркетплейс:</label>
+                <select id="calc-marketplace" class="form-control">
+                    <option value="poizon_taobao_weidan">POIZON / TAOBAO / WEIDAN И ДР.</option>
+                    <option value="weechat_yupoo_goofish">WEECHAT / YUPOO / GOOFISH</option>
+                </select>
+            </div>
+            <br>
+            <label for="price">Цена за единицу:</label>
+            <input type="number" id="price" placeholder="Введите цену" required><br><br>
+            <button class="button-primary" onclick="calculate()">Рассчитать</button>
+            <div id="result" style="margin-top: 20px;"></div>
         </div>
-        <div id="order-form" style="margin-top: 20px; display: none;">
-          <h3>Добавьте товар(ы)</h3>
-          <div id="items-container"></div>
-          <button class="button-primary" onclick="addItem()" style="margin-bottom: 15px;">➕ Добавить товар</button><br>
-          <label for="full-name">ФИО:</label>
-          <input type="text" id="full-name" required /><br><br>
-          <label for="telegram-username">Telegram username:</label>
-          <input type="text" id="telegram-username" required /><br><br>
-          <button class="button-primary" onclick="submitOrder()">✅ Создать заказ</button>
+
+        <!-- Секция: Создать заказ -->
+        <div id="create-order" class="section">
+            <h2>📝 Создать новый заказ</h2>
+            <label for="country">Страна выкупа:</label>
+            <select id="country" onchange="handleCountryChange()" class="form-control">
+                <option value="" selected disabled>Выберите страну</option>
+                <option value="china">🇨🇳 Китай</option>
+                <option value="japan">🇯🇵 Япония</option>
+                <option value="europe" disabled style="color: gray;">🇪🇺 Европа (временно недоступна)</option>
+                <option value="usa" disabled style="color: gray;">🇺🇸 США (временно недоступны)</option>
+            </select>
+            <div id="marketplace-section" style="display: none;">
+                <label for="marketplace">Маркетплейс:</label>
+                <select id="marketplace" class="form-control">
+                    <option value="poizon_taobao_weidan">POIZON / TAOBAO / WEIDAN И ДР.</option>
+                    <option value="weechat_yupoo_goofish">WEECHAT / YUPOO / GOOFISH</option>
+                </select>
+            </div>
+            <div id="order-form" style="margin-top: 20px; display: none;">
+                <h3>Добавьте товар(ы)</h3>
+                <div id="items-container"></div>
+                <button class="button-primary" onclick="addItem()" style="margin-bottom: 15px;">➕ Добавить товар</button><br>
+                <label for="full-name">ФИО:</label>
+                <input type="text" id="full-name" required/><br><br>
+                <label for="telegram-username">Telegram username:</label>
+                <input type="text" id="telegram-username" required/><br><br>
+                <button class="button-primary" onclick="submitOrder()">✅ Создать заказ</button>
+            </div>
         </div>
-      </div>
 
-      <!-- Секция: Мои заказы -->
-      <div id="my-orders" class="section">
-        <h2>📦 Мои заказы</h2>
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Номер заказа</th>
-              <th>Статус</th>
-            </tr>
-          </thead>
-          <tbody id="user-orders-container"></tbody>
-        </table>
-      </div>
+        <!-- Секция: Мои заказы -->
+        <div id="my-orders" class="section">
+            <h2>📦 Мои заказы</h2>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Номер заказа</th>
+                    <th>Статус</th>
+                </tr>
+                </thead>
+                <tbody id="user-orders-container"></tbody>
+            </table>
+        </div>
 
-      <!-- Секция: Менеджер -->
-      <div id="manager" class="section">
-        <h2>🔒 Панель менеджера</h2>
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Номер заказа</th>
-              <th>Статус</th>
-              <th>Действие</th>
-            </tr>
-          </thead>
-          <tbody id="manager-orders-container"></tbody>
-        </table>
-      </div>
-
-      <!-- Подвал -->
-      <div class="footer">© VOLT Logistics · 2025</div>
+        <!-- Подвал -->
+        <div class="footer">© VOLT Logistics · 2025</div>
     </div>
+</div>
 
-    <!-- Лог для отладки -->
-    <div id="debug-log"></div>
-  </div>
+<!-- Модальное окно -->
+<div class="modal-overlay" id="preview-modal">
+    <div class="modal">
+        <h3>Предпросмотр заказа</h3>
+        <div id="preview-content"></div>
+        <div class="modal-buttons">
+            <button class="button-primary" onclick="confirmOrder()">Подтвердить</button>
+            <button class="button-primary button-secondary" onclick="closeModal()">Отмена</button>
+        </div>
+    </div>
+</div>
 
-  <script>
+<script>
     const tg = window.Telegram.WebApp;
 
     // Получаем ID пользователя из Telegram
     const userId = tg.initDataUnsafe?.user?.id || null;
     const isManager = [919034275, 372145026, 6432717873].includes(userId);
     if (isManager) {
-      document.getElementById("manager-button").style.display = "block";
+        document.getElementById("manager-button").style.display = "block";
     }
 
     // Переключение между разделами
     function toggleSection(sectionId) {
-      document.querySelectorAll('.section').forEach(sec => sec.classList.remove("active"));
-      const section = document.getElementById(sectionId);
-      if (section) section.classList.add("active");
-      closeMenu();
+        document.querySelectorAll('.section').forEach(sec => sec.classList.remove("active"));
+        const section = document.getElementById(sectionId);
+        if (section) section.classList.add("active");
+        closeMenu();
     }
 
     // Открытие/закрытие бокового меню
     function toggleMenu() {
-      const sidebar = document.getElementById("sidebar");
-      const burger = document.getElementById("burger");
-      const mainContent = document.getElementById("mainContent");
-      sidebar.classList.toggle("active");
-      burger.classList.toggle("active");
-      mainContent.classList.toggle("dimmed");
+        const sidebar = document.getElementById("sidebar");
+        const burger = document.getElementById("burger");
+        const mainContent = document.getElementById("mainContent");
+        sidebar.classList.toggle("active");
+        burger.classList.toggle("active");
+        mainContent.classList.toggle("dimmed");
     }
 
     function closeMenu() {
-      document.getElementById("sidebar").classList.remove("active");
-      document.getElementById("burger").classList.remove("active");
-      document.getElementById("mainContent").classList.remove("dimmed");
+        document.getElementById("sidebar").classList.remove("active");
+        document.getElementById("burger").classList.remove("active");
+        document.getElementById("mainContent").classList.remove("dimmed");
     }
 
-    // Навигация по меню
     function navigateTo(sectionId) {
-      toggleSection(sectionId);
-      closeMenu();
+        toggleSection(sectionId);
+        closeMenu(); // Закрываем меню после выбора
     }
 
-    // Лог для отладки на странице
-    function logToPage(message) {
-      const logDiv = document.getElementById("debug-log");
-      const timestamp = new Date().toLocaleTimeString();
-      const entry = document.createElement("div");
-      entry.textContent = `[${timestamp}] ${message}`;
-      logDiv.appendChild(entry);
-      logDiv.scrollTop = logDiv.scrollHeight;
-      logDiv.style.display = "block";
-    }
-
-    // Логика формы
     let itemIndex = 0;
 
     function handleCountryChange() {
-      const countrySelect = document.getElementById("country");
-      const marketplaceSection = document.getElementById("marketplace-section");
-      const orderForm = document.getElementById("order-form");
-      const itemsContainer = document.getElementById("items-container");
+        const countrySelect = document.getElementById("country");
+        const marketplaceSection = document.getElementById("marketplace-section");
+        const orderForm = document.getElementById("order-form");
+        const itemsContainer = document.getElementById("items-container");
 
-      itemsContainer.innerHTML = "";
-      itemIndex = 0;
+        itemsContainer.innerHTML = "";
+        const country = countrySelect.value;
 
-      const country = countrySelect.value;
+        if (country === "china") {
+            marketplaceSection.style.display = "block";
+            addItem();
+        } else if (country === "japan") {
+            marketplaceSection.style.display = "none";
+            addJapanItem();
+        } else {
+            alert("Пока доступны только Китай и Япония.");
+            return;
+        }
 
-      if (country === "china") {
-        marketplaceSection.style.display = "block";
-        addItem();
-      } else if (country === "japan") {
-        marketplaceSection.style.display = "none";
-        addJapanItem();
-      } else {
-        alert("Пока доступны только Китай и Япония.");
-        return;
-      }
-
-      orderForm.style.display = "block";
+        orderForm.style.display = "block";
     }
 
     function addItem() {
-      itemIndex++;
-      const itemsContainer = document.getElementById("items-container");
-      const newItem = document.createElement("div");
-      newItem.className = "item-row";
-      newItem.innerHTML = `
-        <hr>
-        <h4>Товар #${itemIndex}</h4>
-        <label>Загрузите фото:</label>
-        <input type="file" class="item-photo" accept="image/*" multiple onchange="previewPhotos(this)">
-        <div class="photo-preview" style="display:flex;flex-wrap:wrap;gap:10px;"></div>
-        <label for="item-link-${itemIndex}">Ссылка / ID:</label>
-        <input type="text" id="item-link-${itemIndex}" placeholder="https://taobao.com/item123  "><br><br>
-        <label for="item-price-${itemIndex}">Цена (CNY):</label>
-        <input type="number" id="item-price-${itemIndex}" step="any" placeholder="¥ 800"><br><br>
-        <label for="item-color-${itemIndex}">Цвет:</label>
-        <input type="text" id="item-color-${itemIndex}" placeholder="Черный / White"><br><br>
-        <label for="item-size-${itemIndex}">Размер:</label>
-        <input type="text" id="item-size-${itemIndex}" placeholder="M / 42 / EU40"><br><br>
-        <label for="item-quantity-${itemIndex}">Количество:</label>
-        <input type="number" id="item-quantity-${itemIndex}" min="1" value="1"><br><br>
-        <label for="item-comment-${itemIndex}">Комментарий:</label>
-        <input type="text" id="item-comment-${itemIndex}" placeholder="Батч A1 | Упаковать аккуратно"><br><br>
-        <button class="button-primary" onclick="removeItem(this)">🗑 Удалить товар</button>
-      `;
-      itemsContainer.appendChild(newItem);
+        if (itemIndex >= 10) {
+            alert("Максимум 10 товаров. Обратитесь к менеджеру для оформления большего количества.");
+            return;
+        }
+        itemIndex++;
+        const itemsContainer = document.getElementById("items-container");
+        const newItem = document.createElement("div");
+        newItem.className = "item-row";
+        newItem.innerHTML = `
+            <hr>
+            <h4>Товар #${itemIndex}</h4>
+            <label>Загрузите фото:</label>
+            <input type="file" class="item-photo" accept="image/*" multiple onchange="previewPhotos(this)">
+            <div class="photo-preview" style="display:flex;flex-wrap:wrap;gap:10px;"></div>
+            <label for="item-link-${itemIndex}">Ссылка / ID:</label>
+            <input type="text" id="item-link-${itemIndex}" placeholder="https://taobao.com/item123  "><br><br>
+            <label for="item-price-${itemIndex}">Цена (CNY):</label>
+            <input type="number" id="item-price-${itemIndex}" step="any" placeholder="¥ 800"><br><br>
+            <label for="item-color-${itemIndex}">Цвет:</label>
+            <input type="text" id="item-color-${itemIndex}" placeholder="Черный / White"><br><br>
+            <label for="item-size-${itemIndex}">Размер:</label>
+            <input type="text" id="item-size-${itemIndex}" placeholder="M / 42 / EU40"><br><br>
+            <label for="item-quantity-${itemIndex}">Количество:</label>
+            <input type="number" id="item-quantity-${itemIndex}" min="1" value="1"><br><br>
+            <label for="item-comment-${itemIndex}">Комментарий:</label>
+            <input type="text" id="item-comment-${itemIndex}" placeholder="Батч A1 | Упаковать аккуратно"><br><br>
+            <button class="button-primary" onclick="removeItem(this)">🗑 Удалить товар</button>
+        `;
+        itemsContainer.appendChild(newItem);
     }
 
     function addJapanItem() {
-      itemIndex++;
-      const itemsContainer = document.getElementById("items-container");
-      const newItem = document.createElement("div");
-      newItem.className = "item-row";
-      newItem.innerHTML = `
-        <hr>
-        <h4>Товар #${itemIndex}</h4>
-        <label>Загрузите фото:</label>
-        <input type="file" class="item-photo" accept="image/*" multiple onchange="previewPhotos(this)">
-        <div class="photo-preview" style="display:flex;flex-wrap:wrap;gap:10px;"></div>
-        <label for="item-link-${itemIndex}">Ссылка на товар:</label>
-        <input type="text" id="item-link-${itemIndex}" placeholder="https://yame.co.jp/item123  "><br><br>
-        <label for="item-price-${itemIndex}">Цена (JPY):</label>
-        <input type="number" id="item-price-${itemIndex}" step="any" placeholder="¥ 2000"><br><br>
-        <label for="item-color-${itemIndex}">Цвет:</label>
-        <input type="text" id="item-color-${itemIndex}" placeholder="Черный / Noir"><br><br>
-        <label for="item-size-${itemIndex}">Размер:</label>
-        <input type="text" id="item-size-${itemIndex}" placeholder="M / 42 / EU40"><br><br>
-        <label for="item-quantity-${itemIndex}">Количество:</label>
-        <input type="number" id="item-quantity-${itemIndex}" min="1" value="1"><br><br>
-        <label for="item-comment-${itemIndex}">Комментарий:</label>
-        <input type="text" id="item-comment-${itemIndex}" placeholder="Батч, особые условия..."><br><br>
-        <button class="button-primary" onclick="removeItem(this)">🗑 Удалить товар</button>
-      `;
-      itemsContainer.appendChild(newItem);
+        if (itemIndex >= 10) {
+            alert("Максимум 10 товаров. Обратитесь к менеджеру для оформления большего количества.");
+            return;
+        }
+        itemIndex++;
+        const itemsContainer = document.getElementById("items-container");
+        const newItem = document.createElement("div");
+        newItem.className = "item-row";
+        newItem.innerHTML = `
+            <hr>
+            <h4>Товар #${itemIndex}</h4>
+            <label>Загрузите фото:</label>
+            <input type="file" class="item-photo" accept="image/*" multiple onchange="previewPhotos(this)">
+            <div class="photo-preview" style="display:flex;flex-wrap:wrap;gap:10px;"></div>
+            <label for="item-link-${itemIndex}">Ссылка на товар:</label>
+            <input type="text" id="item-link-${itemIndex}" placeholder="https://yame.co.jp/item123  "><br><br>
+            <label for="item-price-${itemIndex}">Цена (JPY):</label>
+            <input type="number" id="item-price-${itemIndex}" step="any" placeholder="¥ 2000"><br><br>
+            <label for="item-color-${itemIndex}">Цвет:</label>
+            <input type="text" id="item-color-${itemIndex}" placeholder="Черный / Noir"><br><br>
+            <label for="item-size-${itemIndex}">Размер:</label>
+            <input type="text" id="item-size-${itemIndex}" placeholder="M / 42 / EU40"><br><br>
+            <label for="item-quantity-${itemIndex}">Количество:</label>
+            <input type="number" id="item-quantity-${itemIndex}" min="1" value="1"><br><br>
+            <label for="item-comment-${itemIndex}">Комментарий:</label>
+            <input type="text" id="item-comment-${itemIndex}" placeholder="Батч, особые условия..."><br><br>
+            <button class="button-primary" onclick="removeItem(this)">🗑 Удалить товар</button>
+        `;
+        itemsContainer.appendChild(newItem);
     }
 
     function removeItem(button) {
-      const itemRow = button.parentElement;
-      itemRow.remove();
+        const itemRow = button.parentElement;
+        itemRow.remove();
+        updateIndexes();
+    }
+
+    function updateIndexes() {
+        const items = document.querySelectorAll(".item-row");
+        itemIndex = items.length;
+        items.forEach((row, idx) => {
+            row.querySelector("h4").textContent = `Товар #${idx + 1}`;
+        });
     }
 
     function previewPhotos(input) {
-      const preview = input.nextElementSibling;
-      preview.innerHTML = "";
-      Array.from(input.files).slice(0, 5).forEach(file => {
-        const reader = new FileReader();
-        reader.onload = function (e) {
-          const img = document.createElement("img");
-          img.src = e.target.result;
-          img.className = "preview-img";
-          preview.appendChild(img);
-        };
-        reader.readAsDataURL(file);
-      });
+        const preview = input.nextElementSibling;
+        preview.innerHTML = "";
+        Array.from(input.files).slice(0, 5).forEach(file => {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const img = document.createElement("img");
+                img.src = e.target.result;
+                img.className = "preview-img";
+                preview.appendChild(img);
+            };
+            reader.readAsDataURL(file);
+        });
     }
 
     function calculate() {
-      const country = document.getElementById("calc-country").value;
-      const marketplace = document.getElementById("calc-marketplace").value;
-      const priceInput = document.getElementById("price").value.trim();
+        const country = document.getElementById("calc-country").value;
+        const marketplace = document.getElementById("calc-marketplace").value;
+        const priceInput = document.getElementById("price").value.trim();
 
-      if (!country || !priceInput) {
-        alert("Выберите страну и введите цену.");
-        return;
-      }
+        if (!country || !priceInput) {
+            alert("Выберите страну и введите цену.");
+            return;
+        }
 
-      const price = parseFloat(priceInput);
-      let result = 0;
+        const price = parseFloat(priceInput);
+        let result = 0;
 
-      switch (country) {
-        case "china":
-          result = marketplace === "poizon_taobao_weidan"
-            ? price * 14.5 * 1.08
-            : price * 14.5 * 1.13;
-          break;
-        case "japan":
-          result = price * 0.72 * 1.03;
-          break;
-        default:
-          alert("Ошибка: выберите корректную страну.");
-          return;
-      }
+        switch (country) {
+            case "china":
+                result = marketplace === "poizon_taobao_weidan"
+                    ? price * 14.5 * 1.08
+                    : price * 14.5 * 1.13;
+                break;
+            case "japan":
+                result = price * 0.72 * 1.03;
+                break;
+            default:
+                alert("Ошибка: выберите корректную страну.");
+                return;
+        }
 
-      document.getElementById("result").innerText = `Итоговая стоимость: ${result.toFixed(2)} ₽`;
+        document.getElementById("result").innerText = `Итоговая стоимость: ${result.toFixed(2)} ₽`;
     }
 
     function updateCalculatorFields() {
-      const calcCountry = document.getElementById("calc-country").value;
-      document.getElementById("calc-marketplace-section").style.display = calcCountry === "china" ? "block" : "none";
+        const calcCountry = document.getElementById("calc-country").value;
+        document.getElementById("calc-marketplace-section").style.display = calcCountry === "china" ? "block" : "none";
     }
 
-    function submitOrder() {
-      try {
-        logToPage("🟩 Начало отправки заказа");
+    function closeModal() {
+        document.getElementById("preview-modal").style.display = "none";
+    }
 
+    async function submitOrder() {
         const full_name = document.getElementById("full-name").value.trim();
         const telegram_username = document.getElementById("telegram-username").value.trim();
         const country = document.getElementById("country").value;
         const itemsContainer = document.getElementById("items-container");
 
-        logToPage("🟨 Получены поля формы", { full_name, telegram_username, country });
+        const items = await Promise.all(Array.from(itemsContainer.children).map(async (itemRow, idx) => {
+            const photoInput = itemRow.querySelector(".item-photo");
+            const linkOrIdInput = itemRow.querySelector(`#item-link-${idx + 1}`);
+            const priceInput = itemRow.querySelector(`#item-price-${idx + 1}`);
+            const colorInput = itemRow.querySelector(`#item-color-${idx + 1}`);
+            const sizeInput = itemRow.querySelector(`#item-size-${idx + 1}`);
+            const quantityInput = itemRow.querySelector(`#item-quantity-${idx + 1}`);
+            const commentInput = itemRow.querySelector(`#item-comment-${idx + 1}`);
 
-        const items = Array.from(itemsContainer.children).map((itemRow, idx) => {
-          const photoInput = itemRow.querySelector(".item-photo");
-          const linkOrIdInput = itemRow.querySelector(`#item-link-${idx + 1}`);
-          const priceInput = itemRow.querySelector(`#item-price-${idx + 1}`);
-          const colorInput = itemRow.querySelector(`#item-color-${idx + 1}`);
-          const sizeInput = itemRow.querySelector(`#item-size-${idx + 1}`);
-          const quantityInput = itemRow.querySelector(`#item-quantity-${idx + 1}`);
-          const commentInput = itemRow.querySelector(`#item-comment-${idx + 1}`);
+            const photos = [];
+            if (photoInput && photoInput.files) {
+                for (const file of photoInput.files) {
+                    const base64 = await fileToBase64(file);
+                    photos.push(base64);
+                }
+            }
 
-          return {
-            photos: [...Array.from(photoInput?.files || [])].map(f => f.name),
-            link_or_id: linkOrIdInput?.value || "",
-            price: parseFloat(priceInput?.value || 0),
-            color: colorInput?.value || "",
-            size: sizeInput?.value || "",
-            quantity: parseInt(quantityInput?.value || 1),
-            comment: commentInput?.value || ""
-          };
-        });
-
-        logToPage("🟦 Сформирован объект items", JSON.stringify(items));
+            return {
+                photos: photos,
+                link_or_id: linkOrIdInput?.value || "",
+                price: parseFloat(priceInput?.value || 0),
+                color: colorInput?.value || "",
+                size: sizeInput?.value || "",
+                quantity: parseInt(quantityInput?.value || 1),
+                comment: commentInput?.value || ""
+            };
+        }));
 
         if (!full_name || !telegram_username || !country || items.length === 0) {
-          alert("⚠️ Заполните все обязательные поля.");
-          return;
+            alert("⚠️ Заполните все обязательные поля.");
+            return;
         }
 
         const requestData = {
-          command: "create_order",
-          full_name: full_name,
-          telegram_username: telegram_username,
-          country: country,
-          items: items
+            command: "create_order",
+            full_name: full_name,
+            telegram_username: telegram_username,
+            country: country,
+            items: items
         };
 
-        logToPage("📤 Отправляемые данные: " + JSON.stringify(requestData));
+        showPreview(requestData);
+    }
+
+    function showPreview(data) {
+        const modal = document.getElementById("preview-modal");
+        const preview = document.getElementById("preview-content");
+        preview.innerHTML = "";
+
+        const userDiv = document.createElement("div");
+        userDiv.innerHTML = `<strong>Пользователь:</strong><br>${data.full_name}<br>@${data.telegram_username}`;
+        preview.appendChild(userDiv);
+
+        data.items.forEach((item, idx) => {
+            const itemDiv = document.createElement("div");
+            itemDiv.innerHTML = `<hr><strong>Товар #${idx + 1}</strong><br>`;
+            item.photos.forEach(photo => {
+                const img = document.createElement("img");
+                img.src = photo;
+                img.style.width = "60px";
+                img.style.height = "60px";
+                img.style.objectFit = "cover";
+                img.style.margin = "5px";
+                itemDiv.appendChild(img);
+            });
+            itemDiv.innerHTML += `<br>Ссылка: ${item.link_or_id}<br>`;
+            itemDiv.innerHTML += `Цена: ${item.price} × ${item.quantity}<br>`;
+            itemDiv.innerHTML += `Цвет: ${item.color}, Размер: ${item.size}<br>`;
+            itemDiv.innerHTML += `Комментарий: ${item.comment}`;
+            preview.appendChild(itemDiv);
+        });
+
+        modal.style.display = "flex";
+    }
+
+    function confirmOrder() {
+        const full_name = document.getElementById("full-name").value.trim();
+        const telegram_username = document.getElementById("telegram-username").value.trim();
+        const country = document.getElementById("country").value;
+        const itemsContainer = document.getElementById("items-container");
+
+        const items = Array.from(itemsContainer.children).map((itemRow, idx) => {
+            const photoInput = itemRow.querySelector(".item-photo");
+            const linkOrIdInput = itemRow.querySelector(`#item-link-${idx + 1}`);
+            const priceInput = itemRow.querySelector(`#item-price-${idx + 1}`);
+            const colorInput = itemRow.querySelector(`#item-color-${itemIndex + 1}`);
+            const sizeInput = itemRow.querySelector(`#item-size-${idx + 1}`);
+            const quantityInput = itemRow.querySelector(`#item-quantity-${idx + 1}`);
+            const commentInput = itemRow.querySelector(`#item-comment-${idx + 1}`);
+
+            return {
+                photos: [...Array.from(photoInput?.files || [])].map(f => f.name),
+                link_or_id: linkOrIdInput?.value || "",
+                price: parseFloat(priceInput?.value || 0),
+                color: colorInput?.value || "",
+                size: sizeInput?.value || "",
+                quantity: parseInt(quantityInput?.value || 1),
+                comment: commentInput?.value || ""
+            };
+        });
+
+        const requestData = {
+            command: "create_order",
+            full_name: full_name,
+            telegram_username: telegram_username,
+            country: country,
+            items: items
+        };
+
         tg.sendData(JSON.stringify(requestData));
         alert("✅ Ваш заказ отправлен в бота!");
+        closeModal();
         toggleSection("my-orders");
+    }
 
-      } catch (error) {
-        logToPage("🟥 Ошибка: " + error.message);
-        logToPage("🟥 Stack: " + error.stack);
-        alert("❌ Произошла ошибка при подготовке заказа. Посмотрите лог ниже.");
-      }
+    function fileToBase64(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = error => reject(error);
+            reader.readAsDataURL(file);
+        });
     }
 
     function fetchOrders() {
-      tg.sendData(JSON.stringify({ command: "track_order" }));
-    }
-
-    function showOrderDetails(orderId) {
-      tg.sendData(JSON.stringify({ command: "get_order_details", order_id: orderId }));
-      toggleSection("order-details");
-    }
-
-    function closeModal() {
-      document.getElementById("overlay").style.display = "none";
-      document.getElementById("order-details-modal").style.display = "none";
-    }
-
-    function renderManagerOrders(orders) {
-      const container = document.getElementById("manager-orders-container");
-      container.innerHTML = "";
-      orders.forEach(order => {
-        const row = document.createElement("tr");
-        row.innerHTML = `
-          <td>#${order.id}</td>
-          <td>${order.status}</td>
-          <td>Управление недоступно</td>
-        `;
-        container.appendChild(row);
-      });
+        tg.sendData(JSON.stringify({command: "track_order"}));
     }
 
     function updateMyOrders(orders) {
-      const container = document.getElementById("user-orders-container");
-      container.innerHTML = "";
-      orders.forEach(order => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>#${order.id}</td>
-          <td>${order.status}</td>
-        `;
-        container.appendChild(tr);
-      });
+        const container = document.getElementById("user-orders-container");
+        container.innerHTML = "";
+        orders.forEach(order => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td>#${order.id}</td>
+                <td>${order.status}</td>
+            `;
+            container.appendChild(tr);
+        });
     }
 
-    function updateCalculatorFields() {
-      const calcCountry = document.getElementById("calc-country").value;
-      document.getElementById("calc-marketplace-section").style.display = calcCountry === "china" ? "block" : "none";
-    }
-
-    // Переключение между разделами
-    function toggleSection(sectionId) {
-      document.querySelectorAll('.section').forEach(sec => sec.classList.remove("active"));
-      const section = document.getElementById(sectionId);
-      if (section) section.classList.add("active");
-    }
-
-    // Инициализация Web App
     tg.ready();
-  </script>
+</script>
 </body>
 </html>
