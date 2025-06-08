@@ -7,10 +7,12 @@ import pandas as pd
 import json
 import base64
 import requests
+from openpyxl.drawing.image import Image as XLImage
+from io import BytesIO
 from telebot import types
 
 # --- Настройки бота ---
-BOT_TOKEN = '6425282545:AAHv28Q5sWLgMpMnn-9FLrASUYITQNMDFkM'
+BOT_TOKEN = '6425282545:AAHv28Q5sWLgMpMnn-9FLrASUYITQNMDFkM'  # Токен твоего бота
 bot = telebot.TeleBot(BOT_TOKEN)
 
 # --- Курсы валют ---
@@ -21,17 +23,16 @@ currency_rates = {
     "EUR": 105.3
 }
 
-# --- Настройки GitHub ---
-GITHUB_REPO = "m37avolt/volt-logistics"  # замените на ваш username/repo
-GITHUB_TOKEN = "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"  # замените на ваш Personal Access Token
-
-GITHUB_API_URL = f"https://api.github.com/repos/{GITHUB_REPO}/contents/"
+# --- ID менеджеров ---
+MANAGER_IDS = [919034275, 372145026, 6432717873]
 
 # --- Пути к файлам ---
 script_dir = os.path.dirname(os.path.abspath(__file__))
 db_path = os.path.join(script_dir, 'volt_logistics.db')
 orders_dir = os.path.join(script_dir, 'orders')
-logs_dir = os.path.os.makedirs(orders_dir, exist_ok=True)
+logs_dir = os.path.join(script_dir, 'logs')
+
+os.makedirs(orders_dir, exist_ok=True)
 os.makedirs(logs_dir, exist_ok=True)
 
 log_file_path = os.path.join(logs_dir, f"volt_log_{datetime.now().strftime('%Y-%m-%d')}.txt")
@@ -51,7 +52,6 @@ def log_event(event_type, user_id, message=None):
 def init_db():
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
-
     # Таблица пользователей
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS users (
@@ -61,7 +61,6 @@ def init_db():
             is_manager BOOLEAN DEFAULT FALSE
         )
     ''')
-
     # Таблица заказов
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS orders (
@@ -70,17 +69,16 @@ def init_db():
             full_name TEXT,
             telegram_username TEXT,
             country TEXT,
-            status TEXT,
+            status TEXT DEFAULT 'На модерации',
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
-
     # Таблица товаров внутри заказа
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS order_items (
             item_id INTEGER PRIMARY KEY AUTOINCREMENT,
             order_id INTEGER,
-            photo TEXT,
+            photo BLOB,
             link_or_id TEXT,
             color TEXT,
             size TEXT,
@@ -90,7 +88,6 @@ def init_db():
             FOREIGN KEY(order_id) REFERENCES orders(id)
         )
     ''')
-
     conn.commit()
     conn.close()
     log_event("init_db", "system", "База данных инициализирована.")
@@ -115,9 +112,9 @@ def create_order(user_id, full_name, telegram_username, country):
     cursor = conn.cursor()
     cursor.execute('''
         INSERT INTO orders 
-        (user_id, full_name, telegram_username, country, status)
-        VALUES (?, ?, ?, ?, ?)
-    ''', (user_id, full_name, telegram_username, country, "В ожидании проверки"))
+        (user_id, full_name, telegram_username, country)
+        VALUES (?, ?, ?, ?)
+    ''', (user_id, full_name, telegram_username, country))
     order_id = cursor.lastrowid
     conn.commit()
     conn.close()
@@ -125,18 +122,18 @@ def create_order(user_id, full_name, telegram_username, country):
     return order_id
 
 # --- Сохранение товара в заказе ---
-def add_item_to_order(order_id, photo, link_or_id, color, size, price, quantity, comment=''):
+def add_item_to_order(order_id, photo_b64, link_or_id, color, size, price, quantity, comment=''):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute('''
         INSERT INTO order_items 
         (order_id, photo, link_or_id, color, size, price, quantity, comment)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    ''', (order_id, photo, link_or_id, color, size, price, quantity, comment))
+    ''', (order_id, photo_b64, link_or_id, color, size, price, quantity, comment))
     conn.commit()
     conn.close()
     log_event("item_added", order_id,
-              f"Фото: {photo}, Ссылка: {link_or_id}, Цена: {price}, Кол-во: {quantity}")
+              f"Ссылка: {link_or_id}, Цена: {price}, Кол-во: {quantity}")
 
 # --- Получение всех заказов ---
 def get_all_orders():
@@ -147,6 +144,24 @@ def get_all_orders():
     conn.close()
     return result
 
+# --- Получение конкретного заказа ---
+def get_order_by_id(order_id):
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM orders WHERE id=?", (order_id,))
+    order = cursor.fetchone()
+    conn.close()
+    return order
+
+# --- Обновление статуса заказа ---
+def update_order_status(order_id, new_status):
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute("UPDATE orders SET status=? WHERE id=?", (new_status, order_id))
+    conn.commit()
+    conn.close()
+    log_event("status_updated", "system", f"Заказ #{order_id} → {new_status}")
+
 # --- Создание дневного Excel-файла ---
 def get_daily_excel_path():
     today = datetime.now().strftime("%Y-%m-%d")
@@ -156,14 +171,13 @@ def ensure_daily_excel_exists():
     daily_excel_path = get_daily_excel_path()
     if not os.path.exists(daily_excel_path):
         df = pd.DataFrame(columns=[
-            'Фото', 'ID / Ссылка', 'Цвет',
-            'Размер', 'Цена за единицу', 'Кол-во/шт',
-            'tg контакт', 'Страна выкупа', 'комментарий'
+            'Фото', 'ID / Ссылка', 'Цвет', 'Размер',
+            'Цена за единицу', 'Кол-во/шт', 'tg контакт', 'Страна выкупа', 'комментарий'
         ])
         df.to_excel(daily_excel_path, index=False)
     return daily_excel_path
 
-# --- Сохранение в Excel ---
+# --- Сохранение в Excel с изображением ---
 def save_to_excel(item_data):
     daily_excel_path = get_daily_excel_path()
     try:
@@ -174,49 +188,19 @@ def save_to_excel(item_data):
     df_new = pd.DataFrame([item_data])
     df_combined = pd.concat([df_existing, df_new], ignore_index=True)
     df_combined.to_excel(daily_excel_path, index=False)
+
+    # Добавляем изображение в Excel
+    wb = pd.ExcelFile(daily_excel_path).book
+    ws = wb.active
+    img_data = item_data.get("Фото")
+    if img_data and img_data.startswith("data:image"):
+        img = XLImage(BytesIO(base64.b64decode(img_data.split(",")[1])))
+        ws.column_dimensions['A'].width = 20
+        ws.row_dimensions[ws.max_row + 1].height = 60
+        ws.add_image(img, f"A{ws.max_row + 1}")
+
+    wb.save(daily_excel_path)
     log_event("excel_saved", "system", f"Данные записаны в {daily_excel_path}")
-
-    # Отправляем файл в GitHub
-    github_path = f"orders/{os.path.basename(daily_excel_path)}"
-    update_github_file(github_path, daily_excel_path, "Обновлён дневной заказ")
-
-# --- Обновление файла на GitHub ---
-def update_github_file(path_in_repo, file_path, commit_message="Update file"):
-    with open(file_path, "rb") as f:
-        content = f.read()
-
-    headers = {
-        "Authorization": f"token {GITHUB_TOKEN}",
-        "Accept": "application/vnd.github.v3+json"
-    }
-
-    url = GITHUB_API_URL + path_in_repo
-
-    # Получаем SHA файла (если существует)
-    try:
-        response = requests.get(url, headers=headers)
-        sha = response.json()["sha"] if response.status_code == 200 else None
-    except Exception:
-        sha = None
-
-    payload = {
-        "message": commit_message,
-        "content": base64.b64encode(content).decode("utf-8"),
-        "branch": "main"
-    }
-    if sha:
-        payload["sha"] = sha
-
-    response = requests.put(url, headers=headers, json=payload)
-    if response.status_code in [200, 201]:
-        log_event("github_sync", "system", f"{path_in_repo} успешно обновлен на GitHub.")
-    else:
-        log_event("github_error", "system", f"{response.status_code}: {response.text}")
-
-# --- Обновление SQLite в GitHub ---
-def sync_db_with_github():
-    db_dest_path = "volt_logistics.db"
-    update_github_file(db_dest_path, db_path, "Обновлена база данных")
 
 # --- Обработчик web_app_data ---
 @bot.message_handler(content_types=['web_app_data'])
@@ -242,9 +226,9 @@ def handle_web_app_data(message):
 
             order_id = create_order(user_id, full_name, telegram_username, country)
 
-            for item in items:
+            for idx, item in enumerate(items):
                 photo_list = item.get('photos', [])
-                photo = ', '.join(photo_list) if isinstance(photo_list, list) else ''
+                photo_b64 = photo_list[0] if isinstance(photo_list, list) and photo_list else None
                 link_or_id = item.get('link_or_id', '')
                 color = item.get('color', '')
                 size = item.get('size', '')
@@ -252,10 +236,10 @@ def handle_web_app_data(message):
                 quantity = int(item.get('quantity', 1))
                 comment = item.get('comment', '')
 
-                add_item_to_order(order_id, photo, link_or_id, color, size, price, quantity, comment)
+                add_item_to_order(order_id, photo_b64, link_or_id, color, size, price, quantity, comment)
 
                 excel_data = {
-                    'Фото': photo,
+                    'Фото': photo_b64,
                     'ID / Ссылка': link_or_id,
                     'Цвет': color,
                     'Размер': size,
@@ -268,14 +252,21 @@ def handle_web_app_data(message):
 
                 save_to_excel(excel_data)
 
-            # Синхронизация базы данных с GitHub
-            sync_db_with_github()
+            # Уведомление менеджерам
+            for manager_id in MANAGER_IDS:
+                try:
+                    bot.send_message(manager_id, f"🔔 Новый заказ #{order_id} от @{telegram_username}")
+                except:
+                    pass
 
             bot.send_message(message.chat.id, f"✅ Ваш заказ #{order_id} создан!")
 
-        elif data.get('command') == 'preview_order':
-            bot.send_message(message.chat.id, "Вы предпросмотрели заказ.")
-            log_event("preview_order", user_id)
+        elif data.get('command') == 'update_order_status':
+            order_id = data.get('order_id')
+            new_status = data.get('status')
+            if order_id and new_status:
+                update_order_status(order_id, new_status)
+                bot.send_message(message.chat.id, f"🔄 Статус заказа #{order_id} изменён на '{new_status}'")
 
     except Exception as e:
         error_msg = str(e).replace("\n", "\\n")
@@ -321,45 +312,54 @@ def is_manager(user_id):
 # --- Менеджерская панель ---
 @bot.message_handler(func=lambda m: m.text == "🔒 Панель менеджера")
 def manager_panel(message):
-    if is_manager(message.from_user.id):
+    if message.from_user.id in MANAGER_IDS:
         markup = types.InlineKeyboardMarkup(row_width=2)
         view_orders = types.InlineKeyboardButton("📊 Все заказы", callback_data="view_all_orders")
         back = types.InlineKeyboardButton("⬅ Назад", callback_data="back_main")
         markup.add(view_orders, back)
-        bot.send_message(message.chat.id, "Добро пожаловать в панель менеджера.", reply_markup=markup)
+        bot.send_message(message.chat.id, "🔒 Добро пожаловать в панель менеджера.", reply_markup=markup)
     else:
-        bot.send_message(message.chat.id, "Нет доступа к панели.")
+        bot.send_message(message.chat.id, "❌ Нет доступа к панели менеджера.")
 
 # --- Callback handler ---
 @bot.callback_query_handler(func=lambda call: True)
 def handle_callback(call):
     if call.data == "view_all_orders":
         all_orders = get_all_orders()
-        response = "📦 Все заказы:\n\n" + ("\n".join([
+        response = "📦 Все заказы:\n" + ("\n".join([
             f"• Заказ #{o[0]} | Статус: {o[1]} | Страна: {o[2]}"
-            for o in all_orders
+            for o in get_all_orders()
         ]) if all_orders else "Нет активных заказов.")
         bot.send_message(call.message.chat.id, response)
+
+        # Отправляем кнопки для изменения статуса
+        markup = types.InlineKeyboardMarkup(row_width=1)
+        for order in all_orders:
+            btn = types.InlineKeyboardButton(f"Изменить статус #{order[0]}", callback_data=f"edit_status_{order[0]}")
+            markup.add(btn)
+        bot.send_message(call.message.chat.id, "Выберите заказ для редактирования:", reply_markup=markup)
+
+    elif call.data.startswith("edit_status_"):
+        order_id = int(call.data.split("_")[-1])
+        statuses = ["На модерации", "В обработке", "Готов к отправке", "Отправлен", "Завершён", "Отменён"]
+        markup = types.InlineKeyboardMarkup(row_width=1)
+        for status in statuses:
+            markup.add(types.InlineKeyboardButton(status, callback_data=f"set_status_{order_id}_{status}"))
+        bot.send_message(call.message.chat.id, f"Выберите новый статус для заказа #{order_id}:", reply_markup=markup)
+
+    elif call.data.startswith("set_status_"):
+        _, _, order_id, new_status = call.data.split("_", 3)
+        order_id = int(order_id)
+        update_order_status(order_id, new_status)
+        bot.send_message(call.message.chat.id, f"🔄 Статус заказа #{order_id} изменён на '{new_status}'")
+
     elif call.data == "back_main":
         send_options(call.message)
-
-# --- Вывод всех заказов ---
-def get_all_orders():
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
-    cursor.execute("SELECT id, status, country FROM orders")
-    result = cursor.fetchall()
-    conn.close()
-    return result
 
 # --- Обработчик обычных сообщений ---
 @bot.message_handler(func=lambda message: True)
 def any_message_handler(message):
     send_options(message)
-
-# --- Синхронизация с GitHub ---
-def sync_db_with_github():
-    update_github_file("volt_logistics.db", db_path, "Обновлена база данных")
 
 # --- Запуск бота ---
 if __name__ == "__main__":
