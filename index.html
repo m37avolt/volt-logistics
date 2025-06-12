@@ -225,34 +225,46 @@
             }
         }
 
-        /* Отладка */
-        #debug-log {
+        /* Модальное окно */
+        .modal-overlay {
             position: fixed;
-            bottom: 0;
+            top: 0;
             left: 0;
             width: 100%;
-            max-height: 200px;
-            overflow-y: auto;
-            background-color: #111;
-            color: #0f0;
-            font-family: monospace;
-            font-size: 12px;
-            padding: 10px;
-            box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.5);
-            z-index: 9999;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
             display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
         }
 
-        /* Предпросмотр заказа */
-        .order-preview {
+        .modal {
+            background: var(--dark-accent);
+            padding: 20px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal h3 {
+            margin-top: 0;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: space-between;
             margin-top: 20px;
-            padding: 15px;
-            background-color: var(--dark-accent);
-            border-radius: 8px;
-            font-size: 0.9rem;
         }
 
-        .order-preview img {
+        .button-secondary {
+            background-color: #555;
+        }
+
+        .photo-preview img {
             width: 60px;
             height: 60px;
             object-fit: cover;
@@ -262,15 +274,13 @@
 </head>
 <body>
 <div class="main-container">
-
     <!-- Верхняя шапка -->
     <div class="top-menu">
         <div class="logo">
             <!-- SVG молния -->
             <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
-                      stroke="var(--primary-color)" fill="none" stroke-width="2" stroke-linecap="round"
-                      stroke-linejoin="round"/>
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="var(--primary-color)" fill="none"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
             VOLT Logistics
         </div>
@@ -292,7 +302,6 @@
 
     <!-- Основной контент -->
     <div class="content" id="mainContent">
-
         <!-- Приветственная секция -->
         <div class="section active">
             <h2>Добро пожаловать!</h2>
@@ -366,17 +375,23 @@
                 </thead>
                 <tbody id="user-orders-container"></tbody>
             </table>
-            <div id="order-previews"></div>
         </div>
 
         <!-- Подвал -->
         <div class="footer">© VOLT Logistics · 2025</div>
-
     </div>
+</div>
 
-    <!-- Лог для отладки -->
-    <div id="debug-log"></div>
-
+<!-- Модальное окно -->
+<div class="modal-overlay" id="preview-modal">
+    <div class="modal">
+        <h3>Предпросмотр заказа</h3>
+        <div id="preview-content"></div>
+        <div class="modal-buttons">
+            <button class="button-primary" onclick="confirmOrder()">Подтвердить</button>
+            <button class="button-primary button-secondary" onclick="closeModal()">Отмена</button>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -389,16 +404,7 @@
         document.getElementById("manager-button").style.display = "block";
     }
 
-    function logToPage(message) {
-        const logDiv = document.getElementById("debug-log");
-        const timestamp = new Date().toLocaleTimeString();
-        const entry = document.createElement("div");
-        entry.textContent = `[${timestamp}] ${message}`;
-        logDiv.appendChild(entry);
-        logDiv.scrollTop = logDiv.scrollHeight;
-        logDiv.style.display = "block";
-    }
-
+    // Переключение между разделами
     function toggleSection(sectionId) {
         document.querySelectorAll('.section').forEach(sec => sec.classList.remove("active"));
         const section = document.getElementById(sectionId);
@@ -406,6 +412,7 @@
         closeMenu();
     }
 
+    // Открытие/закрытие бокового меню
     function toggleMenu() {
         const sidebar = document.getElementById("sidebar");
         const burger = document.getElementById("burger");
@@ -423,7 +430,7 @@
 
     function navigateTo(sectionId) {
         toggleSection(sectionId);
-        closeMenu();
+        closeMenu(); // Закрываем меню после выбора
     }
 
     let itemIndex = 0;
@@ -435,8 +442,6 @@
         const itemsContainer = document.getElementById("items-container");
 
         itemsContainer.innerHTML = "";
-        itemIndex = 0;
-
         const country = countrySelect.value;
 
         if (country === "china") {
@@ -454,6 +459,10 @@
     }
 
     function addItem() {
+        if (itemIndex >= 10) {
+            alert("Максимум 10 товаров. Обратитесь к менеджеру для оформления большего количества.");
+            return;
+        }
         itemIndex++;
         const itemsContainer = document.getElementById("items-container");
         const newItem = document.createElement("div");
@@ -482,6 +491,10 @@
     }
 
     function addJapanItem() {
+        if (itemIndex >= 10) {
+            alert("Максимум 10 товаров. Обратитесь к менеджеру для оформления большего количества.");
+            return;
+        }
         itemIndex++;
         const itemsContainer = document.getElementById("items-container");
         const newItem = document.createElement("div");
@@ -512,6 +525,15 @@
     function removeItem(button) {
         const itemRow = button.parentElement;
         itemRow.remove();
+        updateIndexes();
+    }
+
+    function updateIndexes() {
+        const items = document.querySelectorAll(".item-row");
+        itemIndex = items.length;
+        items.forEach((row, idx) => {
+            row.querySelector("h4").textContent = `Товар #${idx + 1}`;
+        });
     }
 
     function previewPhotos(input) {
@@ -519,9 +541,10 @@
         preview.innerHTML = "";
         Array.from(input.files).slice(0, 5).forEach(file => {
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = function (e) {
                 const img = document.createElement("img");
                 img.src = e.target.result;
+                img.className = "preview-img";
                 preview.appendChild(img);
             };
             reader.readAsDataURL(file);
@@ -563,89 +586,143 @@
         document.getElementById("calc-marketplace-section").style.display = calcCountry === "china" ? "block" : "none";
     }
 
-    function submitOrder() {
-        try {
-            logToPage("🟩 Начало отправки заказа");
-
-            const full_name = document.getElementById("full-name").value.trim();
-            const telegram_username = document.getElementById("telegram-username").value.trim();
-            const country = document.getElementById("country").value;
-            const itemsContainer = document.getElementById("items-container");
-
-            logToPage("🟨 Получены поля формы", JSON.stringify({ full_name, telegram_username, country }));
-
-            const items = Array.from(itemsContainer.children).map((itemRow, idx) => {
-                const photoInput = itemRow.querySelector(".item-photo");
-                const linkOrIdInput = itemRow.querySelector(`#item-link-${idx + 1}`);
-                const priceInput = itemRow.querySelector(`#item-price-${idx + 1}`);
-                const colorInput = itemRow.querySelector(`#item-color-${idx + 1}`);
-                const sizeInput = itemRow.querySelector(`#item-size-${idx + 1}`);
-                const quantityInput = itemRow.querySelector(`#item-quantity-${idx + 1}`);
-                const commentInput = itemRow.querySelector(`#item-comment-${idx + 1}`);
-
-                return {
-                    photos: [...Array.from(photoInput?.files || [])].map(f => f.name),
-                    link_or_id: linkOrIdInput?.value || "",
-                    price: parseFloat(priceInput?.value || 0),
-                    color: colorInput?.value || "",
-                    size: sizeInput?.value || "",
-                    quantity: parseInt(quantityInput?.value || 1),
-                    comment: commentInput?.value || ""
-                };
-            });
-
-            if (!full_name || !telegram_username || !country || items.length === 0) {
-                alert("⚠️ Заполните все обязательные поля.");
-                return;
-            }
-
-            const requestData = {
-                command: "create_order",
-                full_name: full_name,
-                telegram_username: telegram_username,
-                country: country,
-                items: items
-            };
-
-            logToPage("🟦 Сформирован объект:", JSON.stringify(requestData));
-            tg.sendData(JSON.stringify(requestData));
-            alert("✅ Ваш заказ отправлен в бота!");
-            showOrderPreview(full_name, items, country);
-            toggleSection("my-orders");
-
-        } catch (error) {
-            logToPage("🟥 Ошибка:", error.message);
-            alert("❌ Произошла ошибка. Посмотрите лог внизу экрана.");
-        }
+    function closeModal() {
+        document.getElementById("preview-modal").style.display = "none";
     }
 
-    function showOrderPreview(fullName, items, country) {
-        const container = document.getElementById("order-previews");
-        container.innerHTML = "";
+    function submitOrder() {
+    try {
+        const full_name = document.getElementById("full-name").value.trim();
+        const telegram_username = document.getElementById("telegram-username").value.trim();
+        const country = document.getElementById("country").value;
+        const itemsContainer = document.getElementById("items-container");
 
-        const preview = document.createElement("div");
-        preview.className = "order-preview";
+        const items = Array.from(itemsContainer.children).map((itemRow, idx) => {
+            const photoInput = itemRow.querySelector(".item-photo");
+            const linkOrIdInput = itemRow.querySelector(`#item-link-${idx + 1}`);
+            const priceInput = itemRow.querySelector(`#item-price-${idx + 1}`);
+            const colorInput = itemRow.querySelector(`#item-color-${idx + 1}`);
+            const sizeInput = itemRow.querySelector(`#item-size-${idx + 1}`);
+            const quantityInput = itemRow.querySelector(`#item-quantity-${idx + 1}`);
+            const commentInput = itemRow.querySelector(`#item-comment-${idx + 1}`);
 
-        preview.innerHTML = `<strong>Пользователь:</strong> ${fullName}<br>`;
-        preview.innerHTML += `<strong>Страна:</strong> ${country}<br>`;
-        preview.innerHTML += `<strong>Статус:</strong> На модерации<br><br>`;
-
-        items.forEach((item, idx) => {
-            preview.innerHTML += `<strong>Товар #${idx + 1}</strong><br>`;
-            item.photos.forEach(photo => {
-                preview.innerHTML += `<img src="#" alt="${photo}">`;
-            });
-            preview.innerHTML += `Ссылка: ${item.link_or_id}<br>`;
-            preview.innerHTML += `Цена: ${item.price}, Кол-во: ${item.quantity}<br>`;
-            preview.innerHTML += `Цвет: ${item.color}, Размер: ${item.size}<br>`;
-            preview.innerHTML += `Комментарий: ${item.comment}<br><br>`;
+            return {
+                photos: [...Array.from(photoInput?.files || [])].map(f => f.name),
+                link_or_id: linkOrIdInput?.value || "",
+                price: parseFloat(priceInput?.value || 0),
+                color: colorInput?.value || "",
+                size: sizeInput?.value || "",
+                quantity: parseInt(quantityInput?.value || 1),
+                comment: commentInput?.value || ""
+            };
         });
 
-        container.appendChild(preview);
+        if (!full_name || !telegram_username || !country || items.length === 0) {
+            alert("⚠️ Заполните все обязательные поля.");
+            return;
+        }
+
+        const requestData = {
+            command: "create_order",
+            full_name: full_name,
+            telegram_username: telegram_username,
+            country: country,
+            items: items
+        };
+
+        console.log("🟦 Отправляемые данные:", JSON.stringify(requestData));
+        tg.sendData(JSON.stringify(requestData));
+        alert("✅ Ваш заказ отправлен в бота!");
+        toggleSection("my-orders");
+
+    } catch (error) {
+        alert("❌ Ошибка: " + error.message);
+        console.error("🟥 Ошибка в JS:", error);
+    }
+    }
+
+    function showPreview(data) {
+        const modal = document.getElementById("preview-modal");
+        const preview = document.getElementById("preview-content");
+        preview.innerHTML = "";
+
+        const userDiv = document.createElement("div");
+        userDiv.innerHTML = `<strong>Пользователь:</strong><br>${data.full_name}<br>@${data.telegram_username}`;
+        preview.appendChild(userDiv);
+
+        data.items.forEach((item, idx) => {
+            const itemDiv = document.createElement("div");
+            itemDiv.innerHTML = `<hr><strong>Товар #${idx + 1}</strong><br>`;
+            item.photos.forEach(photo => {
+                const img = document.createElement("img");
+                img.src = photo;
+                img.style.width = "60px";
+                img.style.height = "60px";
+                img.style.objectFit = "cover";
+                img.style.margin = "5px";
+                itemDiv.appendChild(img);
+            });
+            itemDiv.innerHTML += `<br>Ссылка: ${item.link_or_id}<br>`;
+            itemDiv.innerHTML += `Цена: ${item.price} × ${item.quantity}<br>`;
+            itemDiv.innerHTML += `Цвет: ${item.color}, Размер: ${item.size}<br>`;
+            itemDiv.innerHTML += `Комментарий: ${item.comment}`;
+            preview.appendChild(itemDiv);
+        });
+
+        modal.style.display = "flex";
+    }
+
+    function confirmOrder() {
+        const full_name = document.getElementById("full-name").value.trim();
+        const telegram_username = document.getElementById("telegram-username").value.trim();
+        const country = document.getElementById("country").value;
+        const itemsContainer = document.getElementById("items-container");
+
+        const items = Array.from(itemsContainer.children).map((itemRow, idx) => {
+            const photoInput = itemRow.querySelector(".item-photo");
+            const linkOrIdInput = itemRow.querySelector(`#item-link-${idx + 1}`);
+            const priceInput = itemRow.querySelector(`#item-price-${idx + 1}`);
+            const colorInput = itemRow.querySelector(`#item-color-${itemIndex + 1}`);
+            const sizeInput = itemRow.querySelector(`#item-size-${idx + 1}`);
+            const quantityInput = itemRow.querySelector(`#item-quantity-${idx + 1}`);
+            const commentInput = itemRow.querySelector(`#item-comment-${idx + 1}`);
+
+            return {
+                photos: [...Array.from(photoInput?.files || [])].map(f => f.name),
+                link_or_id: linkOrIdInput?.value || "",
+                price: parseFloat(priceInput?.value || 0),
+                color: colorInput?.value || "",
+                size: sizeInput?.value || "",
+                quantity: parseInt(quantityInput?.value || 1),
+                comment: commentInput?.value || ""
+            };
+        });
+
+        const requestData = {
+            command: "create_order",
+            full_name: full_name,
+            telegram_username: telegram_username,
+            country: country,
+            items: items
+        };
+
+        tg.sendData(JSON.stringify(requestData));
+        alert("✅ Ваш заказ отправлен в бота!");
+        closeModal();
+        toggleSection("my-orders");
+    }
+
+    function fileToBase64(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = error => reject(error);
+            reader.readAsDataURL(file);
+        });
     }
 
     function fetchOrders() {
-        tg.sendData(JSON.stringify({ command: "track_order" }));
+        tg.sendData(JSON.stringify({command: "track_order"}));
     }
 
     function updateMyOrders(orders) {
@@ -659,17 +736,6 @@
             `;
             container.appendChild(tr);
         });
-    }
-
-    function updateCalculatorFields() {
-        const calcCountry = document.getElementById("calc-country").value;
-        document.getElementById("calc-marketplace-section").style.display = calcCountry === "china" ? "block" : "none";
-    }
-
-    function toggleSection(sectionId) {
-        document.querySelectorAll('.section').forEach(sec => sec.classList.remove("active"));
-        const section = document.getElementById(sectionId);
-        if (section) section.classList.add("active");
     }
 
     tg.ready();
