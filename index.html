@@ -399,7 +399,7 @@
         document.getElementById("manager-button").style.display = "block";
     }
 
-    // Переключение между разделами
+    // Логирование действий
     function log(msg) {
         const logs = document.getElementById("logs");
         const timestamp = new Date().toLocaleTimeString();
@@ -407,29 +407,51 @@
         logs.scrollTop = logs.scrollHeight;
     }
 
+    // Переключение между разделами
     function toggleSection(sectionId) {
         document.querySelectorAll('.section').forEach(sec => sec.classList.remove("active"));
         const section = document.getElementById(sectionId);
         if (section) section.classList.add("active");
-        closeMenu();
-        log(`🟩 Открыта секция "${sectionId}"`);
+        closeMenu(); // Всегда закрываем меню при переходе на новую секцию
+        log(`🟩 Открыта секция: "${sectionId}"`);
     }
 
+    // Бургер-меню
     function toggleMenu() {
         const sidebar = document.getElementById("sidebar");
         const burger = document.getElementById("burger");
         const mainContent = document.getElementById("mainContent");
+
         sidebar.classList.toggle("active");
         burger.classList.toggle("active");
         mainContent.classList.toggle("dimmed");
     }
 
-    function closeMenu() {
-        document.getElementById("sidebar").classList.remove("active");
-        document.getElementById("burger").classList.remove("active");
-        document.getElementById("mainContent").classList.remove("dimmed");
+    function closeMenuOnClickOutside(event) {
+        const sidebar = document.getElementById("sidebar");
+        const rect = sidebar.getBoundingClientRect();
+        const clickX = event.clientX;
+
+        // Если меню открыто и клик вне его области
+        if (sidebar.classList.contains("active") && (clickX < rect.left || clickX > rect.right)) {
+            closeMenu();
+        }
     }
 
+    function closeMenu() {
+        const sidebar = document.getElementById("sidebar");
+        const burger = document.getElementById("burger");
+        const mainContent = document.getElementById("mainContent");
+
+        sidebar.classList.remove("active");
+        burger.classList.remove("active");
+        mainContent.classList.remove("dimmed");
+        log("🟥 Бургер-меню закрыто");
+    }
+
+    document.addEventListener("click", closeMenuOnClickOutside);
+
+    // Навигация
     function navigateTo(sectionId) {
         if (sectionId === "my-orders") {
             fetchOrders();  // Запрашиваем данные у бота
@@ -450,6 +472,7 @@
 
         itemsContainer.innerHTML = "";
         itemIndex = 0;
+
         const country = countrySelect.value;
 
         if (country === "china") {
@@ -558,6 +581,8 @@
                 const img = document.createElement("img");
                 img.src = e.target.result;
                 img.style.width = "60px";
+                img.style.height = "60px";
+                img.style.margin = "5px";
                 preview.appendChild(img);
             };
             reader.readAsDataURL(file);
@@ -576,12 +601,12 @@
 
     async function submitOrder() {
         try {
+            log(`🟩 Начало отправки заказа`);
+
             const full_name = document.getElementById("full-name").value.trim();
             const telegram_username = document.getElementById("telegram-username").value.trim();
             const country = document.getElementById("country").value;
             const itemsContainer = document.getElementById("items-container");
-
-            log(`🟩 Начало отправки заказа`);
 
             const items = await Promise.all(Array.from(itemsContainer.children).map(async (itemRow, idx) => {
                 const photoInput = itemRow.querySelector(".item-photo");
@@ -611,6 +636,11 @@
                 };
             }));
 
+            if (!full_name || !telegram_username || !country || items.length === 0) {
+                alert("⚠️ Заполните все обязательные поля.");
+                return;
+            }
+
             const requestData = {
                 command: "create_order",
                 full_name: full_name,
@@ -619,11 +649,11 @@
                 items: items
             };
 
-            log(`🟦 Сформирован объект: ${JSON.stringify(requestData)}`);
-            showPreview(requestData);
+            showPreview(requestData); // Показываем предпросмотр перед отправкой
+
         } catch (error) {
             log(`🟥 Ошибка в JS: ${error.message}`);
-            alert("❌ Произошла ошибка. Посмотрите консоль.");
+            alert("❌ Произошла ошибка. Посмотрите консоль для деталей.");
         }
     }
 
@@ -639,6 +669,7 @@
                 img.src = photo;
                 img.style.width = "60px";
                 img.style.height = "60px";
+                img.style.objectFit = "cover";
                 img.style.margin = "5px";
                 itemDiv.appendChild(img);
             });
@@ -684,7 +715,7 @@
         });
 
         if (!full_name || !telegram_username || !country || items.length === 0) {
-            alert("⚠️ Заполните все поля.");
+            alert("⚠️ Не все поля заполнены.");
             return;
         }
 
@@ -724,7 +755,7 @@
             `;
             container.appendChild(tr);
         });
-        log(`🟦 Обновлены "Мои заказы"`);
+        log(`🟦 "Мои заказы" обновлены`);
     }
 
     function renderManagerOrders(orders) {
@@ -749,7 +780,7 @@
             `;
             container.appendChild(tr);
         });
-        log("🟦 Отрендерены заказы для менеджера");
+        log(`🟦 Отрендерены заказы для менеджера`);
     }
 
     function changeStatus(orderId, newStatus) {
@@ -794,81 +825,73 @@
         document.getElementById("calc-marketplace-section").style.display = calcCountry === "china" ? "block" : "none";
     }
 
-    function toggleSection(sectionId) {
-        document.querySelectorAll('.section').forEach(sec => sec.classList.remove("active"));
-        const section = document.getElementById(sectionId);
-        if (section) section.classList.add("active");
-        log(`🟩 Открыта секция: ${sectionId}`);
-    }
+    // --- Модальное окно ---
+    const modalOverlay = document.createElement("div");
+    modalOverlay.className = "modal-overlay";
+    modalOverlay.id = "preview-modal";
+    modalOverlay.innerHTML = `
+        <div class="modal">
+            <h3>Предпросмотр заказа</h3>
+            <div id="preview-content"></div>
+            <div class="modal-buttons">
+                <button class="button-primary" onclick="confirmOrder()">Подтвердить</button>
+                <button class="button-primary button-secondary" onclick="closeModal()">Закрыть</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modalOverlay);
 
-    function sendOrderToBot() {
-        const full_name = document.getElementById("full-name").value.trim();
-        const telegram_username = document.getElementById("telegram-username").value.trim();
-        const country = document.getElementById("country").value;
-        const itemsContainer = document.getElementById("items-container");
+    // --- Виртуальные логи ---
+    const logsContainer = document.createElement("div");
+    logsContainer.className = "log-output";
+    logsContainer.id = "logs";
+    logsContainer.style.position = "fixed";
+    logsContainer.style.top = "10px";
+    logsContainer.style.right = "10px";
+    logsContainer.style.maxHeight = "150px";
+    logsContainer.style.overflowY = "auto";
+    logsContainer.style.backgroundColor = "#111";
+    logsContainer.style.padding = "10px";
+    logsContainer.style.borderRadius = "8px";
+    logsContainer.style.fontFamily = "monospace";
+    logsContainer.style.fontSize = "0.8rem";
+    logsContainer.style.color = "#0f0";
+    logsContainer.style.zIndex = "9998";
+    logsContainer.style.width = "30%";
+    logsContainer.style.height = "auto";
+    logsContainer.style.maxWidth = "100%";
+    logsContainer.style.textAlign = "left";
+    document.body.appendChild(logsContainer);
 
-        const items = Array.from(itemsContainer.children).map((itemRow, idx) => {
-            const photoInput = itemRow.querySelector(".item-photo");
-            const linkOrIdInput = itemRow.querySelector(`#item-link-${idx + 1}`);
-            const priceInput = itemRow.querySelector(`#item-price-${idx + 1}`);
-            const colorInput = itemRow.querySelector(`#item-color-${idx + 1}`);
-            const sizeInput = itemRow.querySelector(`#item-size-${idx + 1}`);
-            const quantityInput = itemRow.querySelector(`#item-quantity-${idx + 1}`);
-            const commentInput = itemRow.querySelector(`#item-comment-${idx + 1}`);
+    // --- Инициализация Telegram WebApp ---
+    tg.ready();
 
-            return {
-                photos: [...Array.from(photoInput?.files || [])].map(f => f.name),
-                link_or_id: linkOrIdInput?.value || "",
-                price: parseFloat(priceInput?.value || 0),
-                color: colorInput?.value || "",
-                size: sizeInput?.value || "",
-                quantity: parseInt(quantityInput?.value || 1),
-                comment: commentInput?.value || ""
-            };
-        });
-
-        if (!full_name || !telegram_username || !country || items.length === 0) {
-            alert("⚠️ Не все поля заполнены.");
-            return;
+    // --- Обработчик данных от бота ---
+    window.Telegram.WebApp.onEvent("web_app_data_sent", function(event) {
+        const data = JSON.parse(event.data);
+        if (data.command === "return_orders") {
+            showOrdersFromBot(data.orders);
+        } else if (data.command === "all_orders") {
+            renderManagerOrders(data.orders);
+        } else if (data.command === "order_updated") {
+            alert(`🔄 Статус изменён: ${data.status}`);
         }
-
-        const requestData = {
-            command: "create_order",
-            full_name: full_name,
-            telegram_username: telegram_username,
-            country: country,
-            items: items
-        };
-
-        tg.sendData(JSON.stringify(requestData));
-        alert("✅ Ваш заказ отправлен в бота!");
-        toggleSection("my-orders");
-    }
+    });
 
     function showOrdersFromBot(orders) {
         updateMyOrders(orders);
         log("🟦 Заказы загружены из бота");
     }
 
-    function showAllOrdersFromBot(orders) {
-        renderManagerOrders(orders);
-        log("🟦 Все заказы от бота");
+    function fetchOrders() {
+        tg.sendData(JSON.stringify({ command: "get_user_orders", user_id: userId }));
+        log("🟩 Запрошены мои заказы");
     }
 
-    // Обработчик данных от бота
-    window.Telegram.WebApp.onEvent("web_app_data_sent", function(event) {
-        const data = JSON.parse(event.data);
-        if (data.command === "return_orders") {
-            showOrdersFromBot(data.orders);
-        } else if (data.command === "all_orders") {
-            showAllOrdersFromBot(data.orders);
-        } else if (data.command === "order_updated") {
-            alert(`🔄 Обновлён статус: ${data.status}`);
-        }
-    });
-
-    // Инициализация Telegram WebApp
-    tg.ready();
+    function fetchAllOrders() {
+        tg.sendData(JSON.stringify({ command: "get_all_orders" }));
+        log("🟩 Запрошены все заказы");
+    }
 </script>
 </body>
 </html>
