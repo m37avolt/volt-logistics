@@ -4,8 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>VOLT Logistics</title>
+
     <!-- Telegram SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script> 
+
     <style>
         :root {
             --primary-color: #00DBFF;
@@ -20,10 +22,13 @@
             font-family: var(--font-family);
             background-color: var(--black);
             color: var(--white);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
         }
 
         .main-container {
-            width: 100%;
+            width: 75%;
             height: 100vh;
             display: flex;
             flex-direction: column;
@@ -158,7 +163,9 @@
             color: var(--white);
         }
 
-        input, select, button.button-primary {
+        input,
+        select,
+        button.button-primary {
             width: 100%;
             padding: 12px;
             border: none;
@@ -192,11 +199,11 @@
             color: var(--white);
         }
 
-        .photo-preview img {
-            width: 60px;
-            height: 60px;
-            object-fit: cover;
-            margin: 5px;
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #555;
         }
 
         /* Модальное окно */
@@ -214,17 +221,12 @@
         }
 
         .modal {
-            background-color: var(--dark-accent);
+            background: var(--dark-accent);
             padding: 20px;
             border-radius: 12px;
             max-width: 500px;
             width: 90%;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-            position: relative;
-        }
-
-        .modal h3 {
-            margin-top: 0;
         }
 
         .modal-buttons {
@@ -237,25 +239,40 @@
             background-color: #555;
         }
 
+        /* Консоль для логов */
         .log-output {
-            position: fixed;
-            bottom: 10px;
-            left: 10px;
-            max-height: 150px;
-            overflow-y: auto;
+            width: 25%;
+            height: 100vh;
             background: #111;
-            padding: 10px;
-            border-radius: 8px;
+            color: #0f0;
+            font-family: monospace;
             font-size: 0.8rem;
-            color: #aaa;
-            width: calc(100% - 20px);
+            padding: 10px;
+            overflow-y: auto;
+            border-left: 1px solid #222;
+        }
+
+        .log-output::before {
+            content: "🧾 Логи:";
+            display: block;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .photo-preview img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            margin: 5px;
         }
     </style>
 </head>
 <body>
+
+<!-- Основная часть WebApp -->
 <div class="main-container">
 
-    <!-- Верхняя шапка -->
+    <!-- Шапка -->
     <div class="top-menu">
         <div class="logo">
             <!-- SVG молния -->
@@ -270,15 +287,7 @@
         </div>
     </div>
 
-    <!-- Боковое меню -->
-    <div class="sidebar" id="sidebar">
-        <button onclick="navigateTo('calculator')">🧮 Калькулятор</button>
-        <button onclick="navigateTo('create-order')">📝 Создать заказ</button>
-        <button onclick="navigateTo('my-orders')">📦 Мои заказы</button>
-        <button id="manager-button" style="display:none;" onclick="navigateTo('manager')">🔒 Панель менеджера</button>
-    </div>
-
-    <!-- Основной контент -->
+    <!-- Контент -->
     <div class="content" id="mainContent">
 
         <!-- Приветствие -->
@@ -312,7 +321,7 @@
             <div id="result" style="margin-top: 20px;"></div>
         </div>
 
-        <!-- Создать заказ -->
+        <!-- Создание заказа -->
         <div id="create-order" class="section">
             <h2>📝 Создать новый заказ</h2>
             <label for="country">Страна выкупа:</label>
@@ -371,22 +380,33 @@
             </table>
         </div>
 
-        <!-- Модальное окно -->
-        <div class="modal-overlay" id="preview-modal">
-            <div class="modal">
-                <h3>Предпросмотр заказа</h3>
-                <div id="preview-content"></div>
-                <div class="modal-buttons">
-                    <button class="button-primary" onclick="confirmOrder()">Подтвердить</button>
-                    <button class="button-primary button-secondary" onclick="closeModal()">Закрыть</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Виртуальные логи -->
-        <div class="log-output" id="logs"></div>
+        <!-- Подвал -->
+        <div class="footer">© VOLT Logistics · 2025</div>
     </div>
 </div>
+
+<!-- Боковое меню -->
+<div class="sidebar" id="sidebar">
+    <button onclick="navigateTo('calculator')">🧮 Калькулятор</button>
+    <button onclick="navigateTo('create-order')">📝 Создать заказ</button>
+    <button onclick="navigateTo('my-orders')">📦 Мои заказы</button>
+    <button id="manager-button" style="display:none;" onclick="navigateTo('manager')">🔒 Панель менеджера</button>
+</div>
+
+<!-- Модальное окно -->
+<div class="modal-overlay" id="preview-modal">
+    <div class="modal">
+        <h3>Предпросмотр заказа</h3>
+        <div id="preview-content"></div>
+        <div class="modal-buttons">
+            <button class="button-primary" onclick="confirmOrder()">Подтвердить</button>
+            <button class="button-primary button-secondary" onclick="closeModal()">Закрыть</button>
+        </div>
+    </div>
+</div>
+
+<!-- Виртуальные логи -->
+<div class="log-output" id="logs"></div>
 
 <script>
     const tg = window.Telegram.WebApp;
@@ -412,8 +432,8 @@
         document.querySelectorAll('.section').forEach(sec => sec.classList.remove("active"));
         const section = document.getElementById(sectionId);
         if (section) section.classList.add("active");
-        closeMenu(); // Всегда закрываем меню при переходе на новую секцию
-        log(`🟩 Открыта секция: "${sectionId}"`);
+        closeMenu();
+        log(`🟩 Открыта секция "${sectionId}"`);
     }
 
     // Бургер-меню
@@ -422,20 +442,14 @@
         const burger = document.getElementById("burger");
         const mainContent = document.getElementById("mainContent");
 
+        if (!sidebar || !burger || !mainContent) {
+            console.error("Не найдены элементы меню!");
+            return;
+        }
+
         sidebar.classList.toggle("active");
         burger.classList.toggle("active");
         mainContent.classList.toggle("dimmed");
-    }
-
-    function closeMenuOnClickOutside(event) {
-        const sidebar = document.getElementById("sidebar");
-        const rect = sidebar.getBoundingClientRect();
-        const clickX = event.clientX;
-
-        // Если меню открыто и клик вне его области
-        if (sidebar.classList.contains("active") && (clickX < rect.left || clickX > rect.right)) {
-            closeMenu();
-        }
     }
 
     function closeMenu() {
@@ -443,15 +457,16 @@
         const burger = document.getElementById("burger");
         const mainContent = document.getElementById("mainContent");
 
-        sidebar.classList.remove("active");
-        burger.classList.remove("active");
-        mainContent.classList.remove("dimmed");
-        log("🟥 Бургер-меню закрыто");
+        if (sidebar && burger && mainContent) {
+            sidebar.classList.remove("active");
+            burger.classList.remove("active");
+            mainContent.classList.remove("dimmed");
+            log("🟥 Бургер-меню закрыто");
+        } else {
+            console.warn("Элементы меню не найдены при закрытии");
+        }
     }
 
-    document.addEventListener("click", closeMenuOnClickOutside);
-
-    // Навигация
     function navigateTo(sectionId) {
         if (sectionId === "my-orders") {
             fetchOrders();  // Запрашиваем данные у бота
@@ -460,6 +475,19 @@
         }
         toggleSection(sectionId);
     }
+
+    // Обработка клика вне меню
+    document.addEventListener("click", function(event) {
+        const sidebar = document.getElementById("sidebar");
+        const rect = sidebar?.getBoundingClientRect();
+
+        if (!rect) return;
+
+        const clickX = event.clientX;
+        if (sidebar.classList.contains("active") && (clickX > rect.right)) {
+            closeMenu();
+        }
+    });
 
     // Логика формы
     let itemIndex = 0;
@@ -569,7 +597,7 @@
             row.querySelector("h4").textContent = `Товар #${idx + 1}`;
         });
         itemIndex = items.length;
-        log(`🟨 Индексы товаров обновлены`);
+        log(`🟨 Индексы обновлены`);
     }
 
     function previewPhotos(input) {
@@ -582,7 +610,6 @@
                 img.src = e.target.result;
                 img.style.width = "60px";
                 img.style.height = "60px";
-                img.style.margin = "5px";
                 preview.appendChild(img);
             };
             reader.readAsDataURL(file);
@@ -601,8 +628,6 @@
 
     async function submitOrder() {
         try {
-            log(`🟩 Начало отправки заказа`);
-
             const full_name = document.getElementById("full-name").value.trim();
             const telegram_username = document.getElementById("telegram-username").value.trim();
             const country = document.getElementById("country").value;
@@ -637,7 +662,7 @@
             }));
 
             if (!full_name || !telegram_username || !country || items.length === 0) {
-                alert("⚠️ Заполните все обязательные поля.");
+                alert("⚠️ Не все поля заполнены.");
                 return;
             }
 
@@ -649,11 +674,11 @@
                 items: items
             };
 
-            showPreview(requestData); // Показываем предпросмотр перед отправкой
+            showPreview(requestData);
 
         } catch (error) {
             log(`🟥 Ошибка в JS: ${error.message}`);
-            alert("❌ Произошла ошибка. Посмотрите консоль для деталей.");
+            alert("❌ Произошла ошибка. Посмотрите консоль.");
         }
     }
 
@@ -663,21 +688,15 @@
         preview.innerHTML = `<strong>Пользователь:</strong><br>${data.full_name}<br>@${data.telegram_username}<br><br>`;
         data.items.forEach((item, idx) => {
             const itemDiv = document.createElement("div");
-            itemDiv.innerHTML = `<strong>Товар #${idx + 1}</strong><br>`;
             item.photos.forEach(photo => {
                 const img = document.createElement("img");
                 img.src = photo;
                 img.style.width = "60px";
                 img.style.height = "60px";
-                img.style.objectFit = "cover";
                 img.style.margin = "5px";
                 itemDiv.appendChild(img);
             });
-            itemDiv.innerHTML += `
-                <br>Ссылка: ${item.link_or_id}<br>
-                Цена: ${item.price}, Кол-во: ${item.quantity}<br>
-                Цвет: ${item.color}, Размер: ${item.size}<br>
-                Комментарий: ${item.comment}<br><hr>`;
+            itemDiv.innerHTML += `<br>Ссылка: ${item.link_or_id}<br>Цена: ${item.price}, Кол-во: ${item.quantity}<br>Цвет: ${item.color}, Размер: ${item.size}<br>Комментарий: ${item.comment}<br><hr>`;
             preview.appendChild(itemDiv);
         });
         modal.style.display = "flex";
@@ -749,10 +768,7 @@
         container.innerHTML = "";
         orders.forEach(order => {
             const tr = document.createElement("tr");
-            tr.innerHTML = `
-                <td>#${order.id}</td>
-                <td>${order.status}</td>
-            `;
+            tr.innerHTML = `<td>#${order.id}</td><td>${order.status}</td>`;
             container.appendChild(tr);
         });
         log(`🟦 "Мои заказы" обновлены`);
@@ -825,73 +841,122 @@
         document.getElementById("calc-marketplace-section").style.display = calcCountry === "china" ? "block" : "none";
     }
 
-    // --- Модальное окно ---
-    const modalOverlay = document.createElement("div");
-    modalOverlay.className = "modal-overlay";
-    modalOverlay.id = "preview-modal";
-    modalOverlay.innerHTML = `
-        <div class="modal">
-            <h3>Предпросмотр заказа</h3>
-            <div id="preview-content"></div>
-            <div class="modal-buttons">
-                <button class="button-primary" onclick="confirmOrder()">Подтвердить</button>
-                <button class="button-primary button-secondary" onclick="closeModal()">Закрыть</button>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(modalOverlay);
+    function sendOrderToBot() {
+        const full_name = document.getElementById("full-name").value.trim();
+        const telegram_username = document.getElementById("telegram-username").value.trim();
+        const country = document.getElementById("country").value;
+        const itemsContainer = document.getElementById("items-container");
 
-    // --- Виртуальные логи ---
-    const logsContainer = document.createElement("div");
-    logsContainer.className = "log-output";
-    logsContainer.id = "logs";
-    logsContainer.style.position = "fixed";
-    logsContainer.style.top = "10px";
-    logsContainer.style.right = "10px";
-    logsContainer.style.maxHeight = "150px";
-    logsContainer.style.overflowY = "auto";
-    logsContainer.style.backgroundColor = "#111";
-    logsContainer.style.padding = "10px";
-    logsContainer.style.borderRadius = "8px";
-    logsContainer.style.fontFamily = "monospace";
-    logsContainer.style.fontSize = "0.8rem";
-    logsContainer.style.color = "#0f0";
-    logsContainer.style.zIndex = "9998";
-    logsContainer.style.width = "30%";
-    logsContainer.style.height = "auto";
-    logsContainer.style.maxWidth = "100%";
-    logsContainer.style.textAlign = "left";
-    document.body.appendChild(logsContainer);
+        const items = Array.from(itemsContainer.children).map((itemRow, idx) => {
+            const photoInput = itemRow.querySelector(".item-photo");
+            const linkOrIdInput = itemRow.querySelector(`#item-link-${idx + 1}`);
+            const priceInput = itemRow.querySelector(`#item-price-${idx + 1}`);
+            const colorInput = itemRow.querySelector(`#item-color-${idx + 1}`);
+            const sizeInput = itemRow.querySelector(`#item-size-${idx + 1}`);
+            const quantityInput = itemRow.querySelector(`#item-quantity-${idx + 1}`);
+            const commentInput = itemRow.querySelector(`#item-comment-${idx + 1}`);
 
-    // --- Инициализация Telegram WebApp ---
-    tg.ready();
+            return {
+                photos: [...Array.from(photoInput?.files || [])].map(f => f.name),
+                link_or_id: linkOrIdInput?.value || "",
+                price: parseFloat(priceInput?.value || 0),
+                color: colorInput?.value || "",
+                size: sizeInput?.value || "",
+                quantity: parseInt(quantityInput?.value || 1),
+                comment: commentInput?.value || ""
+            };
+        });
 
-    // --- Обработчик данных от бота ---
-    window.Telegram.WebApp.onEvent("web_app_data_sent", function(event) {
-        const data = JSON.parse(event.data);
-        if (data.command === "return_orders") {
-            showOrdersFromBot(data.orders);
-        } else if (data.command === "all_orders") {
-            renderManagerOrders(data.orders);
-        } else if (data.command === "order_updated") {
-            alert(`🔄 Статус изменён: ${data.status}`);
+        if (!full_name || !telegram_username || !country || items.length === 0) {
+            alert("⚠️ Не все поля заполнены.");
+            return;
         }
-    });
+
+        const requestData = {
+            command: "create_order",
+            full_name: full_name,
+            telegram_username: telegram_username,
+            country: country,
+            items: items
+        };
+
+        tg.sendData(JSON.stringify(requestData));
+        alert("✅ Ваш заказ отправлен в бота!");
+        closeModal();
+        toggleSection("my-orders");
+    }
 
     function showOrdersFromBot(orders) {
         updateMyOrders(orders);
         log("🟦 Заказы загружены из бота");
     }
 
-    function fetchOrders() {
-        tg.sendData(JSON.stringify({ command: "get_user_orders", user_id: userId }));
-        log("🟩 Запрошены мои заказы");
+    function showAllOrdersFromBot(orders) {
+        renderManagerOrders(orders);
+        log("🟦 Все заказы от бота");
     }
 
-    function fetchAllOrders() {
-        tg.sendData(JSON.stringify({ command: "get_all_orders" }));
-        log("🟩 Запрошены все заказы");
+    function updateMyOrders(orders) {
+        const container = document.getElementById("user-orders-container");
+        container.innerHTML = "";
+        orders.forEach(order => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `<td>#${order.id}</td><td>${order.status}</td>`;
+            container.appendChild(tr);
+        });
+        log(`🟦 "Мои заказы" обновлены`);
     }
+
+    function renderManagerOrders(orders) {
+        const container = document.getElementById("manager-orders-container");
+        container.innerHTML = "";
+        orders.forEach(order => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td>#${order.id}</td>
+                <td>${order.status}</td>
+                <td>Управление недоступно</td>
+            `;
+            container.appendChild(tr);
+        });
+        log(`🟦 Отрендерены заказы для менеджера`);
+    }
+
+    function updateCalculatorFields() {
+        const calcCountry = document.getElementById("calc-country").value;
+        document.getElementById("calc-marketplace-section").style.display = calcCountry === "china" ? "block" : "none";
+    }
+
+    function navigateTo(sectionId) {
+        toggleSection(sectionId);
+    }
+
+    function toggleSection(sectionId) {
+        document.querySelectorAll('.section').forEach(sec => sec.classList.remove("active"));
+        const section = document.getElementById(sectionId);
+        if (section) section.classList.add("active");
+        closeMenu();
+        log(`🟩 Открыта секция "${sectionId}"`);
+    }
+
+    // --- Инициализация Telegram WebApp ---
+    tg.ready();
+
+    // --- Обработчик данных от бота ---
+    window.Telegram.WebApp.onEvent("web_app_data_sent", function(event) {
+        try {
+            const data = JSON.parse(event.data);
+            if (data.command === "return_orders") {
+                showOrdersFromBot(data.orders);
+            } else if (data.command === "all_orders") {
+                showAllOrdersFromBot(data.orders);
+            } else if (data.command === "order_updated") {
+                alert(`🔄 Статус изменён: ${data.status}`);
+            }
+        } catch (e) {
+            log(`🟥 Ошибка разбора данных: ${e.message}`);
+        }
+    });
 </script>
 </body>
 </html>
