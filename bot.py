@@ -6,10 +6,7 @@ from datetime import datetime
 import pandas as pd
 import json
 import base64
-from io import BytesIO
-from openpyxl.drawing.image import Image as XLImage
-from openpyxl.utils import get_column_letter
-from openpyxl import load_workbook
+import requests
 from telebot import types
 
 # --- Настройки бота ---
@@ -38,7 +35,7 @@ os.makedirs(logs_dir, exist_ok=True)
 
 log_file_path = os.path.join(logs_dir, f"volt_log_{datetime.now().strftime('%Y-%m-%d')}.txt")
 
-# --- Логирование ---
+# --- Логирование событий ---
 def log_event(event_type, user_id, message=None):
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     with open(log_file_path, "a", encoding="utf-8") as f:
@@ -79,7 +76,7 @@ def init_db():
         CREATE TABLE IF NOT EXISTS order_items (
             item_id INTEGER PRIMARY KEY AUTOINCREMENT,
             order_id INTEGER,
-            photo BLOB,
+            photo TEXT,
             link_or_id TEXT,
             color TEXT,
             size TEXT,
@@ -113,9 +110,9 @@ def create_order(user_id, full_name, telegram_username, country):
     cursor = conn.cursor()
     cursor.execute('''
         INSERT INTO orders 
-        (user_id, full_name, telegram_username, country)
-        VALUES (?, ?, ?, ?)
-    ''', (user_id, full_name, telegram_username, country))
+        (user_id, full_name, telegram_username, country, status)
+        VALUES (?, ?, ?, ?, ?)
+    ''', (user_id, full_name, telegram_username, country, "На модерации"))
     order_id = cursor.lastrowid
     conn.commit()
     conn.close()
@@ -136,81 +133,60 @@ def add_item_to_order(order_id, photo, link_or_id, color, size, price, quantity,
     log_event("item_added", order_id,
               f"Фото: {photo}, Ссылка: {link_or_id}, Цена: {price}, Кол-во: {quantity}")
 
-# --- Получение всех товаров для заказа ---
-def get_items(order_id):
+# --- Получение моих заказов ---
+def get_user_orders(user_id):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM order_items WHERE order_id=?", (order_id,))
+    cursor.execute("SELECT id, status FROM orders WHERE user_id = ?", (user_id,))
+    result = cursor.fetchall()
+    conn.close()
+    return [{"id": row[0], "status": row[1]} for row in result]
+
+# --- Получение всех заказов ---
+def get_all_orders():
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, status, country FROM orders")
     result = cursor.fetchall()
     conn.close()
     return result
+
+# --- Обновление статуса ---
+def update_order_status(order_id, new_status):
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute("UPDATE orders SET status = ? WHERE id = ?", (new_status, order_id))
+    conn.commit()
+    conn.close()
+    log_event("status_updated", "system",
+              f"Статус заказа #{order_id} изменён на '{new_status}'")
+    return {"status": new_status}
 
 # --- Путь к Excel ---
 def get_daily_excel_path():
     today = datetime.now().strftime("%Y-%m-%d")
     return os.path.join(orders_dir, f"{today}.xlsx")
 
-# --- Вставка изображения в Excel ---
-def insert_image_in_excel(file_path, image_base64, row_index):
-    wb = load_workbook(file_path)
-    ws = wb.active
-
-    try:
-        img_data = base64.b64decode(image_base64.split(",")[1])
-        img = XLImage(BytesIO(img_data))
-        ws.row_dimensions[row_index].height = 60
-        ws.column_dimensions['A'].width = 20
-        ws.add_image(img, f"A{row_index}")
-    except Exception as e:
-        log_event("excel_image_insert_failed", "system", str(e))
-
-    wb.save(file_path)
-    log_event("excel_image_inserted", "system", f"Фото добавлено в строку {row_index}")
-
-# --- Сохранение в Excel с изображением ---
-def save_to_excel(order_id, items, full_name, telegram_username, country, status, requisites, comment):
+# --- Сохранение в Excel ---
+def save_to_excel(item_data):
     daily_excel_path = get_daily_excel_path()
-
     try:
         df_existing = pd.read_excel(daily_excel_path)
     except Exception:
-        df_existing = pd.DataFrame(columns=[
-            'Номер заказа', 'Фото', 'ID / Ссылка', 'Цвет', 'Размер',
-            'Цена за единицу', 'Кол-во/шт', 'tg контакт',
-            'Страна выкупа', 'статус', 'реквизиты', 'комментарий'
-        ])
-
-    rows = []
-    for idx, item in enumerate(items):
-        rows.append({
-            'Номер заказа': order_id,
-            'Фото': item[1],  # base64 строка
-            'ID / Ссылка': item[2],
-            'Цвет': item[3],
-            'Размер': item[4],
-            'Цена за единицу': round(item[5], 2),
-            'Кол-во/шт': item[6],
-            'tg контакт': telegram_username,
-            'Страна выкупа': country.upper(),
-            'статус': status,
-            'реквизиты': requisites,
-            'комментарий': comment
-        })
-
-    df_new = pd.DataFrame(rows)
+        df_existing = pd.DataFrame(columns=item_data.keys())
+    df_new = pd.DataFrame([item_data])
     df_combined = pd.concat([df_existing, df_new], ignore_index=True)
     df_combined.to_excel(daily_excel_path, index=False)
-
-    # Добавляем фото как изображения
-    wb = load_workbook(daily_excel_path)
-    ws = wb.active
-    start_row = ws.max_row + 1
-    for idx, item in enumerate(items):
-        if item[1] and item[1].startswith("data:image"):
-            insert_image_in_excel(daily_excel_path, item[1], start_row + idx)
-
-    wb.save(daily_excel_path)
     log_event("excel_saved", "system", f"Данные записаны в {daily_excel_path}")
+
+# --- Проверка регистрации ---
+def is_registered(user_id):
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute("SELECT telegram_id FROM users WHERE telegram_id = ?", (user_id,))
+    result = cursor.fetchone()
+    conn.close()
+    return bool(result)
 
 # --- Обработчик web_app_data ---
 @bot.message_handler(content_types=['web_app_data'])
@@ -218,20 +194,22 @@ def handle_web_app_data(message):
     try:
         data = json.loads(message.web_app_data.data)
         user_id = message.from_user.id
-        log_event("form_received", user_id, f"Получены данные: {data}")
+        log_event("form_received", user_id, f"Получены данные от Web App: {data}")
 
         if not is_registered(user_id):
             bot.send_message(message.chat.id, "⚠️ Вы не зарегистрированы. Нажмите /start.")
             return
 
-        if data.get('command') == 'create_order':
-            full_name = data.get('full_name')
-            telegram_username = data.get('telegram_username')
-            country = data.get('country')
-            items = data.get('items', [])
+        command = data.get("command")
+
+        if command == "create_order":
+            full_name = data.get("full_name")
+            telegram_username = data.get("telegram_username")
+            country = data.get("country")
+            items = data.get("items", [])
 
             if not all([full_name, telegram_username, country, len(items) > 0]):
-                bot.send_message(message.chat.id, "⚠️ Не все поля формы заполнены.")
+                bot.send_message(message.chat.id, "⚠️ Не все обязательные поля заполнены.")
                 return
 
             order_id = create_order(user_id, full_name, telegram_username, country)
@@ -260,42 +238,74 @@ def handle_web_app_data(message):
                     'комментарий': comment
                 }
 
-                save_to_excel(order_id, [item], full_name, telegram_username, country, "На модерации", "", "")
-            
+                save_to_excel(excel_data)
+
             # Уведомление менеджерам
             for manager_id in MANAGER_IDS:
                 try:
-                    bot.send_message(manager_id, f"🔔 Новый заказ #{order_id} от @{telegram_username}\nЖдёт подтверждения.", reply_markup=types.InlineKeyboardMarkup().add(
-                        types.InlineKeyboardButton("Перейти в панель", callback_data="view_all_orders")
-                    ))
+                    markup = types.InlineKeyboardMarkup()
+                    btn_view = types.InlineKeyboardButton("📦 Посмотреть заказы", callback_data="view_all_orders")
+                    markup.add(btn_view)
+                    bot.send_message(manager_id, f"🔔 Новый заказ #{order_id} от @{telegram_username}", reply_markup=markup)
                     log_event("manager_notify", user_id, f"Менеджеру {manager_id} отправлено уведомление")
                 except Exception as e:
                     log_event("manager_notify_error", user_id, str(e))
 
-            bot.send_message(message.chat.id, f"✅ Ваш заказ #{order_id} создан!\nОжидайте подтверждения менеджера.")
+            bot.send_message(message.chat.id, f"✅ Ваш заказ #{order_id} создан!")
 
-        elif data.get('command') == 'update_order_status':
-            order_id = data.get('order_id')
-            new_status = data.get('status')
-            requisites = data.get('requisites', '')
-            manager_comment = data.get('manager_comment', '')
-            if order_id and new_status:
-                update_order_status(order_id, new_status, requisites, manager_comment)
-                bot.send_message(message.chat.id, f"🔄 Статус заказа #{order_id} изменён на '{new_status}'")
+        elif command == "update_order_status":
+            order_id = data.get("order_id")
+            new_status = data.get("status")
+            if not all([order_id, new_status]):
+                bot.send_message(message.chat.id, "❌ Ошибка: недостающие параметры команды")
+                return
+
+            response = update_order_status(order_id, new_status)
+            bot.send_message(message.chat.id, f"🔄 Статус заказа #{order_id} изменён на '{new_status}'")
+            for manager_id in MANAGER_IDS:
+                try:
+                    bot.send_message(manager_id, f"🔄 Статус заказа #{order_id} изменён на '{new_status}'")
+                except Exception as e:
+                    log_event("manager_notify_error", user_id, str(e))
+
+        elif command == "get_user_orders":
+            user_id = data.get("user_id")
+            if not user_id:
+                bot.send_message(message.chat.id, "❌ Ошибка: не указан user_id")
+                return
+
+            orders = []
+            conn = sqlite3.connect(db_path)
+            cursor = conn.cursor()
+            cursor.execute("SELECT id, status FROM orders WHERE user_id = ?", (user_id,))
+            rows = cursor.fetchall()
+            for row in rows:
+                orders.append({"id": row[0], "status": row[1]})
+            conn.close()
+
+            bot.send_message(message.chat.id, json.dumps({"command": "return_orders", "orders": orders}))
+            log_event("return_orders", user_id, f"Отправлено {len(orders)} заказов")
+
+        elif command == "get_all_orders":
+            orders = []
+            conn = sqlite3.connect(db_path)
+            cursor = conn.cursor()
+            cursor.execute("SELECT id, status, country FROM orders")
+            rows = cursor.fetchall()
+            for row in rows:
+                orders.append({"id": row[0], "status": row[1], "country": row[2]})
+            conn.close()
+            bot.send_message(message.chat.id, json.dumps({"command": "all_orders", "orders": orders}))
+            log_event("all_orders", user_id, f"Отправлено {len(orders)} заказов всем менеджерам")
+
+        else:
+            bot.send_message(message.chat.id, "❓ Неизвестная команда от WebApp")
+            log_event("unknown_command", user_id, data.get("command"))
 
     except Exception as e:
         error_msg = str(e).replace("\n", "\\n")
         log_event("error", user_id, error_msg)
         bot.send_message(message.chat.id, f"❌ Ошибка при обработке данных: {error_msg}")
-
-# --- Проверка регистрации ---
-def is_registered(user_id):
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
-    cursor.execute("SELECT telegram_id FROM users WHERE telegram_id = ?", (user_id,))
-    result = cursor.fetchone()
-    conn.close()
-    return bool(result)
 
 # --- Команда /start ---
 @bot.message_handler(commands=['start'])
@@ -324,6 +334,23 @@ def open_webapp(message):
     markup.add(btn_open)
     bot.send_message(message.chat.id, "🌐 Откройте WebApp:", reply_markup=markup)
 
+# --- Менеджерская панель ---
+@bot.callback_query_handler(func=lambda call: call.data == "view_all_orders")
+def view_all_orders(call):
+    if call.from_user.id in MANAGER_IDS:
+        all_orders = get_all_orders()
+        response = "📦 Все заказы:\n"
+        if all_orders:
+            for order in all_orders:
+                response += f"• Заказ #{order['id']} | Статус: {order['status']}\n"
+        else:
+            response += "Нет активных заказов."
+        bot.edit_message_text(chat_id=call.message.chat.id,
+                              message_id=call.message.message_id,
+                              text=response)
+    else:
+        bot.answer_callback_query(call.id, "❌ Нет доступа к панели.")
+
 # --- Является ли пользователь менеджером ---
 def is_manager(user_id):
     conn = sqlite3.connect(db_path)
@@ -333,67 +360,18 @@ def is_manager(user_id):
     conn.close()
     return bool(result[0]) if result else False
 
-# --- Получение всех заказов ---
-def get_all_orders():
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
-    cursor.execute("SELECT id, status, country FROM orders")
-    result = cursor.fetchall()
-    conn.close()
-    return result
+# --- Функция для base64 файла ---
+def fileToBase64(file_path):
+    with open(file_path, "rb") as f:
+        encoded_string = base64.b64encode(f.read()).decode()
+    return encoded_string
 
-# --- Менеджерская панель ---
-@bot.message_handler(func=lambda m: m.text == "🔒 Панель менеджера")
-def manager_panel(message):
-    if message.from_user.id in MANAGER_IDS:
-        all_orders = get_all_orders()
-        response = "📦 Все заказы:\n" + ("\n".join([
-            f"• Заказ #{o[0]} | Статус: {o[4]} | Страна: {o[3]}"
-            for o in all_orders
-        ]) if all_orders else "Нет активных заказов.")
-        bot.send_message(message.chat.id, response)
-
-        if all_orders:
-            markup = types.InlineKeyboardMarkup(row_width=1)
-            for order in all_orders:
-                markup.add(types.InlineKeyboardButton(f"Изменить статус #{order[0]}", callback_data=f"edit_status_{order[0]}"))
-            bot.send_message(message.chat.id, "Выберите заказ для редактирования:", reply_markup=markup)
-    else:
-        bot.send_message(message.chat.id, "❌ Нет доступа к панели.")
-
-# --- Callback handler ---
-@bot.callback_query_handler(func=lambda call: True)
-def handle_callback(call):
-    if call.data.startswith("edit_status_"):
-        order_id = int(call.data.split("_")[2])
-        statuses = ["На модерации", "В работе", "Готов к оплате", "Оплачен", "Отправлен", "Завершён"]
-        markup = types.InlineKeyboardMarkup(row_width=1)
-        for status in statuses:
-            markup.add(types.InlineKeyboardButton(status, callback_data=f"set_status_{order_id}_{status}"))
-        bot.send_message(call.message.chat.id, f"Выберите новый статус для заказа #{order_id}:", reply_markup=markup)
-
-    elif call.data.startswith("set_status_"):
-        _, _, order_id, new_status = call.data.split("_", 3)
-        order_id = int(order_id)
-        update_order_status(order_id, new_status)
-        bot.send_message(call.message.chat.id, f"🔄 Статус заказа #{order_id} изменён на '{new_status}'")
-
-# --- Обновление статуса заказа ---
-def update_order_status(order_id, new_status, requisites='', comment=''):
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
-    cursor.execute("UPDATE orders SET status=?, requisites=?, manager_comment=? WHERE id=?", 
-                   (new_status, requisites, comment, order_id))
-    conn.commit()
-    conn.close()
-    log_event("status_updated", "system", f"Заказ #{order_id} → {new_status}")
-
-# --- Обработчик обычных сообщений ---
-@bot.message_handler(func=lambda message: True)
-def any_message_handler(message):
+# --- Обработчик кнопок ---
+@bot.message_handler(func=lambda m: True)
+def handle_default(message):
     send_options(message)
 
-# --- Запуск бота ---
+# --- Инициализация бота ---
 if __name__ == "__main__":
     print("🟢 Бот запущен...")
     bot.polling(none_stop=True)
