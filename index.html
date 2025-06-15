@@ -16,6 +16,7 @@
             --white: #FFFFFF;
             --font-family: 'Montserrat', sans-serif;
             --error-color: #ff4d4d;
+            --error-bg: #330f0f;
         }
 
         body {
@@ -153,7 +154,7 @@
 
         label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 4px;
             font-weight: 600;
             color: var(--white);
         }
@@ -166,7 +167,7 @@
             border: none;
             border-radius: 8px;
             font-size: 1rem;
-            margin-bottom: 16px;
+            margin-bottom: 8px;
             font-family: var(--font-family);
         }
 
@@ -263,10 +264,33 @@
         /* Подсветка ошибок */
         .invalid {
             border: 2px solid var(--error-color);
+            background-color: var(--error-bg);
         }
 
-        .invalid-label {
+        .error-message {
             color: var(--error-color);
+            font-size: 0.9rem;
+            margin-top: -4px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .error-message.hidden {
+            display: none;
+        }
+
+        .photo-preview img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            margin: 5px;
+        }
+
+        /* Для больших экранов */
+        @media (min-width: 768px) {
+            .sidebar {
+                display: none;
+            }
         }
     </style>
 </head>
@@ -347,9 +371,13 @@
                 <div id="items-container"></div>
                 <button class="button-primary" onclick="addItem()" style="margin-bottom: 15px;">➕ Добавить товар</button><br>
                 <label for="full-name">ФИО:</label>
-                <input type="text" id="full-name" required/><br><br>
+                <input type="text" id="full-name" required/><br>
+                <span class="error-message" id="full-name-error" style="display: none;">Пожалуйста, введите ваше ФИО</span>
+
                 <label for="telegram-username">Telegram username:</label>
-                <input type="text" id="telegram-username" required/><br><br>
+                <input type="text" id="telegram-username" required/><br>
+                <span class="error-message" id="telegram-username-error" style="display: none;">Пожалуйста, укажите Telegram username</span>
+
                 <button class="button-primary" onclick="submitOrder()">✅ Создать заказ</button>
             </div>
         </div>
@@ -474,14 +502,15 @@
     // Обработка клика вне меню
     document.addEventListener("click", function(event) {
         const sidebar = document.getElementById("sidebar");
-        const rect = sidebar?.getBoundingClientRect();
-        const clickX = event.clientX;
+        if (!sidebar) return;
 
-        if (rect && clickX >= rect.right) {
+        const rect = sidebar.getBoundingClientRect();
+        if (sidebar.classList.contains("active") && event.clientX > rect.right) {
             closeMenu();
         }
     });
 
+    // Логика формы
     let itemIndex = 0;
 
     function handleCountryChange() {
@@ -522,21 +551,30 @@
         newItem.innerHTML = `
             <hr>
             <h4>Товар #${itemIndex}</h4>
-            <label for="item-photo-${itemIndex}">Загрузите фото:</label>
-            <input type="file" id="item-photo-${itemIndex}" class="item-photo" accept="image/*" multiple onchange="previewPhotos(this)">
-            <div class="photo-preview" style="display:flex;flex-wrap:wrap;gap:10px;" id="preview-${itemIndex}"></div>
+            <label>Загрузите фото:</label>
+            <input type="file" class="item-photo" accept="image/*" multiple onchange="previewPhotos(this)">
+            <div class="photo-preview" style="display:flex;flex-wrap:wrap;gap:10px;"></div>
             <label for="item-link-${itemIndex}">Ссылка / ID:</label>
-            <input type="text" id="item-link-${itemIndex}" placeholder="https://taobao.com/item123  "><br><br>
+            <input type="text" id="item-link-${itemIndex}" placeholder="https://taobao.com/item123  "><br>
+            <span class="error-message" id="item-link-${itemIndex}-error" style="display: none;">Укажите ссылку или ID товара</span>
+
             <label for="item-price-${itemIndex}">Цена (CNY):</label>
-            <input type="number" id="item-price-${itemIndex}" step="any" placeholder="¥ 800"><br><br>
+            <input type="number" id="item-price-${itemIndex}" step="any" placeholder="¥ 800"><br>
+            <span class="error-message" id="item-price-${itemIndex}-error" style="display: none;">Укажите цену</span>
+
             <label for="item-color-${itemIndex}">Цвет:</label>
-            <input type="text" id="item-color-${itemIndex}" placeholder="Черный / White"><br><br>
+            <input type="text" id="item-color-${itemIndex}" placeholder="Черный / White"><br>
+
             <label for="item-size-${itemIndex}">Размер:</label>
-            <input type="text" id="item-size-${itemIndex}" placeholder="M / 42 / EU40"><br><br>
+            <input type="text" id="item-size-${itemIndex}" placeholder="M / 42 / EU40"><br>
+
             <label for="item-quantity-${itemIndex}">Количество:</label>
-            <input type="number" id="item-quantity-${itemIndex}" min="1" value="1"><br><br>
+            <input type="number" id="item-quantity-${itemIndex}" min="1" value="1"><br>
+            <span class="error-message" id="item-quantity-${itemIndex}-error" style="display: none;">Количество должно быть больше 0</span>
+
             <label for="item-comment-${itemIndex}">Комментарий:</label>
             <input type="text" id="item-comment-${itemIndex}" placeholder="Батч A1 | Упаковать аккуратно"><br><br>
+
             <button class="button-primary" onclick="removeItem(this)">🗑 Удалить товар</button>
         `;
         itemsContainer.appendChild(newItem);
@@ -555,21 +593,30 @@
         newItem.innerHTML = `
             <hr>
             <h4>Товар #${itemIndex}</h4>
-            <label for="item-photo-${itemIndex}">Загрузите фото:</label>
-            <input type="file" id="item-photo-${itemIndex}" class="item-photo" accept="image/*" multiple onchange="previewPhotos(this)">
-            <div class="photo-preview" style="display:flex;flex-wrap:wrap;gap:10px;" id="preview-${itemIndex}"></div>
+            <label>Загрузите фото:</label>
+            <input type="file" class="item-photo" accept="image/*" multiple onchange="previewPhotos(this)">
+            <div class="photo-preview" style="display:flex;flex-wrap:wrap;gap:10px;"></div>
             <label for="item-link-${itemIndex}">Ссылка на товар:</label>
-            <input type="text" id="item-link-${itemIndex}" placeholder="https://yame.co.jp/item123  "><br><br>
+            <input type="text" id="item-link-${itemIndex}" placeholder="https://yame.co.jp/item123  "><br>
+            <span class="error-message" id="item-link-${itemIndex}-error" style="display: none;">Укажите ссылку на товар</span>
+
             <label for="item-price-${itemIndex}">Цена (JPY):</label>
-            <input type="number" id="item-price-${itemIndex}" step="any" placeholder="¥ 2000"><br><br>
+            <input type="number" id="item-price-${itemIndex}" step="any" placeholder="¥ 2000"><br>
+            <span class="error-message" id="item-price-${itemIndex}-error" style="display: none;">Укажите корректную цену</span>
+
             <label for="item-color-${itemIndex}">Цвет:</label>
-            <input type="text" id="item-color-${itemIndex}" placeholder="Черный / Noir"><br><br>
+            <input type="text" id="item-color-${itemIndex}" placeholder="Черный / Noir"><br>
+
             <label for="item-size-${itemIndex}">Размер:</label>
-            <input type="text" id="item-size-${itemIndex}" placeholder="M / 42 / EU40"><br><br>
+            <input type="text" id="item-size-${itemIndex}" placeholder="M / 42 / EU40"><br>
+
             <label for="item-quantity-${itemIndex}">Количество:</label>
-            <input type="number" id="item-quantity-${itemIndex}" min="1" value="1"><br><br>
+            <input type="number" id="item-quantity-${itemIndex}" min="1" value="1"><br>
+            <span class="error-message" id="item-quantity-${itemIndex}-error" style="display: none;">Количество должно быть больше 0</span>
+
             <label for="item-comment-${itemIndex}">Комментарий:</label>
             <input type="text" id="item-comment-${itemIndex}" placeholder="Батч, особые условия..."><br><br>
+
             <button class="button-primary" onclick="removeItem(this)">🗑 Удалить товар</button>
         `;
         itemsContainer.appendChild(newItem);
@@ -589,11 +636,11 @@
             row.querySelector("h4").textContent = `Товар #${idx + 1}`;
         });
         itemIndex = items.length;
-        log(`🟨 Индексы обновлены`);
+        log(`🟨 Индексы товаров обновлены`);
     }
 
     function previewPhotos(input) {
-        const preview = document.getElementById("preview-" + input.id.replace("item-photo-", ""));
+        const preview = input.nextElementSibling;
         preview.innerHTML = "";
         Array.from(input.files).slice(0, 5).forEach(file => {
             const reader = new FileReader();
@@ -625,8 +672,39 @@
             const country = document.getElementById("country").value;
             const itemsContainer = document.getElementById("items-container");
 
+            const fullNameError = document.getElementById("full-name-error");
+            const telegramUsernameError = document.getElementById("telegram-username-error");
+
+            // Проверка основных данных
+            let hasError = false;
+
+            if (!full_name) {
+                highlightField("full-name", true);
+                fullNameError.textContent = "⚠️ Пожалуйста, введите ваше ФИО";
+                fullNameError.style.display = "block";
+                hasError = true;
+            } else {
+                highlightField("full-name", false);
+                fullNameError.style.display = "none";
+            }
+
+            if (!telegram_username) {
+                highlightField("telegram-username", true);
+                telegramUsernameError.textContent = "⚠️ Укажите Telegram username";
+                telegramUsernameError.style.display = "block";
+                hasError = true;
+            } else {
+                highlightField("telegram-username", false);
+                telegramUsernameError.style.display = "none";
+            }
+
+            if (!country) {
+                alert("⚠️ Выберите страну");
+                return;
+            }
+
             const items = await Promise.all(Array.from(itemsContainer.children).map(async (itemRow, idx) => {
-                const photoInput = itemRow.querySelector(`#item-photo-${idx + 1}`);
+                const photoInput = itemRow.querySelector(".item-photo");
                 const linkOrIdInput = itemRow.querySelector(`#item-link-${idx + 1}`);
                 const priceInput = itemRow.querySelector(`#item-price-${idx + 1}`);
                 const colorInput = itemRow.querySelector(`#item-color-${idx + 1}`);
@@ -642,54 +720,49 @@
                     }
                 }
 
+                const link_or_id = linkOrIdInput?.value || "";
+                const price = parseFloat(priceInput?.value || 0);
+                const quantity = parseInt(quantityInput?.value || 1);
+
+                const isValid = Boolean(link_or_id && price > 0 && quantity > 0);
+
+                if (!isValid) {
+                    highlightField(`item-link-${idx + 1}`, !link_or_id);
+                    highlightField(`item-price-${idx + 1}`, !(price > 0));
+                    highlightField(`item-quantity-${idx + 1}`, !(quantity > 0));
+
+                    if (!link_or_id) {
+                        document.getElementById(`item-link-${idx + 1}-error`).textContent = "⚠️ Укажите ссылку или ID";
+                        document.getElementById(`item-link-${idx + 1}-error`).style.display = "block";
+                    }
+
+                    if (!(price > 0)) {
+                        document.getElementById(`item-price-${idx + 1}-error`).textContent = "⚠️ Цена должна быть больше 0";
+                        document.getElementById(`item-price-${idx + 1}-error`).style.display = "block";
+                    }
+
+                    if (!(quantity > 0)) {
+                        document.getElementById(`item-quantity-${idx + 1}-error`).textContent = "⚠️ Кол-во должно быть больше 0";
+                        document.getElementById(`item-quantity-${idx + 1}-error`).style.display = "block";
+                    }
+
+                    hasError = true;
+                }
+
                 return {
                     photos: photos,
-                    link_or_id: linkOrIdInput?.value.trim(),
-                    price: parseFloat(priceInput?.value),
-                    color: colorInput?.value.trim(),
-                    size: sizeInput?.value.trim(),
-                    quantity: parseInt(quantityInput?.value),
-                    comment: commentInput?.value.trim()
+                    link_or_id: link_or_id,
+                    price: price,
+                    color: colorInput?.value || "",
+                    size: sizeInput?.value || "",
+                    quantity: quantity,
+                    comment: commentInput?.value || ""
                 };
             }));
 
-            const validItems = items.filter(item => {
-                let hasError = false;
-                if (!item.link_or_id) {
-                    highlightField(`item-link-${idx + 1}`, true);
-                    hasError = true;
-                } else {
-                    highlightField(`item-link-${idx + 1}`, false);
-                }
-
-                if (!item.price || isNaN(item.price)) {
-                    highlightField(`item-price-${idx + 1}`, true);
-                    hasError = true;
-                } else {
-                    highlightField(`item-price-${idx + 1}`, false);
-                }
-
-                if (!item.quantity || item.quantity <= 0 || isNaN(item.quantity)) {
-                    highlightField(`item-quantity-${idx + 1}`, true);
-                    hasError = true;
-                } else {
-                    highlightField(`item-quantity-${idx + 1}`, false);
-                }
-
-                return !hasError;
-            });
-
-            if (!full_name || !telegram_username || !country || validItems.length === 0) {
-                if (!full_name) highlightField("full-name", true);
-                if (!telegram_username) highlightField("telegram-username", true);
-                if (!country) {
-                    alert("Выберите страну");
-                    return;
-                }
-                if (validItems.length === 0) {
-                    alert("Заполните все поля товаров");
-                    return;
-                }
+            if (!full_name || !telegram_username || !country || items.length === 0 || hasError) {
+                alert("⚠️ Исправьте поля перед отправкой");
+                return;
             }
 
             const requestData = {
@@ -697,7 +770,7 @@
                 full_name: full_name,
                 telegram_username: telegram_username,
                 country: country,
-                items: validItems
+                items: items
             };
 
             console.log("🟦 Сформирован объект:", JSON.stringify(requestData, null, 2));
@@ -711,11 +784,8 @@
 
     function highlightField(id, isError) {
         const input = document.getElementById(id);
-        const label = input.previousElementSibling;
+        if (!input) return;
         input.classList.toggle("invalid", isError);
-        if (label && label.tagName === "LABEL") {
-            label.classList.toggle("invalid-label", isError);
-        }
     }
 
     function showPreview(data) {
@@ -751,7 +821,7 @@
         const itemsContainer = document.getElementById("items-container");
 
         const items = Array.from(itemsContainer.children).map((itemRow, idx) => {
-            const photoInput = itemRow.querySelector(`#item-photo-${idx + 1}`);
+            const photoInput = itemRow.querySelector(".item-photo");
             const linkOrIdInput = itemRow.querySelector(`#item-link-${idx + 1}`);
             const priceInput = itemRow.querySelector(`#item-price-${idx + 1}`);
             const colorInput = itemRow.querySelector(`#item-color-${idx + 1}`);
@@ -759,51 +829,32 @@
             const quantityInput = itemRow.querySelector(`#item-quantity-${idx + 1}`);
             const commentInput = itemRow.querySelector(`#item-comment-${idx + 1}`);
 
+            const link_or_id = linkOrIdInput?.value || "";
+            const price = parseFloat(priceInput?.value || 0);
+            const quantity = parseInt(quantityInput?.value || 1);
+            const color = colorInput?.value || "";
+            const size = sizeInput?.value || "";
+            const comment = commentInput?.value || "";
+
             return {
                 photos: [...Array.from(photoInput?.files || [])].map(f => f.name),
-                link_or_id: linkOrIdInput?.value.trim() || "",
-                price: parseFloat(priceInput?.value),
-                color: colorInput?.value.trim() || "",
-                size: sizeInput?.value.trim() || "",
-                quantity: parseInt(quantityInput?.value),
-                comment: commentInput?.value.trim() || ""
+                link_or_id: link_or_id,
+                price: price,
+                color: color,
+                size: size,
+                quantity: quantity,
+                comment: comment
             };
         });
 
-        const invalidFields = [];
+        const validItems = items.filter(item => item.link_or_id && item.price > 0 && item.quantity > 0);
 
-        const validItems = items.map(item => {
-            let hasError = false;
-
-            if (!item.link_or_id) {
-                highlightField(`item-link-${idx + 1}`, true);
-                hasError = true;
-            }
-
-            if (!item.price || isNaN(item.price)) {
-                highlightField(`item-price-${idx + 1}`, true);
-                hasError = true;
-            }
-
-            if (!item.quantity || item.quantity <= 0 || isNaN(item.quantity)) {
-                highlightField(`item-quantity-${idx + 1}`, true);
-                hasError = true;
-            }
-
-            return !hasError ? item : null;
-        }).filter(Boolean);
-
-        if (!full_name || !telegram_username || !country || validItems.length === 0) {
+        if (!full_name || !telegram_username || validItems.length === 0) {
             if (!full_name) highlightField("full-name", true);
             if (!telegram_username) highlightField("telegram-username", true);
-            if (validItems.length === 0) alert("⚠️ Не все поля товаров заполнены.");
-
-            alert("⚠️ Исправьте ошибки перед отправкой");
+            if (validItems.length === 0) alert("⚠️ Не все поля товаров заполнены верно");
             return;
         }
-
-        highlightField("full-name", false);
-        highlightField("telegram-username", false);
 
         const requestData = {
             command: "create_order",
@@ -908,80 +959,6 @@
         document.getElementById("calc-marketplace-section").style.display = calcCountry === "china" ? "block" : "none";
     }
 
-    // --- Инициализация Telegram WebApp ---
-    tg.ready();
-
-    // --- Обработчик данных от бота ---
-    window.Telegram.WebApp.onEvent("web_app_data_sent", function(event) {
-        try {
-            const data = JSON.parse(event.data);
-            if (data.command === "return_orders") {
-                showOrdersFromBot(data.orders);
-            } else if (data.command === "all_orders") {
-                showAllOrdersFromBot(data.orders);
-            } else if (data.command === "order_updated") {
-                alert(`🔄 Статус изменён: ${data.status}`);
-            }
-        } catch (e) {
-            log(`🟥 Ошибка разбора данных: ${e.message}`);
-        }
-    });
-
-    function showOrdersFromBot(orders) {
-        updateMyOrders(orders);
-        log("🟦 Заказы загружены из бота");
-    }
-
-    function showAllOrdersFromBot(orders) {
-        renderManagerOrders(orders);
-        log("🟦 Все заказы от бота");
-    }
-
-    function updateMyOrders(orders) {
-        const container = document.getElementById("user-orders-container");
-        container.innerHTML = "";
-        orders.forEach(order => {
-            const tr = document.createElement("tr");
-            tr.innerHTML = `<td>#${order.id}</td><td>${order.status}</td>`;
-            container.appendChild(tr);
-        });
-        log(`🟦 "Мои заказы" обновлены`);
-    }
-
-    function renderManagerOrders(orders) {
-        const container = document.getElementById("manager-orders-container");
-        container.innerHTML = "";
-        orders.forEach(order => {
-            const tr = document.createElement("tr");
-            tr.innerHTML = `
-                <td>#${order.id}</td>
-                <td>${order.status}</td>
-                <td>
-                    <select onchange="changeStatus(${order.id}, this.value)">
-                        <option value="На модерации" ${order.status === "На модерации" ? "selected" : ""}>На модерации</option>
-                        <option value="В работе" ${order.status === "В работе" ? "selected" : ""}>В работе</option>
-                        <option value="Готов к оплате" ${order.status === "Готов к оплате" ? "selected" : ""}>Готов к оплате</option>
-                        <option value="Оплачен" ${order.status === "Оплачен" ? "selected" : ""}>Оплачен</option>
-                        <option value="Отправлен" ${order.status === "Отправлен" ? "selected" : ""}>Отправлен</option>
-                        <option value="Завершён" ${order.status === "Завершён" ? "selected" : ""}>Завершён</option>
-                        <option value="Отменён" ${order.status === "Отменён" ? "selected" : ""}>Отменён</option>
-                    </select>
-                </td>
-            `;
-            container.appendChild(tr);
-        });
-        log("🟦 Отрендерены заказы для менеджера");
-    }
-
-    function changeStatus(orderId, newStatus) {
-        tg.sendData(JSON.stringify({
-            command: "update_order_status",
-            order_id: orderId,
-            status: newStatus
-        }));
-        log(`🟦 Изменён статус заказа #${orderId} на "${newStatus}"`);
-    }
-
     function navigateTo(sectionId) {
         if (sectionId === "my-orders") {
             fetchOrders();  // Запрашиваем данные у бота
@@ -999,34 +976,45 @@
         log(`🟩 Открыта секция "${sectionId}"`);
     }
 
-    function fetchOrders() {
-        tg.sendData(JSON.stringify({ command: "get_user_orders", user_id: userId }));
-        log("🟩 Запрошены мои заказы");
+    function closeMenu() {
+        const sidebar = document.getElementById("sidebar");
+        const burger = document.getElementById("burger");
+        const mainContent = document.getElementById("mainContent");
+
+        if (sidebar && burger && mainContent) {
+            sidebar.classList.remove("active");
+            burger.classList.remove("active");
+            mainContent.classList.remove("dimmed");
+            log("🟥 Бургер-меню закрыто");
+        }
     }
 
-    function fetchAllOrders() {
-        tg.sendData(JSON.stringify({ command: "get_all_orders" }));
-        log("🟩 Запрошены все заказы");
-    }
+    // --- Инициализация Telegram WebApp ---
+    tg.ready();
 
-    function updateMyOrders(orders) {
-        const container = document.getElementById("user-orders-container");
-        container.innerHTML = "";
-        orders.forEach(order => {
-            const tr = document.createElement("tr");
-            tr.innerHTML = `<td>#${order.id}</td><td>${order.status}</td>`;
-            container.appendChild(tr);
-        });
-        log(`🟦 "Мои заказы" обновлены`);
-    }
+    // --- Обработчик данных от бота ---
+    window.Telegram.WebApp.onEvent("web_app_data_sent", function(event) {
+        try {
+            const data = JSON.parse(event.data);
+            if (data.command === "return_orders") {
+                showOrdersFromBot(data.orders);
+            } else if (data.command === "all_orders") {
+                renderManagerOrders(data.orders);
+            } else if (data.command === "order_updated") {
+                alert(`🔄 Статус изменён: ${data.status}`);
+            }
+        } catch (e) {
+            log(`🟥 Ошибка разбора данных: ${e.message}`);
+        }
+    });
 
-    function showOrdersFromBot(data) {
-        updateMyOrders(data.orders);
+    function showOrdersFromBot(orders) {
+        updateMyOrders(orders);
         log("🟦 Заказы загружены из бота");
     }
 
-    function showAllOrdersFromBot(data) {
-        renderManagerOrders(data.orders);
+    function showAllOrdersFromBot(orders) {
+        renderManagerOrders(orders);
         log("🟦 Все заказы от бота");
     }
 </script>
