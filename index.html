@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>VOLT Logistics</title>
 
-    <!-- Telegram SDK -->
+    <!-- Telegram WebApp SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script> 
 
     <style>
@@ -192,13 +192,6 @@
             color: var(--white);
         }
 
-        .footer {
-            margin-top: 40px;
-            text-align: center;
-            font-size: 0.9rem;
-            color: #555;
-        }
-
         .photo-preview img {
             width: 60px;
             height: 60px;
@@ -247,7 +240,6 @@
             max-width: 500px;
             width: 90%;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-            position: relative;
         }
 
         .modal-buttons {
@@ -420,6 +412,7 @@
         document.getElementById("manager-button").style.display = "block";
     }
 
+    // Логирование действий
     function log(msg) {
         const logs = document.getElementById("logs");
         const timestamp = new Date().toLocaleTimeString();
@@ -427,6 +420,7 @@
         logs.scrollTop = logs.scrollHeight;
     }
 
+    // Переключение между разделами
     function toggleSection(sectionId) {
         document.querySelectorAll('.section').forEach(sec => sec.classList.remove("active"));
         const section = document.getElementById(sectionId);
@@ -470,16 +464,19 @@
     }
 
     // Обработка клика вне меню
-    document.addEventListener("click", function(event) {
+    document.addEventListener("click", function(e) {
         const sidebar = document.getElementById("sidebar");
         if (!sidebar) return;
 
         const rect = sidebar.getBoundingClientRect();
-        if (sidebar.classList.contains("active") && event.clientX > rect.right) {
+        const clickX = e.clientX;
+
+        if (sidebar.classList.contains("active") && clickX > rect.right) {
             closeMenu();
         }
     });
 
+    // Логика формы
     let itemIndex = 0;
 
     function handleCountryChange() {
@@ -490,7 +487,6 @@
 
         itemsContainer.innerHTML = "";
         itemIndex = 0;
-
         const country = countrySelect.value;
 
         if (country === "china") {
@@ -599,7 +595,6 @@
                 const img = document.createElement("img");
                 img.src = e.target.result;
                 img.style.width = "60px";
-                img.style.height = "60px";
                 preview.appendChild(img);
             };
             reader.readAsDataURL(file);
@@ -652,7 +647,7 @@
             }));
 
             if (!full_name || !telegram_username || !country || items.length === 0) {
-                alert("⚠️ Не все поля заполнены.");
+                alert("⚠️ Не все обязательные поля заполнены.");
                 return;
             }
 
@@ -665,7 +660,6 @@
             };
 
             showPreview(requestData);
-
         } catch (error) {
             log(`🟥 Ошибка в JS: ${error.message}`);
             alert("❌ Произошла ошибка. Посмотрите консоль.");
@@ -684,9 +678,13 @@
                 img.style.width = "60px";
                 img.style.height = "60px";
                 img.style.margin = "5px";
-                itemDiv.appendChild(img);
+                preview.appendChild(img);
             });
-            itemDiv.innerHTML += `<br>Ссылка: ${item.link_or_id}<br>Цена: ${item.price}, Кол-во: ${item.quantity}<br>Цвет: ${item.color}, Размер: ${item.size}<br>Комментарий: ${item.comment}<br><hr>`;
+            itemDiv.innerHTML += `
+                <br>Ссылка: ${item.link_or_id}<br>
+                Цена: ${item.price}, Кол-во: ${item.quantity}<br>
+                Цвет: ${item.color}, Размер: ${item.size}<br>
+                Комментарий: ${item.comment}<br><hr>`;
             preview.appendChild(itemDiv);
         });
         modal.style.display = "flex";
@@ -786,7 +784,7 @@
             `;
             container.appendChild(tr);
         });
-        log(`🟦 Отрендерены заказы для менеджера`);
+        log("🟦 Отрендерены заказы для менеджера");
     }
 
     function changeStatus(orderId, newStatus) {
@@ -831,58 +829,13 @@
         document.getElementById("calc-marketplace-section").style.display = calcCountry === "china" ? "block" : "none";
     }
 
-    // --- Инициализация Telegram WebApp ---
-    tg.ready();
-
-    // --- Обработчик данных от бота ---
-    window.Telegram.WebApp.onEvent("web_app_data_sent", function(event) {
-        try {
-            const data = JSON.parse(event.data);
-            if (data.command === "return_orders") {
-                showOrdersFromBot(data.orders);
-            } else if (data.command === "all_orders") {
-                renderManagerOrders(data.orders);
-            } else if (data.command === "order_updated") {
-                alert(`🔄 Статус изменён: ${data.status}`);
-            }
-        } catch (e) {
-            log(`🟥 Ошибка разбора данных: ${e.message}`);
+    function navigateTo(sectionId) {
+        if (sectionId === "my-orders") {
+            fetchOrders();  // Запрашиваем данные у бота
+        } else if (sectionId === "manager") {
+            fetchAllOrders();  // Для менеджера
         }
-    });
-
-    function showOrdersFromBot(orders) {
-        updateMyOrders(orders);
-        log("🟦 Заказы загружены из бота");
-    }
-
-    function updateMyOrders(orders) {
-        const container = document.getElementById("user-orders-container");
-        container.innerHTML = "";
-        orders.forEach(order => {
-            const tr = document.createElement("tr");
-            tr.innerHTML = `<td>#${order.id}</td><td>${order.status}</td>`;
-            container.appendChild(tr);
-        });
-        log(`🟦 "Мои заказы" обновлены`);
-    }
-
-    function renderManagerOrders(orders) {
-        const container = document.getElementById("manager-orders-container");
-        container.innerHTML = "";
-        orders.forEach(order => {
-            const tr = document.createElement("tr");
-            const statusCell = document.createElement("td");
-            statusCell.innerHTML = `<select onchange="changeStatus(${order.id}, this.value)">${renderStatusOptions(order.status)}</select>`;
-            tr.innerHTML = `<td>#${order.id}</td>`;
-            tr.appendChild(statusCell);
-            container.appendChild(tr);
-        });
-        log(`🟦 Отрендерены заказы для менеджера`);
-    }
-
-    function renderStatusOptions(selectedStatus) {
-        const statuses = ["На модерации", "В работе", "Готов к оплате", "Оплачен", "Отправлен", "Завершён", "Отменён"];
-        return statuses.map(status => `<option value="${status}" ${status === selectedStatus ? "selected" : ""}>${status}</option>`).join("");
+        toggleSection(sectionId);
     }
 
     function fetchOrders() {
@@ -895,25 +848,34 @@
         log("🟩 Запрошены все заказы");
     }
 
-    function navigateTo(sectionId) {
-        if (sectionId === "my-orders") {
-            fetchOrders();
-        } else if (sectionId === "manager") {
-            fetchAllOrders();
-        }
-        toggleSection(sectionId);
+    function showOrdersFromBot(data) {
+        updateMyOrders(data.orders);
+        log("🟦 Заказы загружены из бота");
     }
 
-    function toggleSection(sectionId) {
-        document.querySelectorAll('.section').forEach(sec => sec.classList.remove("active"));
-        const section = document.getElementById(sectionId);
-        if (section) section.classList.add("active");
-        closeMenu();
-        log(`🟩 Открыта секция: "${sectionId}"`);
+    function showAllOrdersFromBot(data) {
+        renderManagerOrders(data.orders);
+        log("🟦 Все заказы от бота");
     }
 
     // --- Инициализация Telegram WebApp ---
     tg.ready();
+
+    // --- Обработчик данных от бота ---
+    window.Telegram.WebApp.onEvent("web_app_data_sent", function(event) {
+        try {
+            const data = JSON.parse(event.data);
+            if (data.command === "return_orders") {
+                showOrdersFromBot(data);
+            } else if (data.command === "all_orders") {
+                showAllOrdersFromBot(data);
+            } else if (data.command === "order_updated") {
+                alert(`🔄 Обновлён статус: ${data.status}`);
+            }
+        } catch (e) {
+            log(`🟥 Ошибка разбора данных: ${e.message}`);
+        }
+    });
 </script>
 </body>
 </html>
