@@ -3,870 +3,368 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>VOLT Logistics</title>
+  <title>Volt Logistics</title>
 
-  <!-- Telegram SDK -->
+  <!-- Telegram WebApp SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script> 
 
   <style>
     :root {
-      --primary-color: #00DBFF;
-      --dark-accent: #141414;
-      --black: #000000;
-      --white: #FFFFFF;
-      --font-family: 'Montserrat', sans-serif;
-      --error-color: #ff4d4d;
-      --error-bg: #330f0f;
+      --text-white: rgba(255, 255, 255, 1);
+      --text-gray-light: rgba(115, 115, 115, 1);
+      --text-gray-medium: rgba(161, 161, 161, 1);
+      --bg-dark: #141414;
+      --card-bg: rgba(98, 98, 98, 0.34);
+      --accent-blue: rgba(0, 219, 255, 0.35);
+      --input-bg: rgba(0, 139, 162, 1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
 
     body {
-      margin: 0;
-      font-family: var(--font-family);
-      background-color: var(--dark-accent);
-      color: var(--white);
-      display: flex;
-      height: 100vh;
-      overflow: hidden;
+      width: 100%;
+      min-height: 100vh;
+      overflow-x: hidden;
+      background-color: var(--bg-dark);
+      font-family: 'TT Runs Trial', sans-serif;
+      color: white;
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
     }
 
     .container {
-      width: 100%;
-      max-width: 422px;
-      margin: auto;
-      padding: 20px;
-      box-sizing: border-box;
+      padding: 24px;
     }
 
-    /* Верхнее меню */
-    .top-menu {
-      background-color: var(--dark-accent);
-      padding: 15px 20px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      z-index: 10;
+    .card {
+      backdrop-filter: blur(31.1px);
+      background-color: var(--card-bg);
+      border-radius: 23px;
+      padding: 16px;
+      margin-bottom: 20px;
     }
 
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 1.2rem;
-      font-weight: bold;
-      color: var(--white);
-    }
-
-    .logo svg {
-      width: 24px;
-      height: 24px;
-      fill: var(--primary-color);
-    }
-
-    /* Бургер-меню */
-    .burger {
-      cursor: pointer;
-      width: 30px;
-      height: 24px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      border: 2px solid var(--primary-color);
-      border-radius: 6px;
-      padding: 4px;
-    }
-
-    /* Левое меню */
-    .sidebar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 200px;
-      height: 100%;
-      background-color: var(--dark-accent);
-      padding: 20px;
-      box-sizing: border-box;
-      transition: transform 0.3s ease;
-    }
-
-    .sidebar.active {
-      transform: translateX(0);
-    }
-
-    .sidebar button {
-      display: block;
-      width: 100%;
-      text-align: left;
-      padding: 15px 20px;
-      background-color: transparent;
-      color: var(--white);
-      border: none;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: background-color 0.3s;
-    }
-
-    .sidebar button:hover {
-      background-color: var(--dark-accent);
-    }
-
-    /* Основной контент */
-    .content {
-      flex: 1;
-      overflow-y: auto;
-      padding: 20px;
-      transition: filter 0.3s ease;
-    }
-
-    .content.dimmed {
-      filter: brightness(0.5);
-      pointer-events: none;
-    }
-
-    /* Секции */
-    .section {
-      display: none;
-      animation: slideUp 0.3s ease;
-    }
-
-    .section.active {
-      display: block;
-    }
-
-    @keyframes slideUp {
-      from { transform: translateY(100%); }
-      to { transform: translateY(0); }
-    }
-
-    /* Контент в секциях */
-    .order-form {
-      width: 100%;
-      max-width: 500px;
-      background-color: var(--dark-accent);
-      padding: 25px;
-      border-radius: 12px;
-    }
-
-    label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: 600;
-      color: var(--white);
-    }
-
-    input,
-    select,
-    button.button-primary {
-      width: 100%;
-      padding: 12px;
-      border: none;
-      border-radius: 8px;
-      font-size: 1rem;
-      margin-bottom: 16px;
-      font-family: var(--font-family);
-    }
-
-    .button-primary {
-      background-color: var(--primary-color);
-      color: var(--black);
-      font-weight: bold;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-
-    .button-primary:hover {
-      background-color: #00aacc;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-    }
-
-    th,
-    td {
-      padding: 12px;
-      border-bottom: 1px solid #333;
-      color: var(--white);
-    }
-
-    .order-number {
-      color: var(--primary-color);
-      cursor: pointer;
-      text-decoration: underline;
-    }
-
-    /* Футер */
-    .footer {
-      margin-top: 40px;
-      text-align: center;
-      font-size: 0.9rem;
-      color: #555;
-    }
-
-    @media (min-width: 768px) {
-      .sidebar {
-        display: none;
-      }
-    }
-
-    /* Модальное окно */
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.8);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-      display: none;
-    }
-
-    .modal {
-      background: var(--dark-accent);
-      padding: 20px;
-      border-radius: 12px;
-      width: 90%;
-      max-width: 500px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-    }
-
-    .modal-buttons {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 20px;
-    }
-
-    .button-secondary {
-      background-color: #555;
-    }
-
-    .photo-preview img {
-      width: 60px;
-      height: 60px;
-      object-fit: cover;
-      margin: 5px;
-    }
-
-    .log-output {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      max-height: 150px;
-      background: #111;
-      color: #0f0;
-      font-family: monospace;
-      font-size: 0.8rem;
-      padding: 10px;
-      overflow-y: auto;
-      z-index: 9999;
-      border-top: 1px solid #222;
-    }
-
-    .log-output::before {
-      content: "🧾 Логи:";
-      display: block;
-      font-weight: bold;
-      margin-bottom: 10px;
-    }
-
-    .invalid {
-      border: 2px solid var(--error-color);
-      background-color: var(--error-bg);
-    }
-
-    .error-message {
-      color: var(--error-color);
-      font-size: 0.9rem;
-      display: none;
-    }
-
-    .error-message.visible {
+    .button {
       display: inline-block;
-      margin-top: -8px;
-      margin-bottom: 8px;
+      padding: 12px 20px;
+      background-color: #000;
+      color: white;
+      border-radius: 23px;
+      text-decoration: none;
+      margin-top: 10px;
+    }
+
+    .back-link {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 20px;
+      color: var(--text-white);
+      opacity: 0.5;
+      margin-bottom: 20px;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 11px;
+      background-color: var(--input-bg);
+      color: white;
+      margin-bottom: 15px;
+      font-size: 16px;
+    }
+
+    select {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 11px;
+      background-color: var(--input-bg);
+      color: white;
+      margin-bottom: 15px;
+      font-size: 16px;
     }
   </style>
 </head>
 <body>
+  <div id="app"></div>
 
-<!-- Основной контейнер -->
-<div class="main-container">
-
-  <!-- Левое меню -->
-  <div class="sidebar" id="sidebar">
-    <button onclick="navigateTo('home')">🏠 Главная</button>
-    <button onclick="navigateTo('calculator')">🧮 Калькулятор</button>
-    <button onclick="navigateTo('create-order')">📝 Создать заказ</button>
-    <button onclick="navigateTo('my-orders')">📦 Мои заказы</button>
-    <button onclick="navigateTo('promotions')">🎁 Акции</button>
-  </div>
-
-  <!-- Основной контент -->
-  <div class="content" id="mainContent">
-
-    <!-- Секция: Главная -->
-    <div id="home" class="section active">
-      <h2>VOLT Logistics</h2>
-      <p>Выберите действие:</p>
-      <ul style="list-style: none; padding: 0;">
-        <li><button class="button-primary" onclick="navigateTo('calculator')">🧮 Открыть калькулятор</button></li>
-        <li><button class="button-primary" onclick="navigateTo('create-order')">📝 Создать заказ</button></li>
-        <li><button class="button-primary" onclick="navigateTo('my-orders')">📦 Посмотреть мои заказы</button></li>
-        <li><button class="button-primary" onclick="navigateTo('promotions')">🎁 Перейти к акциям</button></li>
-      </ul>
-    </div>
-
-    <!-- Секция: Калькулятор -->
-    <div id="calculator" class="section">
-      <h2>🧮 Калькулятор стоимости</h2>
-      <label for="calc-country">Страна выкупа:</label>
-      <select id="calc-country" onchange="updateCalculatorFields()" class="form-control">
-        <option value="" selected disabled>Выберите страну</option>
-        <option value="china">🇨🇳 Китай</option>
-        <option value="japan">🇯🇵 Япония</option>
-      </select>
-      <div id="calc-marketplace-section" style="display: none;">
-        <label for="calc-marketplace">Маркетплейс:</label>
-        <select id="calc-marketplace" class="form-control">
-          <option value="poizon_taobao_weidan">POIZON / TAOBAO / WEIDAN И ДР.</option>
-          <option value="weechat_yupoo_goofish">WEECHAT / YUPOO / GOOFISH</option>
-        </select>
-      </div>
-      <br>
-      <label for="price">Цена за единицу:</label>
-      <input type="number" id="price" placeholder="Введите цену" required/><br><br>
-      <button class="button-primary" onclick="calculate()">Рассчитать</button>
-      <div id="result" style="margin-top: 20px;"></div>
-    </div>
-
-    <!-- Секция: Создать заказ -->
-    <div id="create-order" class="section">
-      <h2>📝 Создать новый заказ</h2>
-      <label for="country">Страна выкупа:</label>
-      <select id="country" onchange="handleCountryChange()" class="form-control">
-        <option value="" selected disabled>Выберите страну</option>
-        <option value="china">🇨🇳 Китай</option>
-        <option value="japan">🇯🇵 Япония</option>
-      </select>
-      <div id="marketplace-section" style="display: none;">
-        <label for="marketplace">Маркетплейс:</label>
-        <select id="marketplace" class="form-control">
-          <option value="poizon_taobao_weidan">POIZON / TAOBAO / WEIDAN И ДР.</option>
-          <option value="weechat_yupoo_goofish">WEECHAT / YUPOO / GOOFISH</option>
-        </select>
-      </div>
-      <div id="order-form" style="margin-top: 20px; display: none;">
-        <h3>Добавьте товар(ы)</h3>
-        <div id="items-container"></div>
-        <button class="button-primary" onclick="addItem()" style="margin-bottom: 15px;">➕ Добавить товар</button><br>
-        <label for="full-name">ФИО:</label>
-        <input type="text" id="full-name" required/><br><br>
-        <span class="error-message" id="full-name-error">⚠️ Укажите ваше ФИО</span><br>
-        <label for="telegram-username">Telegram username:</label>
-        <input type="text" id="telegram-username" required/><br><br>
-        <span class="error-message" id="telegram-username-error">⚠️ Укажите Telegram username</span><br>
-        <button class="button-primary" onclick="submitOrder()">✅ Создать заказ</button>
-      </div>
-    </div>
-
-    <!-- Секция: Мои заказы -->
-    <div id="my-orders" class="section">
-      <h2>📦 Мои заказы</h2>
-      <table class="table">
-        <thead>
-          <tr>
-            <th>Номер заказа</th>
-            <th>Статус</th>
-          </tr>
-        </thead>
-        <tbody id="user-orders-container"></tbody>
-      </table>
-    </div>
-
-    <!-- Секция: Акции -->
-    <div id="promotions" class="section">
-      <h2>🎁 Акции</h2>
-      <div class="card">
-        <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/discount-1-28.png"  alt="Акция 1" style="width: 100%; max-width: 300px;" />
-        <p>Текст о текущих акциях и предложениях</p>
-      </div>
-      <button class="button-primary" onclick="navigateTo('home')">⬅ Назад</button>
-    </div>
-
-    <!-- Подвал -->
-    <div class="footer">© VOLT Logistics · 2025</div>
-  </div>
-</div>
-
-<!-- Модальное окно -->
-<div class="modal-overlay" id="preview-modal">
-  <div class="modal">
-    <h3>Предпросмотр заказа</h3>
-    <div id="preview-content"></div>
-    <div class="modal-buttons">
-      <button class="button-primary" onclick="confirmOrder()">Подтвердить</button>
-      <button class="button-primary button-secondary" onclick="closeModal()">Закрыть</button>
-    </div>
-  </div>
-</div>
-
-<!-- Логирование -->
-<div class="log-output" id="logs"></div>
-
-<script>
-  const tg = window.Telegram.WebApp;
-
-  // Получаем ID пользователя из Telegram
-  const userId = tg.initDataUnsafe?.user?.id || null;
-  const isManager = [919034275, 372145026, 6432717873].includes(userId);
-
-  function log(msg) {
-    const logs = document.getElementById("logs");
-    if (!logs) return;
-    const timestamp = new Date().toLocaleTimeString();
-    logs.innerHTML += `[${timestamp}] ${msg}<br>`;
-    logs.scrollTop = logs.scrollHeight;
-  }
-
-  function toggleSection(sectionId) {
-    document.querySelectorAll('.section').forEach(sec => sec.classList.remove("active"));
-    const section = document.getElementById(sectionId);
-    if (section) section.classList.add("active");
-    log(`🟩 Открыта секция "${sectionId}"`);
-  }
-
-  function navigateTo(sectionId) {
-    toggleSection(sectionId);
-    if (sectionId === "my-orders") fetchOrders();
-  }
-
-  let itemIndex = 0;
-
-  function handleCountryChange() {
-    const countrySelect = document.getElementById("country");
-    const marketplaceSection = document.getElementById("marketplace-section");
-    const orderForm = document.getElementById("order-form");
-    const itemsContainer = document.getElementById("items-container");
-
-    itemsContainer.innerHTML = "";
-    itemIndex = 0;
-
-    const country = countrySelect.value;
-
-    if (country === "china") {
-      marketplaceSection.style.display = "block";
-      addItem();
-    } else if (country === "japan") {
-      marketplaceSection.style.display = "none";
-      addJapanItem();
-    } else {
-      alert("Пока доступны только Китай и Япония.");
-      return;
-    }
-
-    orderForm.style.display = "block";
-    log(`🟨 Выбрана страна: ${country}`);
-  }
-
-  function highlightField(id, isError) {
-    const input = document.getElementById(id);
-    const errorLabel = document.getElementById(`${id}-error`);
-    if (input) input.classList.toggle("invalid", isError);
-    if (errorLabel) errorLabel.classList.toggle("visible", isError);
-  }
-
-  function addItem() {
-    if (itemIndex >= 10) {
-      alert("Максимум 10 товаров. Обратитесь к менеджеру.");
-      return;
-    }
-    itemIndex++;
-    const itemsContainer = document.getElementById("items-container");
-    const newItem = document.createElement("div");
-    newItem.className = "item-row";
-    newItem.innerHTML = `
-      <hr>
-      <h4>Товар #${itemIndex}</h4>
-      <label>Загрузите фото:</label>
-      <input type="file" class="item-photo" accept="image/*" multiple onchange="previewPhotos(this)">
-      <div class="photo-preview" style="display:flex;flex-wrap:wrap;gap:10px;"></div>
-      <label for="item-link-${itemIndex}">Ссылка / ID:</label>
-      <input type="text" id="item-link-${itemIndex}" placeholder="https://taobao.com/item123  "><br><br>
-      <span class="error-message" id="item-link-${itemIndex}-error">⚠️ Укажите ссылку или ID</span>
-
-      <label for="item-price-${itemIndex}">Цена (CNY):</label>
-      <input type="number" id="item-price-${itemIndex}" step="any" placeholder="¥ 800"><br><br>
-      <span class="error-message" id="item-price-${itemIndex}-error">⚠️ Укажите корректную цену</span>
-
-      <label for="item-color-${itemIndex}">Цвет:</label>
-      <input type="text" id="item-color-${itemIndex}" placeholder="Черный / White"><br><br>
-
-      <label for="item-size-${itemIndex}">Размер:</label>
-      <input type="text" id="item-size-${itemIndex}" placeholder="M / 42 / EU40"><br><br>
-
-      <label for="item-quantity-${itemIndex}">Количество:</label>
-      <input type="number" id="item-quantity-${itemIndex}" min="1" value="1"><br><br>
-      <span class="error-message" id="item-quantity-${itemIndex}-error">⚠️ Минимум 1 шт.</span>
-
-      <label for="item-comment-${itemIndex}">Комментарий:</label>
-      <input type="text" id="item-comment-${itemIndex}" placeholder="Батч A1 | Упаковать аккуратно"><br><br>
-
-      <button class="button-primary" onclick="removeItem(this)">🗑 Удалить товар</button>
-    `;
-    itemsContainer.appendChild(newItem);
-    log(`🟦 Товар добавлен (#${itemIndex})`);
-  }
-
-  function removeItem(button) {
-    const itemRow = button.parentElement;
-    itemRow.remove();
-    updateIndexes();
-    log(`🟥 Товар удалён`);
-  }
-
-  function updateIndexes() {
-    const items = document.querySelectorAll(".item-row");
-    items.forEach((row, idx) => {
-      row.querySelector("h4").textContent = `Товар #${idx + 1}`;
-    });
-    itemIndex = items.length;
-    log(`🟨 Индексы обновлены`);
-  }
-
-  function previewPhotos(input) {
-    const preview = input.nextElementSibling;
-    preview.innerHTML = "";
-    Array.from(input.files).slice(0, 5).forEach(file => {
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const img = document.createElement("img");
-        img.src = e.target.result;
-        img.style.width = "60px";
-        preview.appendChild(img);
-      };
-      reader.readAsDataURL(file);
-    });
-    log(`🟨 Загружено ${input.files.length} фото`);
-  }
-
-  async function fileToBase64(file) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = error => reject(error);
-      reader.readAsDataURL(file);
-    });
-  }
-
-  async function submitOrder() {
-    try {
-      const full_name = document.getElementById("full-name").value.trim();
-      const telegram_username = document.getElementById("telegram-username").value.trim();
-      const country = document.getElementById("country").value;
-      const itemsContainer = document.getElementById("items-container");
-
-      const fullNameError = document.getElementById("full-name-error");
-      const telegramUsernameError = document.getElementById("telegram-username-error");
-
-      // Проверка основных полей
-      let hasError = false;
-
-      if (!full_name) {
-        highlightField("full-name", true);
-        fullNameError.textContent = "⚠️ Пожалуйста, укажите ваше ФИО";
-        fullNameError.style.display = "block";
-        hasError = true;
-      } else {
-        highlightField("full-name", false);
-        fullNameError.style.display = "none";
-      }
-
-      if (!telegram_username) {
-        highlightField("telegram-0", true);
-        telegramUsernameError.textContent = "⚠️ Укажите Telegram username (например, @all0verme)";
-        telegramUsernameError.style.display = "block";
-        hasError = true;
-      } else {
-        highlightField("telegram-0", false);
-        telegramUsernameError.style.display = "none";
-      }
-
-      if (!country) {
-        alert("⚠️ Выберите страну выкупа");
-        return;
-      }
-
-      const items = await Promise.all(Array.from(itemsContainer.children).map(async (itemRow, idx) => {
-        const photoInput = itemRow.querySelector(".item-photo");
-        const linkOrIdInput = itemRow.querySelector(`#item-link-${idx + 1}`);
-        const priceInput = itemRow.querySelector(`#item-price-${idx + 1}`);
-        const colorInput = itemRow.querySelector(`#item-color-${idx + 1}`);
-        const sizeInput = itemRow.querySelector(`#item-size-${idx + 1}`);
-        const quantityInput = itemRow.querySelector(`#item-quantity-${idx + 1}`);
-        const commentInput = itemRow.querySelector(`#item-comment-${idx + 1}`);
-
-        const photos = [];
-        if (photoInput && photoInput.files) {
-          for (const file of photoInput.files) {
-            const base64 = await fileToBase64(file);
-            photos.push(base64);
-          }
-        }
-
-        const link_or_id = linkOrIdInput?.value || "";
-        const price = parseFloat(priceInput?.value || 0);
-        const quantity = parseInt(quantityInput?.value || 1);
-
-        if (!link_or_id) {
-          highlightField(`item-link-${idx + 1}`, true);
-          document.getElementById(`item-link-${idx + 1}-error`).style.display = "block";
-          hasError = true;
-        }
-
-        if (!(price > 0)) {
-          highlightField(`item-price-${idx + 1}`, true);
-          document.getElementById(`item-price-${idx + 1}-error`).style.display = "block";
-          hasError = true;
-        }
-
-        if (!(quantity > 0)) {
-          highlightField(`item-quantity-${idx + 1}`, true);
-          document.getElementById(`item-quantity-${idx + 1}-error`).style.display = "block";
-          hasError = true;
-        }
-
-        return {
-          photos: [...Array.from(photoInput?.files || [])].map(f => f.name),
-          link_or_id: link_or_id,
-          price: price,
-          color: colorInput?.value || "",
-          size: sizeInput?.value || "",
-          quantity: quantity,
-          comment: commentInput?.value || ""
-        };
-      }));
-
-      if (hasError) {
-        alert("⚠️ Исправьте поля перед отправкой");
-        return;
-      }
-
-      const requestData = {
-        command: "create_order",
-        full_name: full_name,
-        telegram_username: telegram_username,
-        country: country,
-        items: items
-      };
-
-      showPreview(requestData);
-      log(`🟦 Сформирован объект: ${JSON.stringify(requestData)}`);
-    } catch (error) {
-      log(`🟥 Ошибка в JS: ${error.message}`);
-      alert("❌ Произошла ошибка. Посмотрите консоль для деталей.");
-    }
-  }
-
-  function showPreview(data) {
-    const modal = document.getElementById("preview-modal");
-    const preview = document.getElementById("preview-content");
-    preview.innerHTML = `<strong>Пользователь:</strong><br>${data.full_name}<br>@${data.telegram_username}<br><br>`;
-    data.items.forEach((item, idx) => {
-      const itemDiv = document.createElement("div");
-      item.photos.forEach(photo => {
-        const img = document.createElement("img");
-        img.src = photo;
-        img.style.width = "60px";
-        preview.appendChild(img);
-      });
-      itemDiv.innerHTML += `<br>Ссылка: ${item.link_or_id}<br>Цена: ${item.price}, Кол-во: ${item.quantity}<br>Цвет: ${item.color}, Размер: ${item.size}<br>Комментарий: ${item.comment}<br><hr>`;
-      preview.appendChild(itemDiv);
-    });
-    modal.style.display = "flex";
-    log("🟧 Модальное окно открыто");
-  }
-
-  function closeModal() {
-    document.getElementById("preview-modal").style.display = "none";
-    log("🟧 Модальное окно закрыто");
-  }
-
-  function confirmOrder() {
-    const full_name = document.getElementById("full-name").value.trim();
-    const telegram_username = document.getElementById("telegram-username").value.trim();
-    const country = document.getElementById("country").value;
-    const itemsContainer = document.getElementById("items-container");
-
-    const items = Array.from(itemsContainer.children).map((itemRow, idx) => {
-      const linkOrIdInput = itemRow.querySelector(`#item-link-${idx + 1}`);
-      const priceInput = itemRow.querySelector(`#item-price-${idx + 1}`);
-      const colorInput = itemRow.querySelector(`#item-color-${idx + 1}`);
-      const sizeInput = itemRow.querySelector(`#item-size-${idx + 1}`);
-      const quantityInput = itemRow.querySelector(`#item-quantity-${idx + 1}`);
-      const commentInput = itemRow.querySelector(`#item-comment-${idx + 1}`);
-      const photoInput = itemRow.querySelector(".item-photo");
-
-      return {
-        photos: [...Array.from(photoInput?.files || [])].map(f => f.name),
-        link_or_id: linkOrIdInput?.value || "",
-        price: parseFloat(priceInput?.value || 0),
-        color: colorInput?.value || "",
-        size: sizeInput?.value || "",
-        quantity: parseInt(quantityInput?.value || 1),
-        comment: commentInput?.value || ""
-      };
-    });
-
-    const requestData = {
-      command: "create_order",
-      full_name: full_name,
-      telegram_username: telegram_username,
-      country: country,
-      items: items
+  <script>
+    // Роутер
+    const routes = {
+      '/': HomePage,
+      '/promotions': PromotionsPage,
+      '/order': OrderPage,
+      '/order/details': OrderDetailsPage,
+      '/profile': ProfilePage,
+      '/profile/orders': MyOrdersPage,
+      '/telegram': TelegramPage
     };
 
-    log(`🟦 Отправляемые данные: ${JSON.stringify(requestData)}`);
-    tg.sendData(JSON.stringify(requestData));
-    alert("✅ Ваш заказ отправлен в бота!");
-    closeModal();
-    toggleSection("my-orders");
-  }
+    function navigate(path) {
+      const page = routes[path] || NotFound;
+      document.getElementById('app').innerHTML = page();
+    }
 
-  function fetchOrders() {
-    tg.sendData(JSON.stringify({ command: "get_user_orders", user_id: userId }));
-    log("🟩 Запрошены мои заказы");
-  }
-
-  function updateMyOrders(orders) {
-    const container = document.getElementById("user-orders-container");
-    container.innerHTML = "";
-    orders.forEach(order => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `<td>#${order.id}</td><td>${order.status}</td>`;
-      container.appendChild(tr);
+    window.addEventListener('hashchange', () => {
+      navigate(window.location.hash.slice(1));
     });
-    log(`🟦 "Мои заказы" обновлены`);
-  }
 
-  function calculate() {
-    const country = document.getElementById("calc-country").value;
-    const marketplace = document.getElementById("calc-marketplace").value;
-    const priceInput = document.getElementById("price").value.trim();
+    window.addEventListener('load', () => {
+      navigate('/');
+    });
 
-    if (!country || !priceInput) {
-      alert("Выберите страну и введите цену.");
-      return;
-    }
+    // Telegram WebApp init
+    const WebApp = window.Telegram.WebApp;
+    WebApp.ready();
 
-    const price = parseFloat(priceInput);
-    let result = 0;
-
-    switch(country) {
-      case "china":
-        result = marketplace === "poizon_taobao_weidan"
-          ? price * 14.5 * 1.08
-          : price * 14.5 * 1.13;
-        break;
-      case "japan":
-        result = price * 0.72 * 1.03;
-        break;
-    }
-
-    document.getElementById("result").innerText = `Итоговая стоимость: ${result.toFixed(2)} ₽`;
-    log(`🟩 Рассчитана стоимость: ${result.toFixed(2)} ₽`);
-  }
-
-  function updateCalculatorFields() {
-    const calcCountry = document.getElementById("calc-country").value;
-    document.getElementById("calc-marketplace-section").style.display = calcCountry === "china" ? "block" : "none";
-  }
-
-  // --- Инициализация Telegram WebApp ---
-  tg.ready();
-
-  // --- Обработчик данных от бота ---
-  window.Telegram.WebApp.onEvent("web_app_data_sent", function(event) {
-    try {
-      const data = JSON.parse(event.data);
-      if (data.command === "return_orders") {
-        showOrdersFromBot(data.orders);
-      } else if (data.command === "all_orders") {
-        renderManagerOrders(data.orders);
-      } else if (data.command === "order_updated") {
-        alert(`🔄 Статус изменён: ${data.status}`);
+    // Вспомогательная функция отправки данных
+    async function sendDataToSheet(data) {
+      const url = "https://script.google.com/macros/s/AKtNXYZ/exec";  // замени на свою GAS-ссылку
+      try {
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
+        if (res.ok) alert("Заказ успешно отправлен!");
+        else alert("Ошибка при отправке");
+      } catch (e) {
+        console.error(e);
+        alert("Не удалось отправить данные");
       }
-    } catch (e) {
-      log(`🟥 Ошибка разбора данных: ${e.message}`);
     }
-  });
 
-  function showOrdersFromBot(data) {
-    updateMyOrders(data.orders);
-    log("🟦 Заказы загружены из бота");
-  }
+    // Страницы
+    function HomePage() {
+      return `
+        <div class="container">
+          <h1>Главная</h1>
+          
+          <a href="#/promotions" class="back-link"><span>Назад к акциям</span></a>
 
-  function renderManagerOrders(orders) {
-    const container = document.getElementById("manager-orders-container");
-    container.innerHTML = "";
-    orders.forEach(order => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `<td>#${order.id}</td><td>${order.status}</td><td>Управление недоступно</td>`;
-      container.appendChild(tr);
-    });
-    log("🟦 Все заказы от бота");
-  }
+          <div class="card">
+            <p class="text-white">актуальный курс</p>
+            <img src="https://m37avolt.github.io/volt-logistics/img/image-2-13.png"  alt="image-2" />
+          </div>
 
-  function changeStatus(orderId, newStatus) {
-    tg.sendData(JSON.stringify({
-      command: "update_order_status",
-      order_id: orderId,
-      status: newStatus
-    }));
-    log(`🟦 Изменён статус заказа #${orderId} на "${newStatus}"`);
-  }
+          <div class="card">
+            <p class="text-white">оформить заказ</p>
+          </div>
 
-  function fetchAllOrders() {
-    tg.sendData(JSON.stringify({ command: "get_all_orders" }));
-    log("🟩 Запрошены все заказы");
-  }
+          <div class="card">
+            <p class="text-white">рассчитать<br>заказ</p>
+          </div>
 
-  function updateMyOrders(orders) {
-    const container = document.getElementById("user-orders-container");
-    container.innerHTML = "";
-    orders.forEach(order => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `<td>#${order.id}</td><td>${order.status}</td>`;
-      container.appendChild(tr);
-    });
-    log(`🟦 "Мои заказы" обновлены`);
-  }
+          <div style="background-color: rgba(46, 46, 46, 1); border-radius: 23px; padding: 16px;">
+            <h3 class="text-white">Акции</h3>
+          </div>
 
-  function showAllOrdersFromBot(data) {
-    const container = document.getElementById("manager-orders-container");
-    container.innerHTML = "";
-    data.orders.forEach(order => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `<td>#${order.id}</td><td>${order.status}</td><td>Управление недоступно</td>`;
-      container.appendChild(tr);
-    });
-    log("🟦 Все заказы от бота");
-  }
+          <p><a href="#/promotions" class="button">Перейти к акциям</a></p>
+          <p><a href="#/order" class="button">Оформить заказ</a></p>
+          <p><a href="#/telegram" class="button">Telegram канал</a></p>
+          <p><a href="#/profile" class="button">Мой профиль</a></p>
+        </div>
+      `;
+    }
 
-  function fetchOrders() {
-    tg.sendData(JSON.stringify({ command: "get_user_orders", user_id: userId }));
-    log("🟩 Запрошены мои заказы");
-  }
+    function PromotionsPage() {
+      return `
+        <div class="container">
+          <a href="#" class="back-link">
+            <img src="https://m37avolt.github.io/volt-logistics/img/arrow-1-4.svg"  alt="arrow" />
+            <span>назад</span>
+          </a>
 
-  function fetchAllOrders() {
-    tg.sendData(JSON.stringify({ command: "get_all_orders" }));
-    log("🟩 Запрошены все заказы");
-  }
-</script>
+          <div style="background-color: rgba(66, 66, 66, 1); border-radius: 19px; padding: 16px; margin-bottom: 20px;">
+            <p class="text-gray-medium">актуальные акции</p>
+            <p class="text-white">Volt Logistics</p>
+          </div>
+
+          <div style="background-color: #0f0f0f; border-radius:14px; padding: 16px;">
+            <p>Пример акции</p>
+          </div>
+
+          <img src="https://m37avolt.github.io/volt-logistics/img/discount-2-13.png"  alt="discount" />
+        </div>
+      `;
+    }
+
+    function OrderPage() {
+      return `
+        <div class="container">
+          <a href="#" class="back-link">
+            <img src="https://m37avolt.github.io/volt-logistics/img/arrow-1-4.svg"  alt="arrow" />
+            <span>назад</span>
+          </a>
+
+          <div style="background-color: rgba(66, 66, 66, 1); border-radius: 19px; padding: 16px; margin-top: 20px;">
+            <p style="color: var(--text-gray-medium)">оформить заказ</p>
+            <p class="text-white">Volt Logistics</p>
+            <img src="https://m37avolt.github.io/volt-logistics/img/telegram-1-9.png"  alt="Telegram" />
+          </div>
+
+          <p class="text-white">Выберите страну выкупа</p>
+          <div style="background-color: var(--accent-blue); border-radius: 11px; padding: 16px; margin-top: 10px; text-align:center; font-size:18px;">Китай</div>
+
+          <p><a href="#/order/details" class="button">Подробнее</a></p>
+        </div>
+      `;
+    }
+
+    function OrderDetailsPage() {
+      return `
+        <div class="container">
+          <a href="#" class="back-link">
+            <img src="https://m37avolt.github.io/volt-logistics/img/arrow-1-70.svg"  alt="arrow" />
+            <span>назад</span>
+          </a>
+
+          <form id="orderForm">
+            <p class="text-white">Вставьте ссылку</p>
+            <input type="url" id="link" required placeholder="https://example.com"  />
+
+            <p class="text-white">Введите цену</p>
+            <input type="number" id="price" required placeholder="1500" />
+
+            <p class="text-white">Введите цвет</p>
+            <input type="text" id="color" required placeholder="Черный" />
+
+            <p class="text-white">Введите размер</p>
+            <input type="text" id="size" required placeholder="42" />
+
+            <p class="text-white">Введите количество</p>
+            <input type="number" id="quantity" required placeholder="1" />
+
+            <p class="text-white">Введите комментарий</p>
+            <input type="text" id="comment" placeholder="Без комментариев" />
+
+            <p class="text-white">Введите Ваше ФИО</p>
+            <input type="text" id="name" required placeholder="Иванов Иван Иванович" />
+
+            <p class="text-white">Введите Ваш юзернейм</p>
+            <input type="text" id="username" required placeholder="@ivanov" />
+
+            <p class="text-white">Введите Ваш ПВЗ СДЭК</p>
+            <input type="text" id="pvz" required placeholder="г. Москва, ул. Ленина, д. 1" />
+
+            <p><button type="submit" class="button">Создать заказ</button></p>
+          </form>
+        </div>
+
+        <script>
+          document.getElementById('orderForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const data = {
+              link: document.getElementById('link').value,
+              price: document.getElementById('price').value,
+              color: document.getElementById('color').value,
+              size: document.getElementById('size').value,
+              quantity: document.getElementById('quantity').value,
+              comment: document.getElementById('comment').value,
+              name: document.getElementById('name').value,
+              username: document.getElementById('username').value,
+              pvz: document.getElementById('pvz').value,
+            };
+
+            if (!data.link || !data.price || !data.name || !data.username || !data.pvz) {
+              alert("Пожалуйста, заполните обязательные поля.");
+              return;
+            }
+
+            sendDataToSheet(data);
+          });
+        <\/script>
+      `;
+    }
+
+    function ProfilePage() {
+      return `
+        <div class="container">
+          <a href="#" class="back-link">
+            <img src="https://m37avolt.github.io/volt-logistics/img/arrow-1-30.svg"  alt="arrow" />
+            <span>назад</span>
+          </a>
+
+          <div class="card">
+            <img src="https://m37avolt.github.io/volt-logistics/img/image-5-9.png"  alt="avatar" style="width: 100px; height: 100px; border-radius: 20px; margin-bottom: 10px;" />
+            <p class="text-white" style="font-size: 20px;">мой профиль</p>
+          </div>
+
+          <a href="#/profile/orders" class="card">
+            <p class="text-white">мои заказы</p>
+          </a>
+
+          <div class="card">
+            <p class="text-white">панель менеджера</p>
+          </div>
+
+          <div class="card">
+            <p class="text-white">реферальная программа</p>
+          </div>
+        </div>
+      `;
+    }
+
+    function MyOrdersPage() {
+      return `
+        <div class="container">
+          <a href="#" class="back-link">
+            <img src="https://m37avolt.github.io/volt-logistics/img/arrow-1-24.svg"  alt="arrow" />
+            <span>назад</span>
+          </a>
+
+          <div class="card">
+            <p class="text-white">ник телеграм</p>
+          </div>
+
+          <div class="card">
+            <p class="text-white">активные заказы</p>
+            <p style="color: #00dbff; font-size: 150px; margin: 10px 0;">1</p>
+          </div>
+
+          <div class="card">
+            <p class="text-white">завершенные заказы</p>
+            <p style="color: #00dbff; font-size: 150px; margin: 10px 0;">10</p>
+          </div>
+        </div>
+      `;
+    }
+
+    function TelegramPage() {
+      return `
+        <div class="container">
+          <a href="#" class="back-link">
+            <img src="https://m37avolt.github.io/volt-logistics/img/arrow-1-4.svg"  alt="arrow" />
+            <span>назад</span>
+          </a>
+
+          <div style="background-color: #272727; border-radius: 18px; padding: 16px;">
+            <img src="https://m37avolt.github.io/volt-logistics/img/image-4-8.png"  alt="Telegram Logo" style="border-radius: 18px; width: 100%; margin-bottom: 16px;" />
+            <p class="text-white" style="font-size: 24px;">VOLT LOGISTICS</p>
+            <a href="https://t.me/voltlogistics"  target="_blank" class="button" style="display: inline-block; background-color: #00dbff; color: black; text-align: center;">подписаться</a>
+          </div>
+
+          <div style="margin-top: 30px;">
+            <p style="color: var(--text-gray-medium);">наш телеграм канал</p>
+            <p class="text-white">Volt Logistics</p>
+            <img src="https://m37avolt.github.io/volt-logistics/img/telegram-1-16.png"  alt="Telegram icon" style="width: 100%; margin-top: 10px;" />
+          </div>
+        </div>
+      `;
+    }
+
+    function NotFound() {
+      return `<div class="container"><p>Страница не найдена</p></div>`;
+    }
+  </script>
 </body>
 </html>
