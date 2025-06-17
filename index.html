@@ -15,6 +15,8 @@
       --black: #000000;
       --white: #FFFFFF;
       --font-family: 'Montserrat', sans-serif;
+      --error-color: #ff4d4d;
+      --error-bg: #330f0f;
     }
 
     body {
@@ -52,45 +54,6 @@
       fill: var(--primary-color);
     }
 
-    /* Кнопки навигации */
-    .nav-buttons {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-
-    .nav-button {
-      flex: 1 1 calc(50% - 5px);
-      padding: 12px;
-      background-color: var(--primary-color);
-      color: var(--black);
-      text-align: center;
-      font-weight: bold;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-
-    .nav-button:hover {
-      background-color: #00aacc;
-    }
-
-    /* Секции */
-    .section {
-      display: none;
-      animation: fadeIn 0.3s ease;
-    }
-
-    .section.active {
-      display: block;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
     label {
       display: block;
       margin-bottom: 4px;
@@ -106,7 +69,7 @@
       border: none;
       border-radius: 8px;
       font-size: 1rem;
-      margin-bottom: 16px;
+      margin-bottom: 12px;
       font-family: var(--font-family);
     }
 
@@ -170,7 +133,60 @@
       margin-bottom: 10px;
     }
 
-    /* Модальное окно */
+    .nav-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .nav-button {
+      flex: 1 1 calc(50% - 5px);
+      padding: 12px;
+      background-color: var(--primary-color);
+      color: var(--black);
+      text-align: center;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .nav-button:hover {
+      background-color: #00aacc;
+    }
+
+    .section {
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .invalid {
+      border: 2px solid var(--error-color);
+      background-color: var(--error-bg);
+    }
+
+    .error-message {
+      color: var(--error-color);
+      font-size: 0.9rem;
+      display: none;
+    }
+
+    .error-message.visible {
+      display: inline-block;
+      margin-top: -8px;
+      margin-bottom: 8px;
+    }
+
     .modal-overlay {
       display: none;
       position: fixed;
@@ -203,46 +219,6 @@
       background-color: #555;
     }
 
-    /* Секции */
-    .section {
-      animation: fadeIn 0.3s ease;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .header {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 16px;
-      font-weight: bold;
-      margin-bottom: 10px;
-    }
-
-    .header img {
-      width: 30px;
-      height: 30px;
-    }
-
-    .back-btn {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      color: var(--primary-color);
-      font-size: 14px;
-      cursor: pointer;
-    }
-
-    .back-btn svg {
-      width: 16px;
-      height: 16px;
-      vertical-align: middle;
-      fill: var(--primary-color);
-    }
-
     .card {
       background: #1f1f1f;
       padding: 15px;
@@ -256,22 +232,6 @@
 
     .form-group {
       margin-bottom: 10px;
-    }
-
-    .invalid {
-      border: 2px solid #ff4d4d;
-    }
-
-    .error-message {
-      color: #ff4d4d;
-      font-size: 0.9rem;
-      display: none;
-    }
-
-    .error-message.visible {
-      display: inline-block;
-      margin-top: -8px;
-      margin-bottom: 8px;
     }
 
     .photo-preview {
@@ -358,8 +318,10 @@
       <button class="button-primary" onclick="addItem()" style="margin-bottom: 15px;">➕ Добавить товар</button><br>
       <label for="full-name">ФИО:</label>
       <input type="text" id="full-name" required/><br><br>
+      <span class="error-message" id="full-name-error">⚠️ Укажите ваше ФИО</span><br>
       <label for="telegram-username">Telegram username:</label>
       <input type="text" id="telegram-username" required/><br><br>
+      <span class="error-message" id="telegram-username-error">⚠️ Укажите Telegram username</span><br>
       <button class="button-primary" onclick="submitOrder()">✅ Создать заказ</button>
     </div>
   </div>
@@ -412,6 +374,7 @@
 
   // Получаем ID пользователя из Telegram
   const userId = tg.initDataUnsafe?.user?.id || null;
+  const isManager = [919034275, 372145026, 6432717873].includes(userId);
 
   function log(msg) {
     const logs = document.getElementById("logs");
@@ -461,6 +424,13 @@
     log(`🟨 Выбрана страна: ${country}`);
   }
 
+  function highlightField(id, isError) {
+    const input = document.getElementById(id);
+    const errorLabel = document.getElementById(`${id}-error`);
+    if (input) input.classList.toggle("invalid", isError);
+    if (errorLabel) errorLabel.classList.toggle("visible", isError);
+  }
+
   function addItem() {
     if (itemIndex >= 10) {
       alert("Максимум 10 товаров. Обратитесь к менеджеру.");
@@ -478,16 +448,25 @@
       <div class="photo-preview" style="display:flex;flex-wrap:wrap;gap:10px;"></div>
       <label for="item-link-${itemIndex}">Ссылка / ID:</label>
       <input type="text" id="item-link-${itemIndex}" placeholder="https://taobao.com/item123  "><br><br>
+      <span class="error-message" id="item-link-${itemIndex}-error">⚠️ Укажите ссылку или ID</span>
+
       <label for="item-price-${itemIndex}">Цена (CNY):</label>
       <input type="number" id="item-price-${itemIndex}" step="any" placeholder="¥ 800"><br><br>
+      <span class="error-message" id="item-price-${itemIndex}-error">⚠️ Укажите корректную цену</span>
+
       <label for="item-color-${itemIndex}">Цвет:</label>
       <input type="text" id="item-color-${itemIndex}" placeholder="Черный / White"><br><br>
+
       <label for="item-size-${itemIndex}">Размер:</label>
       <input type="text" id="item-size-${itemIndex}" placeholder="M / 42 / EU40"><br><br>
+
       <label for="item-quantity-${itemIndex}">Количество:</label>
       <input type="number" id="item-quantity-${itemIndex}" min="1" value="1"><br><br>
+      <span class="error-message" id="item-quantity-${itemIndex}-error">⚠️ Минимум 1 шт.</span>
+
       <label for="item-comment-${itemIndex}">Комментарий:</label>
       <input type="text" id="item-comment-${itemIndex}" placeholder="Батч A1 | Упаковать аккуратно"><br><br>
+
       <button class="button-primary" onclick="removeItem(this)">🗑 Удалить товар</button>
     `;
     itemsContainer.appendChild(newItem);
@@ -511,14 +490,20 @@
       <div class="photo-preview" style="display:flex;flex-wrap:wrap;gap:10px;"></div>
       <label for="item-link-${itemIndex}">Ссылка на товар:</label>
       <input type="text" id="item-link-${itemIndex}" placeholder="https://yame.co.jp/item123  "><br><br>
+      <span class="error-message" id="item-link-${itemIndex}-error">⚠️ Укажите ссылку</span>
+
       <label for="item-price-${itemIndex}">Цена (JPY):</label>
       <input type="number" id="item-price-${itemIndex}" step="any" placeholder="¥ 2000"><br><br>
+      <span class="error-message" id="item-price-${itemIndex}-error">⚠️ Укажите корректную цену</span>
+
       <label for="item-color-${itemIndex}">Цвет:</label>
       <input type="text" id="item-color-${itemIndex}" placeholder="Черный / Noir"><br><br>
       <label for="item-size-${itemIndex}">Размер:</label>
       <input type="text" id="item-size-${itemIndex}" placeholder="M / 42 / EU40"><br><br>
       <label for="item-quantity-${itemIndex}">Количество:</label>
       <input type="number" id="item-quantity-${itemIndex}" min="1" value="1"><br><br>
+      <span class="error-message" id="item-quantity-${itemIndex}-error">⚠️ Кол-во должно быть больше 0</span>
+
       <label for="item-comment-${itemIndex}">Комментарий:</label>
       <input type="text" id="item-comment-${itemIndex}" placeholder="Батч, особые условия..."><br><br>
       <button class="button-primary" onclick="removeItem(this)">🗑 Удалить товар</button>
@@ -575,6 +560,37 @@
       const country = document.getElementById("country").value;
       const itemsContainer = document.getElementById("items-container");
 
+      const fullNameError = document.getElementById("full-name-error");
+      const telegramUsernameError = document.getElementById("telegram-username-error");
+
+      // Проверка основных полей
+      let hasError = false;
+
+      if (!full_name) {
+        highlightField("full-name", true);
+        fullNameError.textContent = "⚠️ Пожалуйста, укажите ваше ФИО";
+        fullNameError.style.display = "block";
+        hasError = true;
+      } else {
+        highlightField("full-name", false);
+        fullNameError.style.display = "none";
+      }
+
+      if (!telegram_username) {
+        highlightField("telegram-0", true);
+        telegramUsernameError.textContent = "⚠️ Укажите Telegram username (например, @all0verme)";
+        telegramUsernameError.style.display = "block";
+        hasError = true;
+      } else {
+        highlightField("telegram-0", false);
+        telegramUsernameError.style.display = "none";
+      }
+
+      if (!country) {
+        alert("⚠️ Выберите страну выкупа");
+        return;
+      }
+
       const items = await Promise.all(Array.from(itemsContainer.children).map(async (itemRow, idx) => {
         const photoInput = itemRow.querySelector(".item-photo");
         const linkOrIdInput = itemRow.querySelector(`#item-link-${idx + 1}`);
@@ -592,19 +608,41 @@
           }
         }
 
+        const link_or_id = linkOrIdInput?.value || "";
+        const price = parseFloat(priceInput?.value || 0);
+        const quantity = parseInt(quantityInput?.value || 1);
+
+        if (!link_or_id) {
+          highlightField(`item-link-${idx + 1}`, true);
+          document.getElementById(`item-link-${idx + 1}-error`).style.display = "block";
+          hasError = true;
+        }
+
+        if (!(price > 0)) {
+          highlightField(`item-price-${idx + 1}`, true);
+          document.getElementById(`item-price-${idx + 1}-error`).style.display = "block";
+          hasError = true;
+        }
+
+        if (!(quantity > 0)) {
+          highlightField(`item-quantity-${idx + 1}`, true);
+          document.getElementById(`item-quantity-${idx + 1}-error`).style.display = "block";
+          hasError = true;
+        }
+
         return {
-          photos: photos,
-          link_or_id: linkOrIdInput?.value || "",
-          price: parseFloat(priceInput?.value || 0),
+          photos: [...Array.from(photoInput?.files || [])].map(f => f.name),
+          link_or_id: link_or_id,
+          price: price,
           color: colorInput?.value || "",
           size: sizeInput?.value || "",
-          quantity: parseInt(quantityInput?.value || 1),
+          quantity: quantity,
           comment: commentInput?.value || ""
         };
       }));
 
-      if (!full_name || !telegram_username || !country || items.length === 0) {
-        alert("⚠️ Не все обязательные поля заполнены.");
+      if (hasError) {
+        alert("⚠️ Исправьте поля перед отправкой");
         return;
       }
 
@@ -617,6 +655,7 @@
       };
 
       showPreview(requestData);
+      log(`🟦 Сформирован объект: ${JSON.stringify(requestData)}`);
     } catch (error) {
       log(`🟥 Ошибка в JS: ${error.message}`);
       alert("❌ Произошла ошибка. Посмотрите консоль для деталей.");
@@ -654,13 +693,13 @@
     const itemsContainer = document.getElementById("items-container");
 
     const items = Array.from(itemsContainer.children).map((itemRow, idx) => {
-      const photoInput = itemRow.querySelector(".item-photo");
       const linkOrIdInput = itemRow.querySelector(`#item-link-${idx + 1}`);
       const priceInput = itemRow.querySelector(`#item-price-${idx + 1}`);
       const colorInput = itemRow.querySelector(`#item-color-${idx + 1}`);
       const sizeInput = itemRow.querySelector(`#item-size-${idx + 1}`);
       const quantityInput = itemRow.querySelector(`#item-quantity-${idx + 1}`);
       const commentInput = itemRow.querySelector(`#item-comment-${idx + 1}`);
+      const photoInput = itemRow.querySelector(".item-photo");
 
       return {
         photos: [...Array.from(photoInput?.files || [])].map(f => f.name),
@@ -672,11 +711,6 @@
         comment: commentInput?.value || ""
       };
     });
-
-    if (!full_name || !telegram_username || !country || items.length === 0) {
-      alert("⚠️ Не все поля заполнены.");
-      return;
-    }
 
     const requestData = {
       command: "create_order",
@@ -787,136 +821,19 @@
   }
 
   function navigateTo(sectionId) {
+    toggleSection(sectionId);
+  }
+
+  function toggleSection(sectionId) {
     document.querySelectorAll('.section').forEach(sec => sec.classList.remove("active"));
     const section = document.getElementById(sectionId);
     if (section) section.classList.add("active");
-    if (sectionId === "my-orders") fetchOrders();
     log(`🟩 Переход к секции "${sectionId}"`);
   }
 
-  function sendOrderToBot() {
-    const full_name = document.getElementById("full-name").value.trim();
-    const telegram_username = document.getElementById("telegram-username").value.trim();
-    const country = document.getElementById("country").value;
-    const itemsContainer = document.getElementById("items-container");
-    const items = Array.from(itemsContainer.children).map((itemRow, idx) => {
-      const photoInput = itemRow.querySelector(".item-photo");
-
-      const linkOrIdInput = itemRow.querySelector(`#item-link-${idx + 1}`);
-      const priceInput = itemRow.querySelector(`#item-price-${idx + 1}`);
-      const colorInput = itemRow.querySelector(`#item-color-${idx + 1}`);
-      const sizeInput = itemRow.querySelector(`#item-size-${idx + 1}`);
-      const quantityInput = itemRow.querySelector(`#item-quantity-${idx + 1}`);
-      const commentInput = itemRow.querySelector(`#item-comment-${idx + 1}`);
-
-      return {
-        photos: [...Array.from(photoInput?.files || [])].map(f => f.name),
-        link_or_id: linkOrIdInput?.value || "",
-        price: parseFloat(priceInput?.value || 0),
-        color: colorInput?.value || "",
-        size: sizeInput?.value || "",
-        quantity: parseInt(quantityInput?.value || 1),
-        comment: commentInput?.value || ""
-      };
-    });
-
-    if (!full_name || !telegram_username || !country || items.length === 0) {
-      alert("⚠️ Не все обязательные поля заполнены.");
-      return;
-    }
-
-    const requestData = {
-      command: "create_order",
-      full_name: full_name,
-      telegram_username: telegram_username,
-      country: country,
-      items: items
-    };
-
-    log(`🟦 Сформирован объект: ${JSON.stringify(requestData)}`);
-    showPreview(requestData);
-  }
-
-  function showPreview(data) {
-    const modal = document.getElementById("preview-modal");
-    const preview = document.getElementById("preview-content");
-    preview.innerHTML = `<strong>Пользователь:</strong><br>${data.full_name}<br>@${data.telegram_username}<br><br>`;
-    data.items.forEach((item, idx) => {
-      const itemDiv = document.createElement("div");
-      itemDiv.innerHTML = `<strong>Товар #${idx + 1}</strong><br>`;
-      item.photos.forEach(photo => {
-        const img = document.createElement("img");
-        img.src = photo;
-        img.style.width = "60px";
-        img.style.height = "60px";
-        img.style.objectFit = "cover";
-        img.style.margin = "5px";
-        itemDiv.appendChild(img);
-      });
-      itemDiv.innerHTML += `<br>Ссылка: ${item.link_or_id}<br>Цена: ${item.price} × ${item.quantity}<br>Цвет: ${item.color}, Размер: ${item.size}<br>Комментарий: ${item.comment}`;
-      preview.appendChild(itemDiv);
-    });
-    modal.style.display = "flex";
-  }
-
-  function closeModal() {
-    document.getElementById("preview-modal").style.display = "none";
-  }
-
-  function confirmOrder() {
-    const full_name = document.getElementById("full-name").value.trim();
-    const telegram_username = document.getElementById("telegram-username").value.trim();
-    const country = document.getElementById("country").value;
-    const itemsContainer = document.getElementById("items-container");
-
-    const items = Array.from(itemsContainer.children).map((itemRow, idx) => {
-      const photoInput = itemRow.querySelector(".item-photo");
-      const linkOrIdInput = itemRow.querySelector(`#item-link-${idx + 1}`);
-      const priceInput = itemRow.querySelector(`#item-price-${idx + 1}`);
-      const colorInput = itemRow.querySelector(`#item-color-${idx + 1}`);
-      const sizeInput = itemRow.querySelector(`#item-size-${idx + 1}`);
-      const quantityInput = itemRow.querySelector(`#item-quantity-${idx + 1}`);
-      const commentInput = itemRow.querySelector(`#item-comment-${idx + 1}`);
-
-      return {
-        photos: [...Array.from(photoInput?.files || [])].map(f => f.name),
-        link_or_id: linkOrIdInput?.value || "",
-        price: parseFloat(priceInput?.value || 0),
-        color: colorInput?.value || "",
-        size: sizeInput?.value || "",
-        quantity: parseInt(quantityInput?.value || 1),
-        comment: commentInput?.value || ""
-      };
-    });
-
-    if (!full_name || !telegram_username || !country || items.length === 0) {
-      alert("⚠️ Заполните все обязательные поля.");
-      return;
-    }
-
-    const requestData = {
-      command: "create_order",
-      full_name: full_name,
-      telegram_username: telegram_username,
-      country: country,
-      items: items
-    };
-
-    log(`🟦 Отправлено в бота: ${JSON.stringify(requestData)}`);
-    tg.sendData(JSON.stringify(requestData));
-    alert("✅ Ваш заказ отправлен в бота!");
-    closeModal();
-    toggleSection("my-orders");
-  }
-
-  function showOrdersFromBot(orders) {
-    updateMyOrders(orders);
-    log("🟦 Заказы загружены из бота");
-  }
-
-  function showAllOrdersFromBot(orders) {
-    renderManagerOrders(orders);
-    log("🟦 Все заказы от бота");
+  function fetchAllOrders() {
+    tg.sendData(JSON.stringify({ command: "get_all_orders" }));
+    log("🟩 Запрошены все заказы");
   }
 
   function updateMyOrders(orders) {
@@ -930,6 +847,26 @@
     log(`🟦 "Мои заказы" обновлены`);
   }
 
-  function renderManagerOrders(orders) {
+  function showAllOrdersFromBot(data) {
     const container = document.getElementById("manager-orders-container");
-    container.innerHTML}
+    container.innerHTML = "";
+    data.orders.forEach(order => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td>#${order.id}</td><td>${order.status}</td><td>Управление недоступно</td>`;
+      container.appendChild(tr);
+    });
+    log("🟦 Все заказы от бота");
+  }
+
+  function fetchOrders() {
+    tg.sendData(JSON.stringify({ command: "get_user_orders", user_id: userId }));
+    log("🟩 Запрошены мои заказы");
+  }
+
+  function fetchAllOrders() {
+    tg.sendData(JSON.stringify({ command: "get_all_orders" }));
+    log("🟩 Запрошены все заказы");
+  }
+</script>
+</body>
+</html>
