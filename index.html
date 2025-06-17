@@ -22,7 +22,7 @@
     body {
       margin: 0;
       font-family: var(--font-family);
-      background-color: var(--black);
+      background-color: var(--dark-accent);
       color: var(--white);
       display: flex;
       height: 100vh;
@@ -37,7 +37,17 @@
       box-sizing: border-box;
     }
 
-    /* Заголовок */
+    /* Верхнее меню */
+    .top-menu {
+      background-color: var(--dark-accent);
+      padding: 15px 20px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
+    }
+
     .logo {
       display: flex;
       align-items: center;
@@ -45,7 +55,6 @@
       font-size: 1.2rem;
       font-weight: bold;
       color: var(--white);
-      margin-bottom: 20px;
     }
 
     .logo svg {
@@ -54,22 +63,106 @@
       fill: var(--primary-color);
     }
 
+    /* Бургер-меню */
+    .burger {
+      cursor: pointer;
+      width: 30px;
+      height: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border: 2px solid var(--primary-color);
+      border-radius: 6px;
+      padding: 4px;
+    }
+
+    /* Левое меню */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 200px;
+      height: 100%;
+      background-color: var(--dark-accent);
+      padding: 20px;
+      box-sizing: border-box;
+      transition: transform 0.3s ease;
+    }
+
+    .sidebar.active {
+      transform: translateX(0);
+    }
+
+    .sidebar button {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 15px 20px;
+      background-color: transparent;
+      color: var(--white);
+      border: none;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .sidebar button:hover {
+      background-color: var(--dark-accent);
+    }
+
+    /* Основной контент */
+    .content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      transition: filter 0.3s ease;
+    }
+
+    .content.dimmed {
+      filter: brightness(0.5);
+      pointer-events: none;
+    }
+
+    /* Секции */
+    .section {
+      display: none;
+      animation: slideUp 0.3s ease;
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+
+    /* Контент в секциях */
+    .order-form {
+      width: 100%;
+      max-width: 500px;
+      background-color: var(--dark-accent);
+      padding: 25px;
+      border-radius: 12px;
+    }
+
     label {
       display: block;
-      margin-bottom: 4px;
+      margin-bottom: 8px;
       font-weight: 600;
       color: var(--white);
     }
 
     input,
     select,
-    .button-primary {
+    button.button-primary {
       width: 100%;
       padding: 12px;
       border: none;
       border-radius: 8px;
       font-size: 1rem;
-      margin-bottom: 12px;
+      margin-bottom: 16px;
       font-family: var(--font-family);
     }
 
@@ -78,6 +171,7 @@
       color: var(--black);
       font-weight: bold;
       cursor: pointer;
+      transition: background-color 0.3s ease;
     }
 
     .button-primary:hover {
@@ -90,17 +184,65 @@
       margin-top: 20px;
     }
 
-    th, td {
+    th,
+    td {
       padding: 12px;
       border-bottom: 1px solid #333;
       color: var(--white);
     }
 
+    .order-number {
+      color: var(--primary-color);
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    /* Футер */
     .footer {
       margin-top: 40px;
       text-align: center;
       font-size: 0.9rem;
       color: #555;
+    }
+
+    @media (min-width: 768px) {
+      .sidebar {
+        display: none;
+      }
+    }
+
+    /* Модальное окно */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      display: none;
+    }
+
+    .modal {
+      background: var(--dark-accent);
+      padding: 20px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+
+    .button-secondary {
+      background-color: #555;
     }
 
     .photo-preview img {
@@ -133,43 +275,6 @@
       margin-bottom: 10px;
     }
 
-    .nav-buttons {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-
-    .nav-button {
-      flex: 1 1 calc(50% - 5px);
-      padding: 12px;
-      background-color: var(--primary-color);
-      color: var(--black);
-      text-align: center;
-      font-weight: bold;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-
-    .nav-button:hover {
-      background-color: #00aacc;
-    }
-
-    .section {
-      display: none;
-      animation: fadeIn 0.3s ease;
-    }
-
-    .section.active {
-      display: block;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
     .invalid {
       border: 2px solid var(--error-color);
       background-color: var(--error-bg);
@@ -186,172 +291,117 @@
       margin-top: -8px;
       margin-bottom: 8px;
     }
-
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.85);
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-    }
-
-    .modal {
-      background: var(--dark-accent);
-      padding: 20px;
-      border-radius: 12px;
-      max-width: 500px;
-      width: 90%;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-    }
-
-    .modal-buttons {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 20px;
-    }
-
-    .button-secondary {
-      background-color: #555;
-    }
-
-    .card {
-      background: #1f1f1f;
-      padding: 15px;
-      border-radius: 10px;
-      margin-bottom: 15px;
-    }
-
-    .card h3 {
-      margin-top: 0;
-    }
-
-    .form-group {
-      margin-bottom: 10px;
-    }
-
-    .photo-preview {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    .photo-preview img {
-      width: 60px;
-      height: 60px;
-      object-fit: cover;
-    }
   </style>
 </head>
 <body>
 
 <!-- Основной контейнер -->
-<div class="container">
+<div class="main-container">
 
-  <!-- Кнопки навигации -->
-  <div class="nav-buttons">
-    <button class="nav-button" onclick="navigateTo('home')">🏠 Главная</button>
-    <button class="nav-button" onclick="navigateTo('calculator')">🧮 Калькулятор</button>
-    <button class="nav-button" onclick="navigateTo('create-order')">📝 Создать заказ</button>
-    <button class="nav-button" onclick="navigateTo('my-orders')">📦 Мои заказы</button>
-    <button class="nav-button" onclick="navigateTo('promotions')">🎁 Акции</button>
+  <!-- Левое меню -->
+  <div class="sidebar" id="sidebar">
+    <button onclick="navigateTo('home')">🏠 Главная</button>
+    <button onclick="navigateTo('calculator')">🧮 Калькулятор</button>
+    <button onclick="navigateTo('create-order')">📝 Создать заказ</button>
+    <button onclick="navigateTo('my-orders')">📦 Мои заказы</button>
+    <button onclick="navigateTo('promotions')">🎁 Акции</button>
   </div>
 
-  <!-- Секция: Главная -->
-  <div id="home" class="section active">
-    <h2>Добро пожаловать!</h2>
-    <p>Выберите действие:</p>
-    <ul style="list-style: none; padding: 0;">
-      <li><button class="button-primary" onclick="navigateTo('calculator')">🧮 Открыть калькулятор</button></li>
-      <li><button class="button-primary" onclick="navigateTo('create-order')">📝 Создать заказ</button></li>
-      <li><button class="button-primary" onclick="navigateTo('my-orders')">📦 Посмотреть мои заказы</button></li>
-      <li><button class="button-primary" onclick="navigateTo('promotions')">🎁 Перейти к акциям</button></li>
-    </ul>
-  </div>
+  <!-- Основной контент -->
+  <div class="content" id="mainContent">
 
-  <!-- Секция: Калькулятор -->
-  <div id="calculator" class="section">
-    <h2>🧮 Калькулятор стоимости</h2>
-    <label for="calc-country">Страна выкупа:</label>
-    <select id="calc-country" onchange="updateCalculatorFields()" class="form-control">
-      <option value="" selected disabled>Выберите страну</option>
-      <option value="china">🇨🇳 Китай</option>
-      <option value="japan">🇯🇵 Япония</option>
-    </select>
-    <div id="calc-marketplace-section" style="display: none;">
-      <label for="calc-marketplace">Маркетплейс:</label>
-      <select id="calc-marketplace" class="form-control">
-        <option value="poizon_taobao_weidan">POIZON / TAOBAO / WEIDAN И ДР.</option>
-        <option value="weechat_yupoo_goofish">WEECHAT / YUPOO / GOOFISH</option>
+    <!-- Секция: Главная -->
+    <div id="home" class="section active">
+      <h2>VOLT Logistics</h2>
+      <p>Выберите действие:</p>
+      <ul style="list-style: none; padding: 0;">
+        <li><button class="button-primary" onclick="navigateTo('calculator')">🧮 Открыть калькулятор</button></li>
+        <li><button class="button-primary" onclick="navigateTo('create-order')">📝 Создать заказ</button></li>
+        <li><button class="button-primary" onclick="navigateTo('my-orders')">📦 Посмотреть мои заказы</button></li>
+        <li><button class="button-primary" onclick="navigateTo('promotions')">🎁 Перейти к акциям</button></li>
+      </ul>
+    </div>
+
+    <!-- Секция: Калькулятор -->
+    <div id="calculator" class="section">
+      <h2>🧮 Калькулятор стоимости</h2>
+      <label for="calc-country">Страна выкупа:</label>
+      <select id="calc-country" onchange="updateCalculatorFields()" class="form-control">
+        <option value="" selected disabled>Выберите страну</option>
+        <option value="china">🇨🇳 Китай</option>
+        <option value="japan">🇯🇵 Япония</option>
       </select>
+      <div id="calc-marketplace-section" style="display: none;">
+        <label for="calc-marketplace">Маркетплейс:</label>
+        <select id="calc-marketplace" class="form-control">
+          <option value="poizon_taobao_weidan">POIZON / TAOBAO / WEIDAN И ДР.</option>
+          <option value="weechat_yupoo_goofish">WEECHAT / YUPOO / GOOFISH</option>
+        </select>
+      </div>
+      <br>
+      <label for="price">Цена за единицу:</label>
+      <input type="number" id="price" placeholder="Введите цену" required/><br><br>
+      <button class="button-primary" onclick="calculate()">Рассчитать</button>
+      <div id="result" style="margin-top: 20px;"></div>
     </div>
-    <br>
-    <label for="price">Цена за единицу:</label>
-    <input type="number" id="price" placeholder="Введите цену" required/><br><br>
-    <button class="button-primary" onclick="calculate()">Рассчитать</button>
-    <div id="result" style="margin-top: 20px;"></div>
-  </div>
 
-  <!-- Секция: Создать заказ -->
-  <div id="create-order" class="section">
-    <h2>📝 Создать новый заказ</h2>
-    <label for="country">Страна выкупа:</label>
-    <select id="country" onchange="handleCountryChange()" class="form-control">
-      <option value="" selected disabled>Выберите страну</option>
-      <option value="china">🇨🇳 Китай</option>
-      <option value="japan">🇯🇵 Япония</option>
-    </select>
-    <div id="marketplace-section" style="display: none;">
-      <label for="marketplace">Маркетплейс:</label>
-      <select id="marketplace" class="form-control">
-        <option value="poizon_taobao_weidan">POIZON / TAOBAO / WEIDAN И ДР.</option>
-        <option value="weechat_yupoo_goofish">WEECHAT / YUPOO / GOOFISH</option>
+    <!-- Секция: Создать заказ -->
+    <div id="create-order" class="section">
+      <h2>📝 Создать новый заказ</h2>
+      <label for="country">Страна выкупа:</label>
+      <select id="country" onchange="handleCountryChange()" class="form-control">
+        <option value="" selected disabled>Выберите страну</option>
+        <option value="china">🇨🇳 Китай</option>
+        <option value="japan">🇯🇵 Япония</option>
       </select>
+      <div id="marketplace-section" style="display: none;">
+        <label for="marketplace">Маркетплейс:</label>
+        <select id="marketplace" class="form-control">
+          <option value="poizon_taobao_weidan">POIZON / TAOBAO / WEIDAN И ДР.</option>
+          <option value="weechat_yupoo_goofish">WEECHAT / YUPOO / GOOFISH</option>
+        </select>
+      </div>
+      <div id="order-form" style="margin-top: 20px; display: none;">
+        <h3>Добавьте товар(ы)</h3>
+        <div id="items-container"></div>
+        <button class="button-primary" onclick="addItem()" style="margin-bottom: 15px;">➕ Добавить товар</button><br>
+        <label for="full-name">ФИО:</label>
+        <input type="text" id="full-name" required/><br><br>
+        <span class="error-message" id="full-name-error">⚠️ Укажите ваше ФИО</span><br>
+        <label for="telegram-username">Telegram username:</label>
+        <input type="text" id="telegram-username" required/><br><br>
+        <span class="error-message" id="telegram-username-error">⚠️ Укажите Telegram username</span><br>
+        <button class="button-primary" onclick="submitOrder()">✅ Создать заказ</button>
+      </div>
     </div>
-    <div id="order-form" style="margin-top: 20px; display: none;">
-      <h3>Добавьте товар(ы)</h3>
-      <div id="items-container"></div>
-      <button class="button-primary" onclick="addItem()" style="margin-bottom: 15px;">➕ Добавить товар</button><br>
-      <label for="full-name">ФИО:</label>
-      <input type="text" id="full-name" required/><br><br>
-      <span class="error-message" id="full-name-error">⚠️ Укажите ваше ФИО</span><br>
-      <label for="telegram-username">Telegram username:</label>
-      <input type="text" id="telegram-username" required/><br><br>
-      <span class="error-message" id="telegram-username-error">⚠️ Укажите Telegram username</span><br>
-      <button class="button-primary" onclick="submitOrder()">✅ Создать заказ</button>
+
+    <!-- Секция: Мои заказы -->
+    <div id="my-orders" class="section">
+      <h2>📦 Мои заказы</h2>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Номер заказа</th>
+            <th>Статус</th>
+          </tr>
+        </thead>
+        <tbody id="user-orders-container"></tbody>
+      </table>
     </div>
-  </div>
 
-  <!-- Секция: Мои заказы -->
-  <div id="my-orders" class="section">
-    <h2>📦 Мои заказы</h2>
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Номер заказа</th>
-          <th>Статус</th>
-        </tr>
-      </thead>
-      <tbody id="user-orders-container"></tbody>
-    </table>
-  </div>
-
-  <!-- Секция: Акции -->
-  <div id="promotions" class="section">
-    <h2>🎁 Акции</h2>
-    <div class="card">
-      <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/discount-1-28.png"  alt="Акция 1" style="width: 100%; max-width: 300px;" />
-      <p>Текст о текущих акциях и предложениях</p>
+    <!-- Секция: Акции -->
+    <div id="promotions" class="section">
+      <h2>🎁 Акции</h2>
+      <div class="card">
+        <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/discount-1-28.png"  alt="Акция 1" style="width: 100%; max-width: 300px;" />
+        <p>Текст о текущих акциях и предложениях</p>
+      </div>
+      <button class="button-primary" onclick="navigateTo('home')">⬅ Назад</button>
     </div>
-    <button class="button-primary" onclick="navigateTo('home')">⬅ Назад</button>
-  </div>
 
-  <!-- Подвал -->
-  <div class="footer">© VOLT Logistics · 2025</div>
+    <!-- Подвал -->
+    <div class="footer">© VOLT Logistics · 2025</div>
+  </div>
 </div>
 
 <!-- Модальное окно -->
@@ -467,45 +517,6 @@
       <label for="item-comment-${itemIndex}">Комментарий:</label>
       <input type="text" id="item-comment-${itemIndex}" placeholder="Батч A1 | Упаковать аккуратно"><br><br>
 
-      <button class="button-primary" onclick="removeItem(this)">🗑 Удалить товар</button>
-    `;
-    itemsContainer.appendChild(newItem);
-    log(`🟦 Товар добавлен (#${itemIndex})`);
-  }
-
-  function addJapanItem() {
-    if (itemIndex >= 10) {
-      alert("Максимум 10 товаров. Обратитесь к менеджеру.");
-      return;
-    }
-    itemIndex++;
-    const itemsContainer = document.getElementById("items-container");
-    const newItem = document.createElement("div");
-    newItem.className = "item-row";
-    newItem.innerHTML = `
-      <hr>
-      <h4>Товар #${itemIndex}</h4>
-      <label>Загрузите фото:</label>
-      <input type="file" class="item-photo" accept="image/*" multiple onchange="previewPhotos(this)">
-      <div class="photo-preview" style="display:flex;flex-wrap:wrap;gap:10px;"></div>
-      <label for="item-link-${itemIndex}">Ссылка на товар:</label>
-      <input type="text" id="item-link-${itemIndex}" placeholder="https://yame.co.jp/item123  "><br><br>
-      <span class="error-message" id="item-link-${itemIndex}-error">⚠️ Укажите ссылку</span>
-
-      <label for="item-price-${itemIndex}">Цена (JPY):</label>
-      <input type="number" id="item-price-${itemIndex}" step="any" placeholder="¥ 2000"><br><br>
-      <span class="error-message" id="item-price-${itemIndex}-error">⚠️ Укажите корректную цену</span>
-
-      <label for="item-color-${itemIndex}">Цвет:</label>
-      <input type="text" id="item-color-${itemIndex}" placeholder="Черный / Noir"><br><br>
-      <label for="item-size-${itemIndex}">Размер:</label>
-      <input type="text" id="item-size-${itemIndex}" placeholder="M / 42 / EU40"><br><br>
-      <label for="item-quantity-${itemIndex}">Количество:</label>
-      <input type="number" id="item-quantity-${itemIndex}" min="1" value="1"><br><br>
-      <span class="error-message" id="item-quantity-${itemIndex}-error">⚠️ Кол-во должно быть больше 0</span>
-
-      <label for="item-comment-${itemIndex}">Комментарий:</label>
-      <input type="text" id="item-comment-${itemIndex}" placeholder="Батч, особые условия..."><br><br>
       <button class="button-primary" onclick="removeItem(this)">🗑 Удалить товар</button>
     `;
     itemsContainer.appendChild(newItem);
@@ -818,17 +829,6 @@
       status: newStatus
     }));
     log(`🟦 Изменён статус заказа #${orderId} на "${newStatus}"`);
-  }
-
-  function navigateTo(sectionId) {
-    toggleSection(sectionId);
-  }
-
-  function toggleSection(sectionId) {
-    document.querySelectorAll('.section').forEach(sec => sec.classList.remove("active"));
-    const section = document.getElementById(sectionId);
-    if (section) section.classList.add("active");
-    log(`🟩 Переход к секции "${sectionId}"`);
   }
 
   function fetchAllOrders() {
