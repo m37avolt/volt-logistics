@@ -11,6 +11,7 @@
   <style>
     :root {
       --text-white: rgba(255, 255, 255, 1);
+      --text-gray-medium: rgba(161, 161, 161, 1);
       --bg-dark: #141414;
       --card-bg: rgba(98, 98, 98, 0.34);
       --accent-blue: #00DBFF;
@@ -43,6 +44,7 @@
       padding: 24px;
     }
 
+    /* Широкая кнопка "Акции" */
     .wide-block {
       background-color: rgba(46, 46, 46, 1);
       border-radius: 23px;
@@ -58,17 +60,28 @@
       filter: brightness(0.9);
     }
 
+    .wide-block img {
+      width: 100%;
+      height: auto;
+    }
+
+    .wide-block p {
+      font-size: 24px;
+      color: var(--text-white);
+      font-weight: bold;
+    }
+
+    /* Блоки по 2 в строке */
     .grid-row {
       display: flex;
       justify-content: space-between;
       gap: 20px;
-      flex-wrap: wrap;
       margin-bottom: 20px;
     }
 
     .block {
-      flex: 1 1 calc(50% - 10px);
-      background-color: var(--card-bg);
+      width: calc(50% - 10px);
+      background-color: rgba(98, 98, 98, 0.34);
       backdrop-filter: blur(31.1px);
       border-radius: 23px;
       padding: 16px;
@@ -77,34 +90,43 @@
       transition: transform 0.2s ease, filter 0.2s ease;
     }
 
-    .block:active {
-      transform: scale(0.95);
-      filter: brightness(0.9);
-    }
-
     .block img {
-      width: 40px;
-      height: 40px;
+      width: 100%;
+      height: auto;
       margin-bottom: 10px;
     }
 
     .block p {
-      font-size: 16px;
+      font-size: 20px;
       color: var(--text-white);
       font-weight: normal;
     }
 
-    .back-link {
+    /* Нижнее меню */
+    .bottom-menu {
       display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 20px;
-      color: var(--text-white);
-      opacity: 0.5;
-      margin-bottom: 20px;
+      justify-content: space-between;
+      margin-top: 30px;
     }
 
-    /* Для других страниц */
+    .profile-button, .telegram-button, .order-button {
+      width: 61px;
+      height: 61px;
+      background-color: rgba(98, 98, 98, 0.34);
+      border-radius: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform 0.2s ease, filter 0.2s ease;
+    }
+
+    .profile-button img, .telegram-button img, .order-button img {
+      width: 40px;
+      height: 40px;
+    }
+
+    /* Стили для других страниц */
     .button {
       display: inline-block;
       padding: 12px 20px;
@@ -165,7 +187,6 @@
       navigate('/');
     });
 
-    // Telegram WebApp init
     const WebApp = window.Telegram.WebApp;
     WebApp.ready();
 
@@ -188,11 +209,8 @@
     function HomePage() {
       return `
         <div class="container">
-          <h1 style="margin-bottom: 30px;">Главная</h1>
 
-          <a href="#/promotions" class="back-link"><span>Назад к акциям</span></a>
-
-          <!-- Широкая кнопка Акции -->
+          <!-- Широкая кнопка "Акции" -->
           <div class="wide-block" onclick="navigate('/promotions')">
             <img src="https://m37avolt.github.io/volt-logistics/img/discount-1-28.png"  alt="Акции" />
             <p>акции</p>
@@ -201,7 +219,7 @@
           <!-- Блоки по 2 в строке -->
           <div class="grid-row">
             <div class="block" onclick="navigate('/order/details')">
-              <img src="https://m37avolt.github.io/volt-logistics/img/image-2-13.png"  alt="image-2" />
+              <img src="https://m37avolt.github.io/volt-logistics/img/image-2-13.png"  alt="Актуальный курс" />
               <p>актуальный курс</p>
             </div>
             <div class="block" onclick="navigate('/order')">
@@ -215,7 +233,7 @@
               <img src="https://m37avolt.github.io/volt-logistics/img/calculator-1-23.png"  alt="Рассчитать заказ" />
               <p>рассчитать<br>заказ</p>
             </div>
-            <div class="block" onclick="navigate('/telegram')">
+            <div class="block" onclick="window.open('https://t.me/VOLTZAKAZ',  '_blank')">
               <img src="https://m37avolt.github.io/volt-logistics/img/price-tag-1-27.png"  alt="Telegram" />
               <p>Telegram канал</p>
             </div>
@@ -231,11 +249,19 @@
             </div>
           </div>
 
-          <!-- Дополнительные кнопки -->
-          <p style="margin-top: 30px;"><a href="#/promotions" class="button">Перейти к акциям</a></p>
-          <p><a href="#/order" class="button">Оформить заказ</a></p>
-          <p><a href="#/telegram" class="button">Telegram канал</a></p>
-          <p><a href="#/profile" class="button">Мой профиль</a></p>
+          <!-- Нижнее меню -->
+          <div class="bottom-menu">
+            <div class="profile-button" onclick="navigate('/profile')">
+              <img src="https://m37avolt.github.io/volt-logistics/img/v28_56.png"  alt="Профиль" />
+            </div>
+            <div class="telegram-button" onclick="window.open('https://t.me/VOLTZAKAZ',  '_blank')">
+              <img src="https://m37avolt.github.io/volt-logistics/img/v55_5.png"  alt="Telegram" />
+            </div>
+            <div class="order-button" onclick="navigate('/order')">
+              <img src="https://m37avolt.github.io/volt-logistics/img/v28_57.png"  alt="Оформить заказ" />
+            </div>
+          </div>
+
         </div>
       `;
     }
@@ -249,7 +275,7 @@
           </a>
 
           <div style="background-color: rgba(66, 66, 66, 1); border-radius: 19px; padding: 16px; margin-bottom: 20px;">
-            <p style="color: rgba(161, 161, 161, 1);">актуальные акции</p>
+            <p style="color: var(--text-gray-medium);">актуальные акции</p>
             <p class="text-white">Volt Logistics</p>
           </div>
 
