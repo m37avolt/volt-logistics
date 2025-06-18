@@ -43,29 +43,38 @@
       padding: 24px;
     }
 
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
+    .wide-block {
+      background-color: rgba(46, 46, 46, 1);
+      border-radius: 23px;
+      padding: 16px;
+      text-align: center;
+      margin-bottom: 20px;
+      cursor: pointer;
+      transition: transform 0.2s ease, filter 0.2s ease;
+    }
+
+    .wide-block:active {
+      transform: scale(0.98);
+      filter: brightness(0.9);
+    }
+
+    .grid-row {
+      display: flex;
+      justify-content: space-between;
       gap: 20px;
-      margin-top: 30px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
     }
 
     .block {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
+      flex: 1 1 calc(50% - 10px);
       background-color: var(--card-bg);
       backdrop-filter: blur(31.1px);
       border-radius: 23px;
-      padding: 20px;
-      transition: transform 0.2s ease, filter 0.2s ease;
+      padding: 16px;
+      text-align: center;
       cursor: pointer;
-    }
-
-    .block:hover {
-      filter: brightness(1.1);
+      transition: transform 0.2s ease, filter 0.2s ease;
     }
 
     .block:active {
@@ -95,7 +104,7 @@
       margin-bottom: 20px;
     }
 
-    /* Стили для других страниц */
+    /* Для других страниц */
     .button {
       display: inline-block;
       padding: 12px 20px;
@@ -156,10 +165,10 @@
       navigate('/');
     });
 
+    // Telegram WebApp init
     const WebApp = window.Telegram.WebApp;
     WebApp.ready();
 
-    // Функция отправки данных
     async function sendDataToSheet(data) {
       const url = "https://script.google.com/macros/s/AKtNXYZ/exec";  // замени на свою GAS-ссылку
       try {
@@ -183,38 +192,46 @@
 
           <a href="#/promotions" class="back-link"><span>Назад к акциям</span></a>
 
-          <div class="grid">
-            <div class="block" onclick="navigate('/promotions')">
-              <img src="https://m37avolt.github.io/volt-logistics/img/discount-1-28.png"  alt="Акции" />
-              <p>Акции</p>
-            </div>
+          <!-- Широкая кнопка Акции -->
+          <div class="wide-block" onclick="navigate('/promotions')">
+            <img src="https://m37avolt.github.io/volt-logistics/img/discount-1-28.png"  alt="Акции" />
+            <p>акции</p>
+          </div>
 
+          <!-- Блоки по 2 в строке -->
+          <div class="grid-row">
+            <div class="block" onclick="navigate('/order/details')">
+              <img src="https://m37avolt.github.io/volt-logistics/img/image-2-13.png"  alt="image-2" />
+              <p>актуальный курс</p>
+            </div>
             <div class="block" onclick="navigate('/order')">
               <img src="https://m37avolt.github.io/volt-logistics/img/shopping-cart-1-18.png"  alt="Оформить заказ" />
-              <p>Оформить заказ</p>
+              <p>оформить заказ</p>
             </div>
+          </div>
 
-            <div class="block" onclick="navigate('/order/details')">
+          <div class="grid-row">
+            <div class="block" onclick="navigate('/order')">
               <img src="https://m37avolt.github.io/volt-logistics/img/calculator-1-23.png"  alt="Рассчитать заказ" />
-              <p>Рассчитать<br>заказ</p>
+              <p>рассчитать<br>заказ</p>
             </div>
-
-            <div class="block" onclick="navigate('/promotions')">
-              <img src="https://m37avolt.github.io/volt-logistics/img/image-2-13.png"  alt="Актуальный курс" />
-              <p>Актуальный курс</p>
-            </div>
-
-            <div class="block" onclick="navigate('/profile')">
-              <img src="https://m37avolt.github.io/volt-logistics/img/user-guide-1-8.png"  alt="Наши отзывы" />
-              <p>Наши отзывы</p>
-            </div>
-
             <div class="block" onclick="navigate('/telegram')">
               <img src="https://m37avolt.github.io/volt-logistics/img/price-tag-1-27.png"  alt="Telegram" />
               <p>Telegram канал</p>
             </div>
           </div>
 
+          <div class="grid-row">
+            <div class="block" onclick="navigate('/profile')">
+              <img src="https://m37avolt.github.io/volt-logistics/img/user-guide-1-8.png"  alt="Наши отзывы" />
+              <p>наши отзывы</p>
+            </div>
+            <div class="block">
+              <p style="color: rgba(115, 115, 115, 1); font-size: 11px;">агентский договор</p>
+            </div>
+          </div>
+
+          <!-- Дополнительные кнопки -->
           <p style="margin-top: 30px;"><a href="#/promotions" class="button">Перейти к акциям</a></p>
           <p><a href="#/order" class="button">Оформить заказ</a></p>
           <p><a href="#/telegram" class="button">Telegram канал</a></p>
