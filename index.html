@@ -104,9 +104,13 @@
 
     /* Нижнее меню */
     .bottom-menu {
+      position: sticky;
+      bottom: 0;
       display: flex;
       justify-content: space-between;
-      margin-top: 30px;
+      background-color: var(--bg-dark);
+      padding: 16px;
+      z-index: 1000;
     }
 
     .profile-button, .telegram-button, .order-button {
