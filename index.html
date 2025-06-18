@@ -11,12 +11,12 @@
   <style>
     :root {
       --text-white: rgba(255, 255, 255, 1);
-      --text-gray-light: rgba(115, 115, 115, 1);
-      --text-gray-medium: rgba(161, 161, 161, 1);
       --bg-dark: #141414;
       --card-bg: rgba(98, 98, 98, 0.34);
-      --accent-blue: rgba(0, 219, 255, 0.35);
-      --input-bg: rgba(0, 139, 162, 1);
+      --accent-blue: #00DBFF;
+      --shadow-sm: 0px 3px 8px rgba(0, 0, 0, 0.5), 0px 14px 14px rgba(0, 0, 0, 0.5);
+      --shadow-md: 0px 31px 19px rgba(0, 0, 0, 0.5), 0px 56px 22px rgba(0, 0, 0, 0.5);
+      --shadow-lg: 0px 87px 24px rgba(0, 0, 0, 0.5);
     }
 
     * {
@@ -43,22 +43,46 @@
       padding: 24px;
     }
 
-    .card {
-      backdrop-filter: blur(31.1px);
-      background-color: var(--card-bg);
-      border-radius: 23px;
-      padding: 16px;
-      margin-bottom: 20px;
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-top: 30px;
     }
 
-    .button {
-      display: inline-block;
-      padding: 12px 20px;
-      background-color: #000;
-      color: white;
+    .block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      background-color: var(--card-bg);
+      backdrop-filter: blur(31.1px);
       border-radius: 23px;
-      text-decoration: none;
-      margin-top: 10px;
+      padding: 20px;
+      transition: transform 0.2s ease, filter 0.2s ease;
+      cursor: pointer;
+    }
+
+    .block:hover {
+      filter: brightness(1.1);
+    }
+
+    .block:active {
+      transform: scale(0.95);
+      filter: brightness(0.9);
+    }
+
+    .block img {
+      width: 40px;
+      height: 40px;
+      margin-bottom: 10px;
+    }
+
+    .block p {
+      font-size: 16px;
+      color: var(--text-white);
+      font-weight: normal;
     }
 
     .back-link {
@@ -71,12 +95,23 @@
       margin-bottom: 20px;
     }
 
+    /* Стили для других страниц */
+    .button {
+      display: inline-block;
+      padding: 12px 20px;
+      background-color: #000;
+      color: white;
+      border-radius: 23px;
+      text-decoration: none;
+      margin-top: 10px;
+    }
+
     input, textarea {
       width: 100%;
       padding: 12px;
       border: none;
       border-radius: 11px;
-      background-color: var(--input-bg);
+      background-color: rgba(0, 139, 162, 1);
       color: white;
       margin-bottom: 15px;
       font-size: 16px;
@@ -87,7 +122,7 @@
       padding: 12px;
       border: none;
       border-radius: 11px;
-      background-color: var(--input-bg);
+      background-color: rgba(0, 139, 162, 1);
       color: white;
       margin-bottom: 15px;
       font-size: 16px;
@@ -98,7 +133,6 @@
   <div id="app"></div>
 
   <script>
-    // Роутер
     const routes = {
       '/': HomePage,
       '/promotions': PromotionsPage,
@@ -122,11 +156,10 @@
       navigate('/');
     });
 
-    // Telegram WebApp init
     const WebApp = window.Telegram.WebApp;
     WebApp.ready();
 
-    // Вспомогательная функция отправки данных
+    // Функция отправки данных
     async function sendDataToSheet(data) {
       const url = "https://script.google.com/macros/s/AKtNXYZ/exec";  // замени на свою GAS-ссылку
       try {
@@ -143,32 +176,46 @@
       }
     }
 
-    // Страницы
     function HomePage() {
       return `
         <div class="container">
-          <h1>Главная</h1>
-          
+          <h1 style="margin-bottom: 30px;">Главная</h1>
+
           <a href="#/promotions" class="back-link"><span>Назад к акциям</span></a>
 
-          <div class="card">
-            <p class="text-white">актуальный курс</p>
-            <img src="https://m37avolt.github.io/volt-logistics/img/image-2-13.png"  alt="image-2" />
+          <div class="grid">
+            <div class="block" onclick="navigate('/promotions')">
+              <img src="https://m37avolt.github.io/volt-logistics/img/discount-1-28.png"  alt="Акции" />
+              <p>Акции</p>
+            </div>
+
+            <div class="block" onclick="navigate('/order')">
+              <img src="https://m37avolt.github.io/volt-logistics/img/shopping-cart-1-18.png"  alt="Оформить заказ" />
+              <p>Оформить заказ</p>
+            </div>
+
+            <div class="block" onclick="navigate('/order/details')">
+              <img src="https://m37avolt.github.io/volt-logistics/img/calculator-1-23.png"  alt="Рассчитать заказ" />
+              <p>Рассчитать<br>заказ</p>
+            </div>
+
+            <div class="block" onclick="navigate('/promotions')">
+              <img src="https://m37avolt.github.io/volt-logistics/img/image-2-13.png"  alt="Актуальный курс" />
+              <p>Актуальный курс</p>
+            </div>
+
+            <div class="block" onclick="navigate('/profile')">
+              <img src="https://m37avolt.github.io/volt-logistics/img/user-guide-1-8.png"  alt="Наши отзывы" />
+              <p>Наши отзывы</p>
+            </div>
+
+            <div class="block" onclick="navigate('/telegram')">
+              <img src="https://m37avolt.github.io/volt-logistics/img/price-tag-1-27.png"  alt="Telegram" />
+              <p>Telegram канал</p>
+            </div>
           </div>
 
-          <div class="card">
-            <p class="text-white">оформить заказ</p>
-          </div>
-
-          <div class="card">
-            <p class="text-white">рассчитать<br>заказ</p>
-          </div>
-
-          <div style="background-color: rgba(46, 46, 46, 1); border-radius: 23px; padding: 16px;">
-            <h3 class="text-white">Акции</h3>
-          </div>
-
-          <p><a href="#/promotions" class="button">Перейти к акциям</a></p>
+          <p style="margin-top: 30px;"><a href="#/promotions" class="button">Перейти к акциям</a></p>
           <p><a href="#/order" class="button">Оформить заказ</a></p>
           <p><a href="#/telegram" class="button">Telegram канал</a></p>
           <p><a href="#/profile" class="button">Мой профиль</a></p>
@@ -185,7 +232,7 @@
           </a>
 
           <div style="background-color: rgba(66, 66, 66, 1); border-radius: 19px; padding: 16px; margin-bottom: 20px;">
-            <p class="text-gray-medium">актуальные акции</p>
+            <p style="color: rgba(161, 161, 161, 1);">актуальные акции</p>
             <p class="text-white">Volt Logistics</p>
           </div>
 
@@ -207,13 +254,13 @@
           </a>
 
           <div style="background-color: rgba(66, 66, 66, 1); border-radius: 19px; padding: 16px; margin-top: 20px;">
-            <p style="color: var(--text-gray-medium)">оформить заказ</p>
+            <p style="color: rgba(161, 161, 161, 1);">оформить заказ</p>
             <p class="text-white">Volt Logistics</p>
             <img src="https://m37avolt.github.io/volt-logistics/img/telegram-1-9.png"  alt="Telegram" />
           </div>
 
           <p class="text-white">Выберите страну выкупа</p>
-          <div style="background-color: var(--accent-blue); border-radius: 11px; padding: 16px; margin-top: 10px; text-align:center; font-size:18px;">Китай</div>
+          <div style="background-color: rgba(0, 219, 255, 0.35); border-radius: 11px; padding: 16px; margin-top: 10px; text-align:center; font-size:18px;">Китай</div>
 
           <p><a href="#/order/details" class="button">Подробнее</a></p>
         </div>
@@ -294,7 +341,7 @@
             <span>назад</span>
           </a>
 
-          <div class="card">
+          <div style="background-color: var(--card-bg); border-radius: 23px; padding: 16px; margin-bottom: 20px; text-align:center;">
             <img src="https://m37avolt.github.io/volt-logistics/img/image-5-9.png"  alt="avatar" style="width: 100px; height: 100px; border-radius: 20px; margin-bottom: 10px;" />
             <p class="text-white" style="font-size: 20px;">мой профиль</p>
           </div>
@@ -349,12 +396,12 @@
 
           <div style="background-color: #272727; border-radius: 18px; padding: 16px;">
             <img src="https://m37avolt.github.io/volt-logistics/img/image-4-8.png"  alt="Telegram Logo" style="border-radius: 18px; width: 100%; margin-bottom: 16px;" />
-            <p class="text-white" style="font-size: 24px;">VOLT LOGISTICS</p>
+            <p style="font-size: 24px; color: white;">VOLT LOGISTICS</p>
             <a href="https://t.me/voltlogistics"  target="_blank" class="button" style="display: inline-block; background-color: #00dbff; color: black; text-align: center;">подписаться</a>
           </div>
 
           <div style="margin-top: 30px;">
-            <p style="color: var(--text-gray-medium);">наш телеграм канал</p>
+            <p style="color: rgba(161, 161, 161, 1);">наш телеграм канал</p>
             <p class="text-white">Volt Logistics</p>
             <img src="https://m37avolt.github.io/volt-logistics/img/telegram-1-16.png"  alt="Telegram icon" style="width: 100%; margin-top: 10px;" />
           </div>
