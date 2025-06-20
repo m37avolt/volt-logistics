@@ -26,16 +26,16 @@
             padding-bottom: 120px;
         }
 
-        /* Широкая карточка акций */
+        /* Широкая карточка акций - точные размеры как в оригинале */
         .promotions-card {
             background-color: #2e2e2e;
             border-radius: 20px;
-            padding: 20px;
+            padding: 24px;
             margin-bottom: 12px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            height: 100px;
+            height: 110px;
             cursor: pointer;
             transition: transform 0.15s ease;
         }
@@ -47,24 +47,27 @@
         .promotions-left {
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 20px;
         }
 
+        /* Увеличенная серая иконка тега */
         .tag-icon {
-            width: 50px;
-            height: 50px;
+            width: 60px;
+            height: 60px;
             object-fit: contain;
+            opacity: 0.6;
         }
 
         .promotions-title {
-            font-size: 22px;
+            font-size: 24px;
             font-weight: 500;
             color: white;
         }
 
+        /* Увеличенная голубая иконка процентов */
         .discount-badge {
-            width: 60px;
-            height: 60px;
+            width: 70px;
+            height: 70px;
             object-fit: contain;
         }
 
@@ -79,7 +82,7 @@
         .card {
             background-color: #2e2e2e;
             border-radius: 20px;
-            padding: 20px;
+            padding: 24px;
             position: relative;
             overflow: hidden;
             transition: transform 0.15s ease;
@@ -94,33 +97,37 @@
             transform: scale(0.98);
         }
 
-        .card-cyan {
-            background-color: #01dbff;
-        }
-
         .card-gray {
             background-color: #626262;
         }
 
-        /* Иконки - увеличенные размеры */
+        /* Главный логотип - просто кнопка с прозрачным фоном */
+        .logo-button {
+            border: none;
+            aspect-ratio: 1;
+            cursor: pointer;
+            transition: transform 0.15s ease;
+            padding: 0;
+            background: transparent;
+        }
+
+        .logo-button:active {
+            transform: scale(0.98);
+        }
+
+        /* Логотип с прозрачным фоном и закругленными краями */
+        .company-logo {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        /* Увеличенные иконки в карточках */
         .card-icon {
-            width: 55px;
-            height: 55px;
+            width: 60px;
+            height: 60px;
             object-fit: contain;
-            margin-bottom: 8px;
-        }
-
-        .large-icon {
-            width: 80px;
-            height: 80px;
-            object-fit: contain;
-        }
-
-        /* Центрированные карточки */
-        .centered-card {
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            margin-bottom: 12px;
         }
 
         .card-title {
@@ -249,8 +256,8 @@
             align-items: center;
             justify-content: center;
             background-color: #01dbff;
-            border-radius: 8px;
-            color: #000;
+            border-radius: 20px;
+            color: white;
             font-weight: bold;
         }
 
@@ -268,7 +275,7 @@
 </head>
 <body>
     <div class="container">
-        <!-- Широкая карточка акций с v1_115.png слева -->
+        <!-- Широкая карточка акций с увеличенными иконками -->
         <div class="promotions-card">
             <div class="promotions-left">
                 <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/v1_115-ll2JkopnVOpygY3dttWZ1v8LOldIyg.png" 
@@ -276,7 +283,7 @@
                      class="tag-icon loading"
                      onerror="handleImageError(this, '🏷')"
                      onload="handleImageLoad(this)">
-                <div class="image-fallback" style="width: 50px; height: 50px;">🏷</div>
+                <div class="image-fallback" style="width: 60px; height: 60px;">🏷</div>
                 <div class="promotions-title">акции</div>
             </div>
             <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/v1_114.png" 
@@ -284,33 +291,33 @@
                  class="discount-badge loading"
                  onerror="handleImageError(this, '%')"
                  onload="handleImageLoad(this)">
-            <div class="image-fallback" style="width: 60px; height: 60px; font-size: 20px;">%</div>
+            <div class="image-fallback" style="width: 70px; height: 70px; font-size: 24px;">%</div>
         </div>
 
         <!-- Первый ряд квадратных карточек -->
         <div class="grid">
-            <!-- Оформить заказ -->
+            <!-- Оформить заказ с увеличенной иконкой -->
             <div class="card">
                 <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/v1_145.png" 
                      alt="Shopping Cart" 
                      class="card-icon loading"
                      onerror="handleImageError(this, '🛒')"
                      onload="handleImageLoad(this)">
-                <div class="image-fallback" style="width: 55px; height: 55px;">🛒</div>
+                <div class="image-fallback" style="width: 60px; height: 60px;">🛒</div>
                 <div class="card-title">
                     оформить<br>заказ
                 </div>
             </div>
 
-            <!-- Большой логотип на темном фоне -->
-            <div class="card centered-card">
+            <!-- Логотип Volt Logistics на прозрачном фоне с закругленными краями -->
+            <button class="logo-button" onclick="handleLogoClick()" aria-label="Volt Logistics - Главное меню">
                 <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/v1_14.png" 
-                     alt="Transfer Arrow" 
-                     class="large-icon loading"
-                     onerror="handleImageError(this, '→')"
+                     alt="Volt Logistics Logo" 
+                     class="company-logo loading"
+                     onerror="handleImageError(this, 'V')"
                      onload="handleImageLoad(this)">
-                <div class="image-fallback" style="width: 80px; height: 80px; font-size: 32px; background: transparent; color: #01dbff;">→</div>
-            </div>
+                <div class="image-fallback" style="width: 100%; height: 100%; font-size: 36px; aspect-ratio: 1;">V</div>
+            </button>
         </div>
 
         <!-- Второй ряд квадратных карточек -->
@@ -322,7 +329,7 @@
                      class="card-icon loading"
                      onerror="handleImageError(this, '₽¥')"
                      onload="handleImageLoad(this)">
-                <div class="image-fallback" style="width: 55px; height: 55px;">₽¥</div>
+                <div class="image-fallback" style="width: 60px; height: 60px;">₽¥</div>
                 <div class="card-title">
                     актуальный<br>курс
                 </div>
@@ -333,10 +340,10 @@
                 <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/v1_150.png" 
                      alt="Calculator" 
                      class="card-icon loading"
-                     style="width: 100%; height: 60px; margin-bottom: 8px;"
+                     style="width: 100%; height: 65px; margin-bottom: 12px;"
                      onerror="handleImageError(this, '=')"
                      onload="handleImageLoad(this)">
-                <div class="image-fallback" style="width: 100%; height: 60px;">=</div>
+                <div class="image-fallback" style="width: 100%; height: 65px;">=</div>
                 <div class="card-title">
                     рассчитать<br>заказ
                 </div>
@@ -352,7 +359,7 @@
                      class="card-icon loading"
                      onerror="handleImageError(this, '★')"
                      onload="handleImageLoad(this)">
-                <div class="image-fallback" style="width: 55px; height: 55px;">★</div>
+                <div class="image-fallback" style="width: 60px; height: 60px;">★</div>
                 <div class="card-title">
                     наши<br>отзывы
                 </div>
@@ -435,6 +442,13 @@
             console.log(`Navigating to: ${section}`);
         }
 
+        function handleLogoClick() {
+            if (navigator.vibrate) {
+                navigator.vibrate(75); // Более сильная вибрация для главной кнопки
+            }
+            console.log('Volt Logistics main logo clicked');
+        }
+
         document.querySelectorAll('.card, .promotions-card, .reviews-card, .small-app').forEach(card => {
             card.addEventListener('click', function() {
                 if (navigator.vibrate) {
@@ -445,7 +459,7 @@
         });
 
         window.addEventListener('load', function() {
-            console.log('App loaded successfully');
+            console.log('Volt Logistics App loaded successfully');
         });
     </script>
 </body>
