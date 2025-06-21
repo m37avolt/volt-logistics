@@ -35,22 +35,20 @@
             display: block;
         }
 
-        /* Широкая карточка акций - точные размеры */
+        /* Широкая карточка акций - увеличенная высота */
         .promotions-card {
-            background-color: rgba(46, 46, 46, 0.85);
-            backdrop-filter: blur(10px);
+            background-color: #2e2e2e;
             border-radius: 20px;
-            padding: 20px 24px;
+            padding: 24px;
             margin-bottom: 12px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            height: 110px;
+            height: 120px; /* Увеличена высота */
             cursor: pointer;
             transition: transform 0.15s ease;
-            width: 100%;
+            width: 100%; /* Полная ширина */
             position: relative;
-            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .promotions-card:active {
@@ -60,38 +58,36 @@
         .promotions-left {
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 16px;
             position: relative;
-            height: 100%;
         }
 
-        /* Серая иконка тега - точное позиционирование */
+        /* Серая иконка тега с тенью - в левом верхнем углу, реверснутая */
         .tag-icon {
-            width: 45px;
-            height: 45px;
+            width: 50px;
+            height: 50px;
             object-fit: contain;
-            opacity: 0.6;
-            filter: drop-shadow(3px 3px 6px rgba(0, 0, 0, 0.7));
+            opacity: 0.7;
+            filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.5));
             position: absolute;
-            top: 8px;
-            left: 0px;
-            transform: scaleX(-1);
+            top: -12px;
+            left: -4px;
+            transform: scaleX(-1); /* Реверс изображения */
         }
 
         .promotions-title {
-            font-size: 24px;
+            font-size: 22px;
             font-weight: 500;
             color: white;
-            margin-left: 65px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            margin-left: 60px; /* Отступ для размещения иконки */
         }
 
-        /* Голубая иконка процентов - точное позиционирование */
+        /* Голубая иконка процентов с тенью - остается справа */
         .discount-badge {
-            width: 55px;
-            height: 55px;
+            width: 60px;
+            height: 60px;
             object-fit: contain;
-            filter: drop-shadow(3px 3px 6px rgba(0, 0, 0, 0.7));
+            filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.5));
         }
 
         /* Основная сетка квадратных карточек */
@@ -103,10 +99,9 @@
         }
 
         .card {
-            background-color: rgba(46, 46, 46, 0.9);
-            backdrop-filter: blur(8px);
+            background-color: #2e2e2e;
             border-radius: 20px;
-            padding: 20px;
+            padding: 24px;
             position: relative;
             overflow: hidden;
             transition: transform 0.15s ease;
@@ -115,11 +110,14 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            border: 1px solid rgba(255, 255, 255, 0.08);
         }
 
         .card:active {
             transform: scale(0.98);
+        }
+
+        .card-gray {
+            background-color: #626262;
         }
 
         /* Главный логотип с закруглением */
@@ -138,54 +136,29 @@
             transform: scale(0.98);
         }
 
-        /* Логотип - точные размеры */
+        /* Логотип с закругленными краями и тенью */
         .company-logo {
             width: 100%;
             height: 100%;
-            object-fit: cover;
-            border-radius: 20px;
-            filter: drop-shadow(4px 4px 8px rgba(0, 0, 0, 0.6));
-        }
-
-        /* Иконки в карточках - точные размеры и позиционирование */
-        .card-icon {
-            width: 70px;
-            height: 70px;
             object-fit: contain;
-            margin-bottom: 8px;
-            filter: drop-shadow(3px 3px 6px rgba(0, 0, 0, 0.7));
-            align-self: flex-start;
+            border-radius: 20px;
+            filter: drop-shadow(2px 2px 6px rgba(0, 0, 0, 0.4));
         }
 
-        /* Специальные размеры для разных иконок */
-        .card-icon.cart-icon {
-            width: 65px;
-            height: 65px;
-        }
-
-        .card-icon.currency-icon {
-            width: 75px;
-            height: 75px;
-        }
-
-        .card-icon.calculator-icon {
-            width: 85px;
-            height: 70px;
-            margin-bottom: 8px;
-        }
-
-        .card-icon.reviews-icon {
-            width: 68px;
-            height: 68px;
+        /* Иконки в карточках с тенью */
+        .card-icon {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            margin-bottom: 12px;
+            filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.5));
         }
 
         .card-title {
-            font-size: 16px;
+            font-size: 18px;
             font-weight: 500;
             line-height: 1.1;
             color: white;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-            margin-top: auto;
         }
 
         /* Нижняя секция */
@@ -197,8 +170,7 @@
         }
 
         .reviews-card {
-            background-color: rgba(46, 46, 46, 0.9);
-            backdrop-filter: blur(8px);
+            background-color: #2e2e2e;
             border-radius: 20px;
             padding: 20px;
             aspect-ratio: 1;
@@ -207,24 +179,21 @@
             justify-content: space-between;
             cursor: pointer;
             transition: transform 0.15s ease;
-            border: 1px solid rgba(255, 255, 255, 0.08);
         }
 
         .reviews-card:active {
             transform: scale(0.98);
         }
 
-        /* Виджет приложений - точные размеры */
+        /* Виджет приложений - единый стиль */
         .apps-widget {
-            background-color: rgba(46, 46, 46, 0.9);
-            backdrop-filter: blur(8px);
+            background-color: #2e2e2e;
             border-radius: 20px;
-            padding: 12px;
+            padding: 16px;
             aspect-ratio: 1;
             display: flex;
             flex-direction: column;
             justify-content: center;
-            border: 1px solid rgba(255, 255, 255, 0.08);
         }
 
         /* Сетка 2x2 для всех 4 приложений */
@@ -232,13 +201,13 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             grid-template-rows: 1fr 1fr;
-            gap: 6px;
+            gap: 8px;
             width: 100%;
             height: 100%;
         }
 
         .small-app {
-            border-radius: 14px;
+            border-radius: 16px;
             overflow: hidden;
             cursor: pointer;
             transition: transform 0.15s ease;
@@ -253,23 +222,21 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.8));
+            filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.6));
         }
 
-        /* Черный фон для help приложения - точные размеры */
+        /* Черный фон для help приложения */
         .small-app.help-app {
             background-color: #000000;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 14px;
         }
 
         .small-app.help-app img {
-            width: 75%;
-            height: 75%;
+            width: 80%;
+            height: 80%;
             object-fit: contain;
-            filter: drop-shadow(2px 2px 4px rgba(255, 255, 255, 0.2));
         }
 
         /* Текст внизу */
@@ -278,10 +245,9 @@
             color: #737373;
             font-size: 14px;
             margin-bottom: 20px;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
         }
 
-        /* Фиксированное меню - с blur и прозрачностью */
+        /* Фиксированное меню - более узкое и длинное, с анимацией */
         .fixed-nav {
             position: fixed;
             bottom: 20px;
@@ -289,10 +255,10 @@
             transform: translateX(-50%) translateY(100px);
             width: 280px;
             height: 60px;
-            background-color: rgba(46, 46, 46, 0.8);
-            backdrop-filter: blur(20px);
+            background-color: rgba(46, 46, 46, 0.9);
+            backdrop-filter: blur(15px);
             border-radius: 30px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
             z-index: 1000;
             display: flex;
             align-items: center;
@@ -300,7 +266,6 @@
             padding: 8px 16px;
             opacity: 0;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .fixed-nav.show {
@@ -308,12 +273,11 @@
             opacity: 1;
         }
 
-        /* Кнопки меню - точные размеры */
+        /* Кнопки меню - меньше */
         .nav-button {
             width: 44px;
             height: 44px;
-            background-color: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(10px);
+            background-color: rgba(0, 0, 0, 0.6);
             border: none;
             border-radius: 12px;
             display: flex;
@@ -322,7 +286,6 @@
             cursor: pointer;
             transition: all 0.15s ease;
             position: relative;
-            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .nav-button:active {
@@ -330,30 +293,29 @@
         }
 
         .nav-button.active {
-            background-color: rgba(1, 219, 255, 0.9);
-            backdrop-filter: blur(10px);
+            background-color: #01dbff;
         }
 
-        /* Размеры иконок в меню - точные */
+        /* Размеры иконок в меню с тенью */
         .nav-button-profile img {
-            width: 28px;
-            height: 28px;
+            width: 32px;
+            height: 32px;
             object-fit: contain;
-            filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.7));
+            filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.5));
         }
 
         .nav-button-chat img {
-            width: 42px;
-            height: 42px;
+            width: 48px;
+            height: 48px;
             object-fit: contain;
-            filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.7));
+            filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.5));
         }
 
         .nav-button-lock img {
-            width: 30px;
-            height: 30px;
+            width: 34px;
+            height: 34px;
             object-fit: contain;
-            filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.7));
+            filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.5));
         }
 
         /* Стильная кнопка назад с blur */
@@ -362,8 +324,8 @@
             bottom: 30px;
             left: 50%;
             transform: translateX(-50%) translateY(100px);
-            background-color: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(20px);
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(15px);
             border: none;
             border-radius: 20px;
             padding: 12px 24px;
@@ -377,8 +339,7 @@
             z-index: 1000;
             opacity: 0;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
 
         .stylish-back-button.show {
@@ -387,7 +348,7 @@
         }
 
         .stylish-back-button:hover {
-            background-color: rgba(0, 0, 0, 0.9);
+            background-color: rgba(0, 0, 0, 0.8);
             transform: translateX(-50%) translateY(-2px);
         }
 
@@ -644,7 +605,7 @@
                          class="tag-icon loading"
                          onerror="handleImageError(this, '🏷')"
                          onload="handleImageLoad(this)">
-                    <div class="image-fallback" style="width: 45px; height: 45px;">🏷</div>
+                    <div class="image-fallback" style="width: 50px; height: 50px;">🏷</div>
                     <div class="promotions-title">акции</div>
                 </div>
                 <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/v1_114.png" 
@@ -652,7 +613,7 @@
                      class="discount-badge loading"
                      onerror="handleImageError(this, '%')"
                      onload="handleImageLoad(this)">
-                <div class="image-fallback" style="width: 55px; height: 55px; font-size: 24px;">%</div>
+                <div class="image-fallback" style="width: 60px; height: 60px; font-size: 24px;">%</div>
             </div>
 
             <!-- Первый ряд квадратных карточек -->
@@ -661,10 +622,10 @@
                 <div class="card" onclick="navigateTo('order')">
                     <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/v1_145.png" 
                          alt="Shopping Cart" 
-                         class="card-icon cart-icon loading"
+                         class="card-icon loading"
                          onerror="handleImageError(this, '🛒')"
                          onload="handleImageLoad(this)">
-                    <div class="image-fallback" style="width: 65px; height: 65px;">🛒</div>
+                    <div class="image-fallback" style="width: 70px; height: 70px;">🛒</div>
                     <div class="card-title">
                         оформить<br>заказ
                     </div>
@@ -687,10 +648,10 @@
                 <div class="card" onclick="navigateTo('currency')">
                     <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/v1_136.png" 
                          alt="Currency Exchange" 
-                         class="card-icon currency-icon loading"
+                         class="card-icon loading"
                          onerror="handleImageError(this, '₽¥')"
                          onload="handleImageLoad(this)">
-                    <div class="image-fallback" style="width: 75px; height: 75px;">₽¥</div>
+                    <div class="image-fallback" style="width: 70px; height: 70px;">₽¥</div>
                     <div class="card-title">
                         актуальный<br>курс
                     </div>
@@ -700,10 +661,11 @@
                 <div class="card" onclick="navigateTo('calculator')">
                     <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/v1_150.png" 
                          alt="Calculator" 
-                         class="card-icon calculator-icon loading"
+                         class="card-icon loading"
+                         style="width: 100%; height: 75px; margin-bottom: 12px;"
                          onerror="handleImageError(this, '=')"
                          onload="handleImageLoad(this)">
-                    <div class="image-fallback" style="width: 85px; height: 70px;">=</div>
+                    <div class="image-fallback" style="width: 100%; height: 75px;">=</div>
                     <div class="card-title">
                         рассчитать<br>заказ
                     </div>
@@ -716,10 +678,10 @@
                 <div class="reviews-card" onclick="navigateTo('reviews')">
                     <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/v55_17.png" 
                          alt="Reviews" 
-                         class="card-icon reviews-icon loading"
+                         class="card-icon loading"
                          onerror="handleImageError(this, '★')"
                          onload="handleImageLoad(this)">
-                    <div class="image-fallback" style="width: 68px; height: 68px;">★</div>
+                    <div class="image-fallback" style="width: 70px; height: 70px;">★</div>
                     <div class="card-title">
                         наши<br>отзывы
                     </div>
@@ -728,7 +690,7 @@
                 <!-- Виджет приложений в едином стиле -->
                 <div class="apps-widget">
                     <div class="apps-grid">
-                        <!-- Help приложение с черным фоном -->
+                        <!-- Help приложение с черным фоном (поменяно местами с POIZON) -->
                         <div class="small-app help-app" onclick="navigateTo('help')">
                             <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/v55_13.png" alt="Help App">
                         </div>
@@ -738,7 +700,7 @@
                         <div class="small-app" onclick="navigateTo('yellow')">
                             <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/v1_11.png" alt="Yellow App">
                         </div>
-                        <!-- POIZON приложение -->
+                        <!-- POIZON приложение (поменяно местами с Help) -->
                         <div class="small-app" onclick="navigateTo('poizon')">
                             <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/v1_8.png" alt="POIZON App">
                         </div>
@@ -912,7 +874,7 @@
                  class="loading"
                  onerror="handleImageError(this, '👤')"
                  onload="handleImageLoad(this)">
-            <div class="image-fallback" style="width: 28px; height: 28px; font-size: 12px;">👤</div>
+            <div class="image-fallback" style="width: 32px; height: 32px; font-size: 12px;">👤</div>
         </button>
         
         <button class="nav-button nav-button-chat" onclick="navigateTo('chat')" aria-label="Чат" data-page="chat">
@@ -921,7 +883,7 @@
                  class="loading"
                  onerror="handleImageError(this, '💬')"
                  onload="handleImageLoad(this)">
-            <div class="image-fallback" style="width: 42px; height: 42px; font-size: 16px;">💬</div>
+            <div class="image-fallback" style="width: 48px; height: 48px; font-size: 16px;">💬</div>
         </button>
         
         <button class="nav-button nav-button-lock" onclick="navigateTo('security')" aria-label="Безопасность" data-page="security">
@@ -930,7 +892,7 @@
                  class="loading"
                  onerror="handleImageError(this, '🔒')"
                  onload="handleImageLoad(this)">
-            <div class="image-fallback" style="width: 30px; height: 30px; font-size: 12px;">🔒</div>
+            <div class="image-fallback" style="width: 34px; height: 34px; font-size: 12px;">🔒</div>
         </button>
     </div>
 
