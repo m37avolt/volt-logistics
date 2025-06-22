@@ -35,59 +35,32 @@
             display: block;
         }
 
-        /* Широкая карточка акций - увеличенная высота */
-        .promotions-card {
-            background-color: #2e2e2e;
-            border-radius: 20px;
-            padding: 24px;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            height: 120px; /* Увеличена высота */
+        /* Кнопка акций с изображением - исправленная версия */
+        .promotions-image-button {
+            width: 100%;
+            height: 160px; /* Увеличено с 120px */
+            border: none;
+            background: transparent;
+            padding: 0;
+            margin: 0 0 12px 0;
             cursor: pointer;
             transition: transform 0.15s ease;
-            width: 100%; /* Полная ширина */
-            position: relative;
+            border-radius: 20px;
+            overflow: hidden;
+            display: block;
         }
 
-        .promotions-card:active {
+        .promotions-image-button:active {
             transform: scale(0.98);
         }
 
-        .promotions-left {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            position: relative;
-        }
-
-        /* Серая иконка тега с тенью - в левом верхнем углу, реверснутая */
-        .tag-icon {
-            width: 50px;
-            height: 50px;
-            object-fit: contain;
-            opacity: 0.7;
-            filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.5));
-            position: absolute;
-            top: -12px;
-            left: -4px;
-            transform: scaleX(-1); /* Реверс изображения */
-        }
-
-        .promotions-title {
-            font-size: 22px;
-            font-weight: 500;
-            color: white;
-            margin-left: 60px; /* Отступ для размещения иконки */
-        }
-
-        /* Голубая иконка процентов с тенью - остается справа */
-        .discount-badge {
-            width: 60px;
-            height: 60px;
-            object-fit: contain;
-            filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.5));
+        .promotions-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 20px;
+            filter: drop-shadow(2px 2px 6px rgba(0, 0, 0, 0.3));
+            display: block;
         }
 
         /* Основная сетка квадратных карточек */
@@ -173,7 +146,7 @@
             background-color: #2e2e2e;
             border-radius: 20px;
             padding: 20px;
-            aspect-ratio: 1;
+            min-height: 160px; /* Добавлено для выравнивания с другими виджетами */
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -190,10 +163,10 @@
             background-color: #2e2e2e;
             border-radius: 20px;
             padding: 16px;
-            aspect-ratio: 1;
             display: flex;
             flex-direction: column;
             justify-content: center;
+            min-height: 160px; /* Добавлено для выравнивания с другими виджетами */
         }
 
         /* Сетка 2x2 для всех 4 приложений */
@@ -253,11 +226,11 @@
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%) translateY(100px);
-            width: 280px;
+            width: 320px;
             height: 60px;
             background-color: rgba(46, 46, 46, 0.9);
             backdrop-filter: blur(15px);
-            border-radius: 30px;
+            border-radius: 20px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
             z-index: 1000;
             display: flex;
@@ -277,7 +250,7 @@
         .nav-button {
             width: 44px;
             height: 44px;
-            background-color: rgba(0, 0, 0, 0.6);
+            background-color: #000000;
             border: none;
             border-radius: 12px;
             display: flex;
@@ -591,45 +564,299 @@
         .back-text {
             font-weight: 400;
         }
+
+        /* Стили для страницы main с изображением */
+        .main-image-container {
+            position: relative;
+            width: 100%;
+            height: calc(100vh - 32px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .main-background-image {
+            width: 100%;
+            max-width: 300px;
+            height: auto;
+            object-fit: contain;
+            filter: drop-shadow(2px 2px 8px rgba(0, 0, 0, 0.3));
+        }
+
+        /* Невидимая кнопка поверх области подписки на изображении */
+        .invisible-subscribe-button {
+            position: absolute;
+            bottom: 25%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 40px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            z-index: 10;
+            transition: all 0.15s ease;
+        }
+
+        .invisible-subscribe-button:active {
+            transform: translateX(-50%) scale(0.98);
+        }
+
+        /* Fallback стили для случая, если изображение не загрузится */
+        .main-fallback {
+            width: 100%;
+            max-width: 300px;
+            height: 400px;
+            background-color: #2e2e2e;
+            border-radius: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .fallback-content {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .fallback-logo {
+            width: 80px;
+            height: 80px;
+            background-color: #000;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #01dbff;
+            font-size: 36px;
+            font-weight: bold;
+        }
+
+        .fallback-title {
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        .fallback-button {
+            background-color: #01dbff;
+            color: #000000;
+            border: none;
+            border-radius: 20px;
+            padding: 12px 40px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            text-transform: uppercase;
+            min-width: 140px;
+        }
+
+        .fallback-button:hover {
+            background-color: #00c4e6;
+            transform: translateY(-1px);
+        }
+
+        .fallback-button:active {
+            transform: translateY(0);
+        }
+
+        /* Стили для страницы main с отдельными компонентами */
+        .main-page-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: calc(100vh - 32px);
+            padding: 20px;
+            gap: 30px;
+        }
+
+        /* Фиксированная полоска с Telegram вверху экрана */
+        .telegram-fixed-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+            padding: 8px 16px;
+            background: transparent;
+        }
+
+        .telegram-bar-content {
+            max-width: 320px;
+            width: 100%;
+        }
+
+        .main-tg-image-fixed {
+            width: 100%;
+            height: auto;
+            object-fit: contain;
+            filter: drop-shadow(2px 2px 6px rgba(0, 0, 0, 0.3));
+        }
+
+        .main-center-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            position: relative;
+        }
+
+        .main-content-block {
+            position: relative;
+        }
+
+        .main-block-image {
+            width: 100%;
+            max-width: 280px;
+            height: auto;
+            object-fit: contain;
+            filter: drop-shadow(2px 2px 8px rgba(0, 0, 0, 0.3));
+        }
+
+        /* Fallback стили */
+        .main-tg-fallback,
+        .main-block-fallback,
+        .main-button-fallback {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Стили для страницы профиля */
+        .profile-page-container {
+            padding: 20px;
+            min-height: calc(100vh - 32px);
+        }
+
+        .profile-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .profile-card {
+            background-color: #2e2e2e;
+            border-radius: 20px;
+            aspect-ratio: 1;
+            cursor: pointer;
+            transition: transform 0.15s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .profile-card:active {
+            transform: scale(0.98);
+        }
+
+        .profile-card-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .profile-avatar-container {
+            position: relative;
+            width: 60px;
+            height: 60px;
+        }
+
+        .profile-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #01dbff;
+        }
+
+        .profile-avatar-fallback {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: #01dbff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+        }
+
+        .profile-card-text {
+            color: white;
+        }
+
+        .profile-card-title {
+            font-size: 16px;
+            font-weight: 500;
+            line-height: 1.1;
+            text-transform: uppercase;
+        }
+
+        .profile-card-image {
+            width: 100%;
+            height: auto;
+            aspect-ratio: 1;
+            object-fit: cover;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: transform 0.15s ease;
+            filter: drop-shadow(2px 2px 6px rgba(0, 0, 0, 0.3));
+        }
+
+        .profile-card-image:active {
+            transform: scale(0.98);
+        }
+
+        .manager-panel {
+            display: none;
+        }
+
+        .manager-panel.show {
+            display: block;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <!-- Главная страница -->
         <div id="home" class="page active">
-            <!-- Широкая карточка акций -->
-            <div class="promotions-card" onclick="navigateTo('promotions')">
-                <div class="promotions-left">
-                    <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/v1_115.png" 
-                         alt="Tag Icon" 
-                         class="tag-icon loading"
-                         onerror="handleImageError(this, '🏷')"
-                         onload="handleImageLoad(this)">
-                    <div class="image-fallback" style="width: 50px; height: 50px;">🏷</div>
-                    <div class="promotions-title">акции</div>
-                </div>
-                <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/v1_114.png" 
-                     alt="Discount" 
-                     class="discount-badge loading"
-                     onerror="handleImageError(this, '%')"
-                     onload="handleImageLoad(this)">
-                <div class="image-fallback" style="width: 60px; height: 60px; font-size: 24px;">%</div>
-            </div>
+            <!-- Кнопка акций с изображением -->
+            <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/v1.png" 
+                 alt="Акции" 
+                 class="promotions-image-button loading"
+                 onclick="navigateTo('promotions')"
+                 onerror="handleImageError(this, 'АКЦИИ')"
+                 onload="handleImageLoad(this)"
+                 style="cursor: pointer;">
+            <div class="image-fallback" style="width: 100%; height: 160px; margin-bottom: 12px; font-size: 18px; display: none;">АКЦИИ</div>
 
             <!-- Первый ряд квадратных карточек -->
             <div class="grid">
                 <!-- Оформить заказ -->
-                <div class="card" onclick="navigateTo('order')">
-                    <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/v1_145.png" 
-                         alt="Shopping Cart" 
-                         class="card-icon loading"
-                         onerror="handleImageError(this, '🛒')"
-                         onload="handleImageLoad(this)">
-                    <div class="image-fallback" style="width: 70px; height: 70px;">🛒</div>
-                    <div class="card-title">
-                        оформить<br>заказ
-                    </div>
-                </div>
+                <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/v2.png" 
+                     alt="Оформить заказ" 
+                     class="card loading"
+                     onclick="navigateTo('order')"
+                     onerror="handleImageError(this, 'ЗАКАЗ')"
+                     onload="handleImageLoad(this)"
+                     style="cursor: pointer; padding: 0; object-fit: cover;">
 
                 <!-- Логотип Volt Logistics с закруглением -->
                 <button class="logo-button" onclick="navigateTo('main')" aria-label="Volt Logistics - Главное меню">
@@ -645,47 +872,34 @@
             <!-- Второй ряд квадратных карточек -->
             <div class="grid">
                 <!-- Актуальный курс -->
-                <div class="card" onclick="navigateTo('currency')">
-                    <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/v1_136.png" 
-                         alt="Currency Exchange" 
-                         class="card-icon loading"
-                         onerror="handleImageError(this, '₽¥')"
-                         onload="handleImageLoad(this)">
-                    <div class="image-fallback" style="width: 70px; height: 70px;">₽¥</div>
-                    <div class="card-title">
-                        актуальный<br>курс
-                    </div>
-                </div>
+                <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/v3.png" 
+                     alt="Актуальный курс" 
+                     class="card loading"
+                     onclick="navigateTo('currency')"
+                     onerror="handleImageError(this, 'КУРС')"
+                     onload="handleImageLoad(this)"
+                     style="cursor: pointer; padding: 0; object-fit: cover;">
 
                 <!-- Рассчитать заказ -->
-                <div class="card" onclick="navigateTo('calculator')">
-                    <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/v1_150.png" 
-                         alt="Calculator" 
-                         class="card-icon loading"
-                         style="width: 100%; height: 75px; margin-bottom: 12px;"
-                         onerror="handleImageError(this, '=')"
-                         onload="handleImageLoad(this)">
-                    <div class="image-fallback" style="width: 100%; height: 75px;">=</div>
-                    <div class="card-title">
-                        рассчитать<br>заказ
-                    </div>
-                </div>
+                <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/v4.png" 
+                     alt="Рассчитать заказ" 
+                     class="card loading"
+                     onclick="navigateTo('calculator')"
+                     onerror="handleImageError(this, 'РАСЧЕТ')"
+                     onload="handleImageLoad(this)"
+                     style="cursor: pointer; padding: 0; object-fit: cover;">
             </div>
 
             <!-- Нижняя секция -->
             <div class="bottom-section">
                 <!-- Наши отзывы -->
-                <div class="reviews-card" onclick="navigateTo('reviews')">
-                    <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/v55_17.png" 
-                         alt="Reviews" 
-                         class="card-icon loading"
-                         onerror="handleImageError(this, '★')"
-                         onload="handleImageLoad(this)">
-                    <div class="image-fallback" style="width: 70px; height: 70px;">★</div>
-                    <div class="card-title">
-                        наши<br>отзывы
-                    </div>
-                </div>
+                <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/v5.png" 
+                     alt="Наши отзывы" 
+                     class="reviews-card loading"
+                     onclick="navigateTo('reviews')"
+                     onerror="handleImageError(this, 'ОТЗЫВЫ')"
+                     onload="handleImageLoad(this)"
+                     style="cursor: pointer; padding: 0; object-fit: cover;">
                 
                 <!-- Виджет приложений в едином стиле -->
                 <div class="apps-widget">
@@ -712,71 +926,110 @@
             <div class="bottom-text">агентский договор</div>
         </div>
 
-        <!-- Страница main с правильной структурой как в оригинале -->
+        <!-- Страница main с отдельными компонентами -->
         <div id="main" class="page">
-            <div class="telegram-page">
-                <!-- Верхний прямоугольник с иконкой Telegram и текстом -->
-                <div class="telegram-header-card">
-                    <div class="telegram-icon-container">
-                        <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/v31_169.png" 
-                             alt="Telegram" 
-                             class="telegram-icon"
-                             onerror="handleImageError(this, '✈')"
+            <!-- Фиксированная полоска с Telegram вверху экрана -->
+            <div class="telegram-fixed-bar">
+                <div class="telegram-bar-content">
+                    <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/main_tg.png" 
+                         alt="Volt Logistics Telegram" 
+                         class="main-tg-image-fixed"
+                         onerror="handleImageError(this, 'Telegram')"
+                         onload="handleImageLoad(this)">
+                    <div class="image-fallback main-tg-fallback" style="display: none;">
+                        <div style="display: flex; align-items: center; gap: 12px; padding: 16px; background-color: #2e2e2e; border-radius: 20px;">
+                            <div style="width: 40px; height: 40px; background-color: #01dbff; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px;">✈</div>
+                            <div>
+                                <div style="color: white; font-weight: 600;">Volt Logistics</div>
+                                <div style="color: #737373; font-size: 13px;">наш телеграм канал</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="main-page-container" style="padding-top: 80px;">
+                <!-- Центральная секция с основным блоком и интегрированной кнопкой -->
+                <div class="main-center-section">
+                    <div class="main-content-block" style="position: relative;">
+                        <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/main.png" 
+                             alt="Volt Logistics Main Block" 
+                             class="main-block-image"
+                             onerror="handleImageError(this, 'Main Block')"
                              onload="handleImageLoad(this)">
-                        <div class="image-fallback telegram-fallback">✈</div>
-                    </div>
-                    <div class="telegram-title">
-                        <div class="company-name">Volt Logistics</div>
-                        <div class="channel-description">наш телеграм канал</div>
-                    </div>
-                </div>
-
-                <!-- Центральная секция с кругом НАД прямоугольником -->
-                <div class="main-content-section">
-                    <div class="logo-and-card-container">
-                        <!-- Круглый контейнер с логотипом -->
-                        <div class="main-logo-circle">
-                            <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/v1_218.png" 
-                                 alt="Volt Logistics" 
-                                 class="main-logo-image"
-                                 onerror="handleImageError(this, 'V')"
-                                 onload="handleImageLoad(this)">
-                            <div class="image-fallback main-logo-fallback">V</div>
+                        
+                        <!-- Кнопка поверх основного блока -->
+                        <div style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);">
+                            <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/main_button.png" 
+                                 alt="Подписаться" 
+                                 class="main-button-image"
+                                 onclick="openTelegramChannel()"
+                                 onerror="handleImageError(this, 'Button')"
+                                 onload="handleImageLoad(this)"
+                                 style="cursor: pointer; width: 250px; height: auto;">
+                            <div class="image-fallback main-button-fallback" style="display: none;">
+                                <button style="background-color: #01dbff; color: #000000; border: none; border-radius: 20px; padding: 12px 40px; font-size: 14px; font-weight: 600; cursor: pointer; text-transform: uppercase; min-width: 200px;" onclick="openTelegramChannel()">ПОДПИСАТЬСЯ</button>
+                            </div>
                         </div>
 
-                        <!-- Прямоугольник с названием компании и кнопкой -->
-                        <div class="company-card-with-button">
-                            <div class="main-logo-text">VOLT LOGISTICS</div>
-                            <button class="subscribe-button" onclick="openTelegramChannel()">
-                                подписаться
-                            </button>
+                        <div class="image-fallback main-block-fallback" style="display: none;">
+                            <div style="background-color: #2e2e2e; border-radius: 25px; padding: 40px 20px; text-align: center; position: relative;">
+                                <div style="width: 80px; height: 80px; background-color: #000; border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; color: #01dbff; font-size: 36px; font-weight: bold;">V</div>
+                                <div style="color: white; font-size: 18px; font-weight: 600; letter-spacing: 1px; margin-bottom: 20px;">VOLT LOGISTICS</div>
+                                <button style="background-color: #01dbff; color: #000000; border: none; border-radius: 20px; padding: 12px 40px; font-size: 14px; font-weight: 600; cursor: pointer; text-transform: uppercase; min-width: 200px;" onclick="openTelegramChannel()">ПОДПИСАТЬСЯ</button>
+                            </div>
                         </div>
                     </div>
-                </div>
-
-                <!-- Кнопка назад -->
-                <div class="back-section">
-                    <button class="back-arrow-button" onclick="navigateTo('home')">
-                        <span class="back-arrow">←</span>
-                        <span class="back-text">назад</span>
-                    </button>
                 </div>
             </div>
         </div>
 
-        <!-- Остальные страницы остаются без изменений -->
         <!-- Страница профиля -->
         <div id="profile" class="page">
-            <div class="page-header">
-                <div class="page-title">Профиль</div>
-            </div>
-            <div class="page-content">
-                <div class="placeholder-content">
-                    <h3>Страница профиля</h3>
-                    <p>Здесь будет информация о пользователе</p>
+    <div class="profile-page-container">
+        <!-- Сетка карточек профиля -->
+        <div class="profile-grid">
+            <!-- Мой профиль -->
+            <div class="profile-card" onclick="navigateTo('my-profile')">
+                <div class="profile-card-content">
+                    <div class="profile-avatar-container">
+                        <img id="userAvatar" src="/placeholder.svg" alt="User Avatar" class="profile-avatar" style="display: none;">
+                        <div class="profile-avatar-fallback">👤</div>
+                    </div>
+                    <div class="profile-card-text">
+                        <div class="profile-card-title">МОЙ</div>
+                        <div class="profile-card-title">ПРОФИЛЬ</div>
+                    </div>
                 </div>
             </div>
+
+            <!-- Мои заказы -->
+            <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/profile_orders.png" 
+                 alt="Мои заказы" 
+                 class="profile-card-image"
+                 onclick="navigateTo('my-orders')"
+                 onerror="handleImageError(this, 'ЗАКАЗЫ')"
+                 onload="handleImageLoad(this)">
+
+            <!-- Реферальная программа -->
+            <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/profile_referal.png" 
+                 alt="Реферальная программа" 
+                 class="profile-card-image"
+                 onclick="navigateTo('referral')"
+                 onerror="handleImageError(this, 'РЕФЕРАЛ')"
+                 onload="handleImageLoad(this)">
+
+            <!-- Панель менеджера (только для определенных пользователей) -->
+            <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/profile_mgmt.png" 
+                 alt="Панель менеджера" 
+                 class="profile-card-image manager-panel"
+                 onclick="navigateTo('manager-panel')"
+                 onerror="handleImageError(this, 'МЕНЕДЖЕР')"
+                 onload="handleImageLoad(this)"
+                 style="display: none;">
         </div>
+    </div>
+</div>
 
         <!-- Страница чата -->
         <div id="chat" class="page">
@@ -897,57 +1150,127 @@
     </div>
 
     <!-- Стильная кнопка назад для остальных страниц -->
-    <button class="stylish-back-button" id="backButton" onclick="navigateTo('home')">
+    <button class="stylish-back-button" id="backButton" onclick="goBack()">
         <span class="back-arrow-icon">←</span>
         <span>назад</span>
     </button>
 
+    <!-- Страница "Мой профиль" -->
+<div id="my-profile" class="page">
+    <div class="page-header">
+        <div class="page-title">Мой профиль</div>
+    </div>
+    <div class="page-content">
+        <div class="placeholder-content">
+            <h3>Информация о профиле</h3>
+            <p>Здесь будет информация о пользователе</p>
+        </div>
+    </div>
+</div>
+
+<!-- Страница "Мои заказы" -->
+<div id="my-orders" class="page">
+    <div class="page-header">
+        <div class="page-title">Мои заказы</div>
+    </div>
+    <div class="page-content">
+        <div class="placeholder-content">
+            <h3>История заказов</h3>
+            <p>Здесь будет список ваших заказов</p>
+        </div>
+    </div>
+</div>
+
+<!-- Страница "Реферальная программа" -->
+<div id="referral" class="page">
+    <div class="page-header">
+        <div class="page-title">Реферальная программа</div>
+    </div>
+    <div class="page-content">
+        <div class="placeholder-content">
+            <h3>Пригласите друзей</h3>
+            <p>Получайте бонусы за приглашенных друзей</p>
+        </div>
+    </div>
+</div>
+
+<!-- Страница "Панель менеджера" -->
+<div id="manager-panel" class="page">
+    <div class="page-header">
+        <div class="page-title">Панель менеджера</div>
+    </div>
+    <div class="page-content">
+        <div class="placeholder-content">
+            <h3>Управление системой</h3>
+            <p>Инструменты для менеджеров</p>
+        </div>
+    </div>
+</div>
+
     <script>
         // SPA Navigation System
         let currentPage = 'home';
+        let previousPage = 'home';
 
-        function navigateTo(pageId) {
-            // Скрыть текущую страницу
-            const currentPageElement = document.getElementById(currentPage);
-            if (currentPageElement) {
-                currentPageElement.classList.remove('active');
-            }
+function navigateTo(pageId) {
+    // Сохранить текущую страницу как предыдущую
+    previousPage = currentPage;
+    
+    // Скрыть текущую страницу
+    const currentPageElement = document.getElementById(currentPage);
+    if (currentPageElement) {
+        currentPageElement.classList.remove('active');
+    }
 
-            // Показать новую страницу
-            const newPageElement = document.getElementById(pageId);
-            if (newPageElement) {
-                newPageElement.classList.add('active');
-                currentPage = pageId;
-            }
+    // Показать новую страницу
+    const newPageElement = document.getElementById(pageId);
+    if (newPageElement) {
+        newPageElement.classList.add('active');
+        currentPage = pageId;
+    }
 
-            // Управление навигацией и кнопкой назад
-            const mainNav = document.getElementById('mainNav');
-            const backButton = document.getElementById('backButton');
+    // Управление навигацией и кнопкой назад
+    const mainNav = document.getElementById('mainNav');
+    const backButton = document.getElementById('backButton');
 
-            if (pageId === 'home') {
-                // Показать навигацию, скрыть кнопку назад
-                setTimeout(() => {
-                    mainNav.classList.add('show');
-                }, 100);
-                backButton.classList.remove('show');
-            } else {
-                // Скрыть навигацию, показать кнопку назад
-                mainNav.classList.remove('show');
-                setTimeout(() => {
-                    backButton.classList.add('show');
-                }, 100);
-            }
+    if (pageId === 'home') {
+        // Показать навигацию, скрыть кнопку назад
+        setTimeout(() => {
+            mainNav.classList.add('show');
+        }, 100);
+        backButton.classList.remove('show');
+    } else {
+        // Скрыть навигацию, показать кнопку назад
+        mainNav.classList.remove('show');
+        setTimeout(() => {
+            backButton.classList.add('show');
+        }, 100);
+    }
 
-            // Обновить активную кнопку в навигации
-            updateActiveNavButton(pageId);
+    // Обновить активную кнопку в навигации
+    updateActiveNavButton(pageId);
 
-            // Вибрация при навигации
-            if (navigator.vibrate) {
-                navigator.vibrate(50);
-            }
+    // Вибрация при навигации
+    if (navigator.vibrate) {
+        navigator.vibrate(50);
+    }
 
-            console.log(`Navigated to: ${pageId}`);
-        }
+    console.log(`Navigated to: ${pageId}, Previous: ${previousPage}`);
+}
+
+function goBack() {
+    // Определить, куда возвращаться
+    let targetPage = 'home';
+    
+    // Если текущая страница - подстраница профиля, вернуться к профилю
+    if (['my-profile', 'my-orders', 'referral', 'manager-panel'].includes(currentPage)) {
+        targetPage = 'profile';
+    } else {
+        targetPage = 'home';
+    }
+    
+    navigateTo(targetPage);
+}
 
         function updateActiveNavButton(pageId) {
             // Убрать активный класс со всех кнопок
@@ -976,10 +1299,57 @@
             img.classList.remove('loading');
         }
 
+        // Telegram WebApp integration
+let telegramUser = null;
+const managerIds = [919034275, 372145026, 6432717873];
+
+// Инициализация Telegram WebApp
+function initTelegramWebApp() {
+    if (window.Telegram && window.Telegram.WebApp) {
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        
+        telegramUser = tg.initDataUnsafe?.user;
+        
+        if (telegramUser) {
+            // Установить аватарку пользователя
+            if (telegramUser.photo_url) {
+                const avatarImg = document.getElementById('userAvatar');
+                const avatarFallback = document.querySelector('.profile-avatar-fallback');
+                
+                avatarImg.src = telegramUser.photo_url;
+                avatarImg.style.display = 'block';
+                avatarFallback.style.display = 'none';
+            }
+            
+            // Проверить, является ли пользователь менеджером
+            if (managerIds.includes(telegramUser.id)) {
+                const managerPanel = document.querySelector('.manager-panel');
+                if (managerPanel) {
+                    managerPanel.classList.add('show');
+                }
+            }
+            
+            console.log('Telegram user:', telegramUser);
+        }
+    } else {
+        console.log('Telegram WebApp not available');
+        // Fallback для тестирования
+        const testUserId = 919034275; // Для тестирования менеджерской панели
+        if (managerIds.includes(testUserId)) {
+            const managerPanel = document.querySelector('.manager-panel');
+            if (managerPanel) {
+                managerPanel.classList.add('show');
+            }
+        }
+    }
+}
+
         // Инициализация при загрузке
         window.addEventListener('load', function() {
             console.log('Volt Logistics SPA loaded successfully');
             updateActiveNavButton('home');
+            initTelegramWebApp();
             
             // Показать навигацию на главной странице с задержкой
             setTimeout(() => {
