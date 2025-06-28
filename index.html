@@ -38,7 +38,7 @@
         /* Кнопка акций с изображением - исправленная версия */
         .promotions-image-button {
             width: 100%;
-            height: 160px; /* Увеличено с 120px */
+            height: 160px;
             border: none;
             background: transparent;
             padding: 0;
@@ -146,7 +146,7 @@
             background-color: #2e2e2e;
             border-radius: 20px;
             padding: 20px;
-            min-height: 160px; /* Добавлено для выравнивания с другими виджетами */
+            min-height: 160px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -166,7 +166,7 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
-            min-height: 160px; /* Добавлено для выравнивания с другими виджетами */
+            min-height: 160px;
         }
 
         /* Сетка 2x2 для всех 4 приложений */
@@ -196,6 +196,13 @@
             height: 100%;
             object-fit: cover;
             filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.6));
+        }
+
+        /* Специальные закругления для POIZON, Taobao и Yellow - 13 градусов */
+        .small-app.poizon-app img,
+        .small-app.taobao-app img,
+        .small-app.yellow-app img {
+            border-radius: 13px;
         }
 
         /* Черный фон для help приложения */
@@ -266,7 +273,7 @@
         }
 
         .nav-button.active {
-            background-color: #01dbff;
+            background-color: #008BA2;
         }
 
         /* Размеры иконок в меню с тенью */
@@ -365,7 +372,7 @@
             display: none;
             align-items: center;
             justify-content: center;
-            background-color: #01dbff;
+            background-color: #008BA2;
             border-radius: 20px;
             color: white;
             font-weight: bold;
@@ -382,187 +389,422 @@
             100% { opacity: 0.7; }
         }
 
-        /* Telegram Page Styles - правильная структура как в оригинале */
-        .telegram-page {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: space-between;
-            min-height: calc(100vh - 140px);
-            padding: 40px 20px 40px;
-            gap: 40px;
-        }
-
-        /* Верхний прямоугольник с Telegram */
-        .telegram-header-card {
-            background-color: #2e2e2e;
-            border-radius: 20px;
+        /* НОВЫЕ СТИЛИ ДЛЯ ТОЧНОГО КОПИРОВАНИЯ FIGMA ДИЗАЙНА */
+        .figma-order-page {
             padding: 20px;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            width: 100%;
-            max-width: 300px;
+            max-width: 375px;
+            margin: 0 auto;
+            background-color: #141414;
         }
 
-        .telegram-icon-container {
-            position: relative;
+        /* Заголовок с иконкой корзины */
+        .figma-header {
+          background: transparent;
+          border-radius: 20px;
+          padding: 0;
+          margin-bottom: 24px;
+          overflow: hidden;
         }
 
-        .telegram-icon {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
+        .figma-header img {
+          width: 100%;
+          height: auto;
+          object-fit: contain;
+          filter: drop-shadow(2px 2px 6px rgba(0, 0, 0, 0.3));
         }
 
-        .telegram-fallback {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background-color: #01dbff;
+        /* Лейблы полей */
+        .figma-label {
             color: white;
-            font-size: 20px;
-        }
-
-        .telegram-title {
-            text-align: left;
-        }
-
-        .company-name {
-            font-size: 18px;
-            font-weight: 600;
-            color: white;
-            margin-bottom: 2px;
-        }
-
-        .channel-description {
-            font-size: 13px;
-            color: #737373;
-        }
-
-        /* Центральная секция - круг над прямоугольником */
-        .main-content-section {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            flex: 1;
-            justify-content: center;
-            position: relative;
-        }
-
-        /* Контейнер для круга и прямоугольника */
-        .logo-and-card-container {
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        /* Круглый контейнер с логотипом - лежит НАД прямоугольником */
-        .main-logo-circle {
-            width: 120px;
-            height: 120px;
-            background-color: #000;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 15px;
-            position: relative;
-            z-index: 2;
-            margin-bottom: -30px; /* Перекрытие с прямоугольником */
-        }
-
-        .main-logo-image {
-            width: 80px;
-            height: 80px;
-            object-fit: contain;
-        }
-
-        .main-logo-fallback {
-            width: 80px;
-            height: 80px;
-            background-color: #01dbff;
-            color: white;
-            font-size: 45px;
-            border-radius: 50%;
-        }
-
-        /* Прямоугольник с названием компании и кнопкой */
-        .company-card-with-button {
-            background-color: #2e2e2e;
-            border-radius: 25px;
-            padding: 50px 30px 30px 30px; /* Больше отступ сверху для круга */
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-            min-width: 250px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .main-logo-text {
             font-size: 16px;
-            font-weight: 600;
-            color: white;
-            letter-spacing: 1px;
-            margin-top: 10px;
+            font-weight: 400;
+            margin-bottom: 12px;
+            display: block;
         }
 
-        /* Кнопка подписаться с черным текстом */
-        .subscribe-button {
-            background-color: #01dbff;
-            color: #000000; /* ЧЕРНЫЙ текст как в оригинале */
+        /* Селекты и инпуты в стиле Figma */
+        .figma-select,
+        .figma-input,
+        .figma-textarea {
+            background-color: #00BCD4;
             border: none;
-            border-radius: 20px;
-            padding: 12px 40px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.15s ease;
-            text-transform: lowercase;
-            min-width: 140px;
+            border-radius: 11px;
+            padding: 16px 20px;
+            color: white;
+            font-size: 16px;
+            font-weight: 500;
+            width: 100%;
+            box-sizing: border-box;
+            margin-bottom: 24px;
         }
 
-        .subscribe-button:hover {
-            background-color: #00c4e6;
-            transform: translateY(-1px);
+        .figma-select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 16px center;
+            background-repeat: no-repeat;
+            background-size: 16px;
+            padding-right: 50px;
         }
 
-        .subscribe-button:active {
-            transform: translateY(0);
+        .figma-select option {
+            background-color: #00BCD4;
+            color: white;
         }
 
-        /* Кнопка назад */
-        .back-section {
-            align-self: center;
+        .figma-select option:disabled {
+            background-color: #666;
+            color: #999;
         }
 
-        .back-arrow-button {
+        .figma-textarea {
+            resize: none;
+            min-height: 60px;
+        }
+
+        .figma-select:focus,
+        .figma-input:focus,
+        .figma-textarea:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(0, 188, 212, 0.5);
+        }
+
+        .figma-select::placeholder,
+        .figma-input::placeholder,
+        .figma-textarea::placeholder {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* Секция товаров с горизонтальным скроллом */
+        .figma-products-section {
+            margin-bottom: 24px;
+        }
+
+        .figma-product-tabs {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            overflow-x: auto;
+            overflow-y: visible;
+            padding: 4px 0;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            scroll-behavior: smooth;
+        }
+
+        .figma-product-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Добавить индикатор скролла */
+        .figma-product-tabs::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 20px;
+            background: linear-gradient(to right, transparent, #141414);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .figma-product-tabs.scrollable::after {
+            opacity: 1;
+        }
+
+        .figma-product-tab {
             background: none;
             border: none;
-            color: #737373;
-            font-size: 14px;
             cursor: pointer;
+            transition: all 0.15s ease;
+            padding: 0;
+            opacity: 0.6;
+            flex-shrink: 0;
+        }
+
+        .figma-product-tab img {
+            height: 35px;
+            width: auto;
+            transition: transform 0.15s ease;
+        }
+
+        .figma-product-tab:hover img {
+            transform: scale(1.05);
+        }
+
+        .figma-product-tab.active {
+            opacity: 1;
+        }
+
+        .figma-add-product {
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            padding: 0;
+            opacity: 0.7;
+            flex-shrink: 0;
+        }
+
+        .figma-add-product img {
+            width: 35px;
+            height: 35px;
+            transition: transform 0.15s ease;
+        }
+
+        .figma-add-product:hover img {
+            transform: scale(1.05);
+        }
+
+        .figma-add-product:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        /* Кнопка добавления фото - ПРИЖАТА К ЛЕВОМУ КРАЮ */
+        .figma-photo-button,
+        .figma-delete-button-image, 
+        .figma-submit-button-image {
+          background: none;
+          border: none;
+          cursor: pointer;
+          transition: transform 0.15s ease;
+          padding: 0;
+          margin: 24px 0;
+          width: 100%;
+          display: flex;
+          justify-content: flex-start;
+        }
+
+        .figma-photo-button img {
+          width: 60%;
+          max-width: 180px;
+          height: auto;
+        }
+
+        .figma-delete-button-image img,
+        .figma-submit-button-image img {
+          width: 100%;
+          max-width: 300px;
+          height: auto;
+        }
+
+        .figma-delete-button-image,
+        .figma-submit-button-image {
+          justify-content: center;
+        }
+
+        .figma-photo-button:hover,
+        .figma-delete-button-image:hover,
+        .figma-submit-button-image:hover {
+          transform: scale(1.02);
+        }
+
+        .figma-photo-button:active,
+        .figma-delete-button-image:active,
+        .figma-submit-button-image:active {
+          transform: scale(0.98);
+        }
+
+        .figma-submit-button-image:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+
+        /* Чекбокс для выбора доставки */
+        .delivery-option {
+            margin-bottom: 24px;
+        }
+
+        .delivery-option label {
             display: flex;
             align-items: center;
-            gap: 8px;
-            padding: 12px 16px;
-            transition: color 0.15s ease;
-        }
-
-        .back-arrow-button:hover {
+            gap: 12px;
+            cursor: pointer;
             color: white;
-        }
-
-        .back-arrow {
             font-size: 16px;
         }
 
-        .back-text {
-            font-weight: 400;
+        .delivery-option input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: #00BCD4;
+        }
+
+        /* Анимация для кнопки подписаться на странице main */
+        .main-button-image {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .main-button-image:active {
+            transform: scale(0.95);
+            filter: brightness(1.1) drop-shadow(2px 2px 8px rgba(0, 0, 0, 0.3));
+        }
+
+        .main-button-image.clicked {
+            animation: subscribeClick 0.6s ease-out;
+        }
+
+        @keyframes subscribeClick {
+            0% {
+                transform: scale(1);
+            }
+            25% {
+                transform: scale(0.95) rotate(-2deg);
+            }
+            50% {
+                transform: scale(1.05) rotate(1deg);
+            }
+            75% {
+                transform: scale(0.98) rotate(-0.5deg);
+            }
+            100% {
+                transform: scale(1) rotate(0deg);
+            }
+        }
+
+        /* Модальное окно */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: #2e2e2e;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid #444;
+        }
+
+        .modal-header h3 {
+            color: white;
+            margin: 0;
+            font-size: 18px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: #999;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-close:hover {
+            color: white;
+        }
+
+        .modal-body {
+            padding: 20px;
+            color: white;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 10px;
+            padding: 20px;
+            border-top: 1px solid #444;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.15s ease;
+        }
+
+        .cancel-btn {
+            background-color: #666;
+            color: white;
+        }
+
+        .cancel-btn:hover {
+            background-color: #555;
+        }
+
+        .submit-btn {
+            background-color: #00BCD4;
+            color: white;
+        }
+
+        .submit-btn:hover {
+            background-color: #00ACC1;
+        }
+
+        .preview-item {
+            background-color: #1a1a1a;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .preview-item h4 {
+            color: #00BCD4;
+            margin: 0 0 10px 0;
+            font-size: 16px;
+        }
+
+        .preview-field {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .preview-field-label {
+            color: #999;
+        }
+
+        .preview-field-value {
+            color: white;
+            font-weight: 500;
         }
 
         /* Стили для страницы main с изображением */
@@ -613,57 +855,6 @@
             display: flex;
             align-items: center;
             justify-content: center;
-        }
-
-        .fallback-content {
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .fallback-logo {
-            width: 80px;
-            height: 80px;
-            background-color: #000;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #01dbff;
-            font-size: 36px;
-            font-weight: bold;
-        }
-
-        .fallback-title {
-            color: white;
-            font-size: 18px;
-            font-weight: 600;
-            letter-spacing: 1px;
-        }
-
-        .fallback-button {
-            background-color: #01dbff;
-            color: #000000;
-            border: none;
-            border-radius: 20px;
-            padding: 12px 40px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.15s ease;
-            text-transform: uppercase;
-            min-width: 140px;
-        }
-
-        .fallback-button:hover {
-            background-color: #00c4e6;
-            transform: translateY(-1px);
-        }
-
-        .fallback-button:active {
-            transform: translateY(0);
         }
 
         /* Стили для страницы main с отдельными компонентами */
@@ -783,14 +974,14 @@
             height: 60px;
             border-radius: 50%;
             object-fit: cover;
-            border: 2px solid #01dbff;
+            border: 2px solid #00BCD4;
         }
 
         .profile-avatar-fallback {
             width: 60px;
             height: 60px;
             border-radius: 50%;
-            background-color: #01dbff;
+            background-color: #00BCD4;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -830,6 +1021,104 @@
 
         .manager-panel.show {
             display: block;
+        }
+
+        /* Предпросмотр загруженных фото */
+        .photo-preview-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin: 16px 0;
+        }
+
+        .photo-preview-item {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: #2e2e2e;
+        }
+
+        .photo-preview-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .photo-delete-btn {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: rgba(255, 68, 68, 0.9);
+            border: 1px solid white;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s ease;
+            backdrop-filter: blur(4px);
+        }
+
+        .photo-delete-btn:hover {
+            background-color: rgba(204, 0, 0, 0.9);
+            transform: scale(1.1);
+        }
+    
+
+        /* Стили для валидации */
+        .validation-error {
+            background-color: rgba(255, 68, 68, 0.1);
+            border: 1px solid #ff4444;
+            color: #ff6666;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .validation-error.show {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .field-error {
+            border-color: #ff4444 !important;
+            box-shadow: 0 0 0 2px rgba(255, 68, 68, 0.2) !important;
+        }
+
+        /* Стили для фото в модальном окне */
+        .modal-photos {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .modal-photo {
+            width: 40px;
+            height: 40px;
+            border-radius: 4px;
+            object-fit: cover;
+            border: 1px solid #444;
         }
     </style>
 </head>
@@ -904,18 +1193,20 @@
                 <!-- Виджет приложений в едином стиле -->
                 <div class="apps-widget">
                     <div class="apps-grid">
-                        <!-- Help приложение с черным фоном (поменяно местами с POIZON) -->
+                        <!-- Help приложение с черным фоном -->
                         <div class="small-app help-app" onclick="navigateTo('help')">
                             <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/v55_13.png" alt="Help App">
                         </div>
-                        <div class="small-app" onclick="navigateTo('taobao')">
+                        <!-- Taobao приложение с закруглением 13px -->
+                        <div class="small-app taobao-app" onclick="navigateTo('taobao')">
                             <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/v1_9.png" alt="Taobao App">
                         </div>
-                        <div class="small-app" onclick="navigateTo('yellow')">
+                        <!-- Yellow приложение с закруглением 13px -->
+                        <div class="small-app yellow-app" onclick="navigateTo('yellow')">
                             <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/v1_11.png" alt="Yellow App">
                         </div>
-                        <!-- POIZON приложение (поменяно местами с Help) -->
-                        <div class="small-app" onclick="navigateTo('poizon')">
+                        <!-- POIZON приложение с закруглением 13px -->
+                        <div class="small-app poizon-app" onclick="navigateTo('poizon')">
                             <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/v1_8.png" alt="POIZON App">
                         </div>
                     </div>
@@ -938,7 +1229,7 @@
                          onload="handleImageLoad(this)">
                     <div class="image-fallback main-tg-fallback" style="display: none;">
                         <div style="display: flex; align-items: center; gap: 12px; padding: 16px; background-color: #2e2e2e; border-radius: 20px;">
-                            <div style="width: 40px; height: 40px; background-color: #01dbff; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px;">✈</div>
+                            <div style="width: 40px; height: 40px; background-color: #00BCD4; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px;">✈</div>
                             <div>
                                 <div style="color: white; font-weight: 600;">Volt Logistics</div>
                                 <div style="color: #737373; font-size: 13px;">наш телеграм канал</div>
@@ -968,15 +1259,15 @@
                                  onload="handleImageLoad(this)"
                                  style="cursor: pointer; width: 250px; height: auto;">
                             <div class="image-fallback main-button-fallback" style="display: none;">
-                                <button style="background-color: #01dbff; color: #000000; border: none; border-radius: 20px; padding: 12px 40px; font-size: 14px; font-weight: 600; cursor: pointer; text-transform: uppercase; min-width: 200px;" onclick="openTelegramChannel()">ПОДПИСАТЬСЯ</button>
+                                <button style="background-color: #00BCD4; color: #000000; border: none; border-radius: 20px; padding: 12px 40px; font-size: 14px; font-weight: 600; cursor: pointer; text-transform: uppercase; min-width: 200px;" onclick="openTelegramChannel()">ПОДПИСАТЬСЯ</button>
                             </div>
                         </div>
 
                         <div class="image-fallback main-block-fallback" style="display: none;">
                             <div style="background-color: #2e2e2e; border-radius: 25px; padding: 40px 20px; text-align: center; position: relative;">
-                                <div style="width: 80px; height: 80px; background-color: #000; border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; color: #01dbff; font-size: 36px; font-weight: bold;">V</div>
+                                <div style="width: 80px; height: 80px; background-color: #000; border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; color: #00BCD4; font-size: 36px; font-weight: bold;">V</div>
                                 <div style="color: white; font-size: 18px; font-weight: 600; letter-spacing: 1px; margin-bottom: 20px;">VOLT LOGISTICS</div>
-                                <button style="background-color: #01dbff; color: #000000; border: none; border-radius: 20px; padding: 12px 40px; font-size: 14px; font-weight: 600; cursor: pointer; text-transform: uppercase; min-width: 200px;" onclick="openTelegramChannel()">ПОДПИСАТЬСЯ</button>
+                                <button style="background-color: #00BCD4; color: #000000; border: none; border-radius: 20px; padding: 12px 40px; font-size: 14px; font-weight: 600; cursor: pointer; text-transform: uppercase; min-width: 200px;" onclick="openTelegramChannel()">ПОДПИСАТЬСЯ</button>
                             </div>
                         </div>
                     </div>
@@ -986,50 +1277,50 @@
 
         <!-- Страница профиля -->
         <div id="profile" class="page">
-    <div class="profile-page-container">
-        <!-- Сетка карточек профиля -->
-        <div class="profile-grid">
-            <!-- Мой профиль -->
-            <div class="profile-card" onclick="navigateTo('my-profile')">
-                <div class="profile-card-content">
-                    <div class="profile-avatar-container">
-                        <img id="userAvatar" src="/placeholder.svg" alt="User Avatar" class="profile-avatar" style="display: none;">
-                        <div class="profile-avatar-fallback">👤</div>
+            <div class="profile-page-container">
+                <!-- Сетка карточек профиля -->
+                <div class="profile-grid">
+                    <!-- Мой профиль -->
+                    <div class="profile-card" onclick="navigateTo('my-profile')">
+                        <div class="profile-card-content">
+                            <div class="profile-avatar-container">
+                                <img id="userAvatar" src="/placeholder.svg" alt="User Avatar" class="profile-avatar" style="display: none;">
+                                <div class="profile-avatar-fallback">👤</div>
+                            </div>
+                            <div class="profile-card-text">
+                                <div class="profile-card-title">МОЙ</div>
+                                <div class="profile-card-title">ПРОФИЛЬ</div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="profile-card-text">
-                        <div class="profile-card-title">МОЙ</div>
-                        <div class="profile-card-title">ПРОФИЛЬ</div>
-                    </div>
+
+                    <!-- Мои заказы -->
+                    <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/profile_orders.png" 
+                         alt="Мои заказы" 
+                         class="profile-card-image"
+                         onclick="navigateTo('my-orders')"
+                         onerror="handleImageError(this, 'ЗАКАЗЫ')"
+                         onload="handleImageLoad(this)">
+
+                    <!-- Реферальная программа -->
+                    <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/profile_referal.png" 
+                         alt="Реферальная программа" 
+                         class="profile-card-image"
+                         onclick="navigateTo('referral')"
+                         onerror="handleImageError(this, 'РЕФЕРАЛ')"
+                         onload="handleImageLoad(this)">
+
+                    <!-- Панель менеджера (только для определенных пользователей) -->
+                    <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/profile_mgmt.png" 
+                         alt="Панель менеджера" 
+                         class="profile-card-image manager-panel"
+                         onclick="navigateTo('manager-panel')"
+                         onerror="handleImageError(this, 'МЕНЕДЖЕР')"
+                         onload="handleImageLoad(this)"
+                         style="display: none;">
                 </div>
             </div>
-
-            <!-- Мои заказы -->
-            <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/profile_orders.png" 
-                 alt="Мои заказы" 
-                 class="profile-card-image"
-                 onclick="navigateTo('my-orders')"
-                 onerror="handleImageError(this, 'ЗАКАЗЫ')"
-                 onload="handleImageLoad(this)">
-
-            <!-- Реферальная программа -->
-            <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/profile_referal.png" 
-                 alt="Реферальная программа" 
-                 class="profile-card-image"
-                 onclick="navigateTo('referral')"
-                 onerror="handleImageError(this, 'РЕФЕРАЛ')"
-                 onload="handleImageLoad(this)">
-
-            <!-- Панель менеджера (только для определенных пользователей) -->
-            <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/profile_mgmt.png" 
-                 alt="Панель менеджера" 
-                 class="profile-card-image manager-panel"
-                 onclick="navigateTo('manager-panel')"
-                 onerror="handleImageError(this, 'МЕНЕДЖЕР')"
-                 onload="handleImageLoad(this)"
-                 style="display: none;">
         </div>
-    </div>
-</div>
 
         <!-- Страница чата -->
         <div id="chat" class="page">
@@ -1070,18 +1361,142 @@
             </div>
         </div>
 
+        <!-- СТРАНИЦА ЗАКАЗА В ТОЧНОМ СООТВЕТСТВИИ С FIGMA ДИЗАЙНОМ -->
         <div id="order" class="page">
-            <div class="page-header">
-                <div class="page-title">Оформить заказ</div>
-            </div>
-            <div class="page-content">
-                <div class="placeholder-content">
-                    <h3>Форма заказа</h3>
-                    <p>Здесь будет форма для оформления заказа</p>
+            <div class="figma-order-page">
+                <!-- Заголовок с изображением из GitHub -->
+                <div class="figma-header">
+                    <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/order_table.png" 
+                         alt="Volt Logistics - Оформить заказ" 
+                         style="width: 100%; height: auto; object-fit: contain;"
+                         onerror="handleImageError(this, 'ОФОРМИТЬ ЗАКАЗ')"
+                         onload="handleImageLoad(this)">
+                    <div class="image-fallback" style="display: none;">
+                        <div style="display: flex; align-items: center; gap: 12px; padding: 16px; background-color: #4A4A4A; border-radius: 20px; color: white;">
+                            <div style="width: 24px; height: 24px; background-color: #00BCD4; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 14px;">🛒</div>
+                            <div>
+                                <div style="font-size: 18px; font-weight: 600;">Volt Logistics</div>
+                                <div style="font-size: 14px; opacity: 0.8;">оформить заказ</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+
+                <!-- Форма заказа -->
+                <form id="figmaOrderForm">
+                    <!-- Выбор страны выкупа -->
+                    <label class="figma-label">Выберите страну выкупа</label>
+                    <select id="figmaCountry" class="figma-select" onchange="handleFigmaCountryChange(this.value)">
+                        <option value="">Выберите страну</option>
+                        <option value="china">Китай</option>
+                        <option value="japan">Япония</option>
+                    </select>
+
+                    <!-- Секция товаров -->
+                    <div id="figmaProductsSection" style="display: none;">
+                        <label class="figma-label">Добавьте товар[ы]</label>
+                        <div class="figma-product-tabs">
+                            <button type="button" class="figma-product-tab active" onclick="selectFigmaProduct(1)">
+                                <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/order_item1.png" alt="Товар 1">
+                            </button>
+                            <button type="button" class="figma-product-tab" onclick="selectFigmaProduct(2)" style="display: none;">
+                                <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/order_item2.png" alt="Товар 2">
+                            </button>
+                            <button type="button" class="figma-product-tab" onclick="selectFigmaProduct(3)" style="display: none;">
+                                <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/order_item3.png" alt="Товар 3">
+                            </button>
+                            <button type="button" class="figma-add-product" onclick="addFigmaProduct()">
+                                <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/order_add_item.png" alt="Добавить товар">
+                            </button>
+                        </div>
+
+    <!-- Выбор площадки (только для Китая) -->
+    <div id="figmaMarketplaceSection">
+        <label class="figma-label">Выберите площадку</label>
+        <select id="figmaMarketplace" class="figma-select">
+            <option value="">Выберите площадку</option>
+            <option value="category1">Категория 1 (POIZON, TaoBao, Weidan)</option>
+            <option value="category2">Категория 2 (WeChat, Yupoo, GooFish)</option>
+        </select>
+    </div>
+
+    <!-- Загрузка фото с изображением из GitHub -->
+    <label class="figma-label">Загрузите фото товара</label>
+    <button type="button" class="figma-photo-button" onclick="uploadFigmaPhoto()">
+        <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/order_add_photo.png" 
+             alt="Добавить фото">
+    </button>
+    <input type="file" id="figmaPhotoInput" accept="image/*" multiple style="display: none;" onchange="handleFigmaPhotoUpload(this)">
+    
+    <!-- Контейнер для предпросмотра фото -->
+    <div id="photoPreviewContainer" class="photo-preview-container"></div>
+
+    <!-- Поля товара -->
+    <label class="figma-label" id="figmaLinkLabel">Вставьте ссылку</label>
+    <input type="url" id="figmaLink" class="figma-input" placeholder="">
+
+    <label class="figma-label">Введите цену</label>
+    <input type="number" id="figmaPrice" class="figma-input" placeholder="" step="0.01" min="0">
+
+    <label class="figma-label">Введите цвет</label>
+    <input type="text" id="figmaColor" class="figma-input" placeholder="">
+
+    <label class="figma-label">Введите размер</label>
+    <input type="text" id="figmaSize" class="figma-input" placeholder="">
+
+    <label class="figma-label">Введите количество</label>
+    <input type="number" id="figmaQuantity" class="figma-input" placeholder="" min="1" max="99" value="1">
+
+    <label class="figma-label">Введите комментарий</label>
+    <textarea id="figmaComment" class="figma-textarea" placeholder=""></textarea>
+
+    <!-- Кнопка удаления товара с изображением из GitHub -->
+    <button type="button" class="figma-delete-button-image" onclick="deleteFigmaProduct()">
+        <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/order_button2.png" 
+             alt="Удалить товар">
+    </button>
+</div>
+
+<!-- Данные получателя -->
+<div id="figmaRecipientSection" style="display: none;">
+    <!-- Выбор способа доставки -->
+    <label class="figma-label">Выберите способ доставки</label>
+    <select id="deliveryType" class="figma-select" onchange="handleDeliveryTypeChange(this.value)">
+        <option value="same">Доставить все товары на один адрес</option>
+        <option value="different">Доставить товары на разные адреса</option>
+    </select>
+
+    <!-- Контейнер для ошибок валидации -->
+    <div id="validationError" class="validation-error"></div>
+
+    <!-- Общие данные получателя (для одного адреса) -->
+    <div id="commonRecipientData">
+        <label class="figma-label">Введите Ваше ФИО</label>
+        <input type="text" id="figmaRecipientName" class="figma-input" placeholder="">
+
+        <label class="figma-label">Введите Ваш юзернейм</label>
+        <input type="text" id="figmaRecipientUsername" class="figma-input" placeholder="">
+
+        <label class="figma-label">Введите Ваш ПВЗ СДЭК</label>
+        <textarea id="figmaRecipientAddress" class="figma-textarea" placeholder=""></textarea>
+    </div>
+
+    <!-- Индивидуальные данные для каждого товара (для разных адресов) -->
+    <div id="individualRecipientData" style="display: none;">
+        <div id="recipientDataContainer"></div>
+    </div>
+
+    <!-- Кнопка создания заказа с изображением из GitHub -->
+    <button type="button" class="figma-submit-button-image" onclick="submitFigmaOrder()">
+        <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/order_button1.png" 
+             alt="Создать заказ">
+    </button>
+</div>
+</form>
             </div>
         </div>
 
+        <!-- Остальные страницы -->
         <div id="currency" class="page">
             <div class="page-header">
                 <div class="page-title">Актуальный курс</div>
@@ -1117,276 +1532,129 @@
                 </div>
             </div>
         </div>
+
+        <!-- Страница "Мой профиль" -->
+        <div id="my-profile" class="page">
+            <div class="page-header">
+                <div class="page-title">Мой профиль</div>
+            </div>
+            <div class="page-content">
+                <div class="placeholder-content">
+                    <h3>Информация о профиле</h3>
+                    <p>Здесь будет информация о пользователе</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Страница "Мои заказы" -->
+        <div id="my-orders" class="page">
+            <div class="page-header">
+                <div class="page-title">Мои заказы</div>
+            </div>
+            <div class="page-content">
+                <div class="placeholder-content">
+                    <h3>История заказов</h3>
+                    <p>Здесь будет список ваших заказов</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Страница "Реферальная программа" -->
+        <div id="referral" class="page">
+            <div class="page-header">
+                <div class="page-title">Реферальная программа</div>
+            </div>
+            <div class="page-content">
+                <div class="placeholder-content">
+                    <h3>Пригласите друзей</h3>
+                    <p>Получайте бонусы за приглашенных друзей</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Страница "Панель менеджера" -->
+        <div id="manager-panel" class="page">
+            <div class="page-header">
+                <div class="page-title">Панель менеджера</div>
+            </div>
+            <div class="page-content">
+                <div class="placeholder-content">
+                    <h3>Управление системой</h3>
+                    <p>Инструменты для менеджеров</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Дополнительные страницы приложений -->
+        <div id="help" class="page">
+            <div class="page-header">
+                <div class="page-title">Помощь</div>
+            </div>
+            <div class="page-content">
+                <div class="placeholder-content">
+                    <h3>Центр помощи</h3>
+                    <p>Здесь вы найдете ответы на часто задаваемые вопросы</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="taobao" class="page">
+            <div class="page-header">
+                <div class="page-title">Taobao</div>
+            </div>
+            <div class="page-content">
+                <div class="placeholder-content">
+                    <h3>Taobao Marketplace</h3>
+                    <p>Покупки с китайской площадки Taobao</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="yellow" class="page">
+            <div class="page-header">
+                <div class="page-title">Yellow App</div>
+            </div>
+            <div class="page-content">
+                <div class="placeholder-content">
+                    <h3>Yellow Application</h3>
+                    <p>Специальное приложение для заказов</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="poizon" class="page">
+            <div class="page-header">
+                <div class="page-title">POIZON</div>
+            </div>
+            <div class="page-content">
+                <div class="placeholder-content">
+                    <h3>POIZON Marketplace</h3>
+                    <p>Покупки с площадки POIZON</p>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- Фиксированное меню с анимацией - только для главной страницы -->
+    <!-- Фиксированное меню -->
     <div class="fixed-nav" id="mainNav">
-        <button class="nav-button nav-button-profile" onclick="navigateTo('profile')" aria-label="Профиль" data-page="profile">
-            <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/v28_55.png" 
-                 alt="Profile" 
-                 class="loading"
-                 onerror="handleImageError(this, '👤')"
-                 onload="handleImageLoad(this)">
-            <div class="image-fallback" style="width: 32px; height: 32px; font-size: 12px;">👤</div>
+        <button class="nav-button nav-button-profile" onclick="navigateTo('profile')" aria-label="Профиль">
+            <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/v28_55.png" alt="Profile">
         </button>
-        
-        <button class="nav-button nav-button-chat" onclick="navigateTo('chat')" aria-label="Чат" data-page="chat">
-            <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/v55_7.png" 
-                 alt="Chat" 
-                 class="loading"
-                 onerror="handleImageError(this, '💬')"
-                 onload="handleImageLoad(this)">
-            <div class="image-fallback" style="width: 48px; height: 48px; font-size: 16px;">💬</div>
+        <button class="nav-button nav-button-chat" onclick="navigateTo('chat')" aria-label="Чат">
+            <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/v55_7.png" alt="Chat">
         </button>
-        
-        <button class="nav-button nav-button-lock" onclick="navigateTo('security')" aria-label="Безопасность" data-page="security">
-            <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/v177_2.png" 
-                 alt="Security Lock" 
-                 class="loading"
-                 onerror="handleImageError(this, '🔒')"
-                 onload="handleImageLoad(this)">
-            <div class="image-fallback" style="width: 34px; height: 34px; font-size: 12px;">🔒</div>
+        <button class="nav-button nav-button-lock" onclick="navigateTo('security')" aria-label="Безопасность">
+            <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/v177_2.png" alt="Security">
         </button>
     </div>
 
-    <!-- Стильная кнопка назад для остальных страниц -->
+    <!-- Кнопка назад -->
     <button class="stylish-back-button" id="backButton" onclick="goBack()">
         <span class="back-arrow-icon">←</span>
         <span>назад</span>
     </button>
 
-    <!-- Страница "Мой профиль" -->
-<div id="my-profile" class="page">
-    <div class="page-header">
-        <div class="page-title">Мой профиль</div>
-    </div>
-    <div class="page-content">
-        <div class="placeholder-content">
-            <h3>Информация о профиле</h3>
-            <p>Здесь будет информация о пользователе</p>
-        </div>
-    </div>
-</div>
-
-<!-- Страница "Мои заказы" -->
-<div id="my-orders" class="page">
-    <div class="page-header">
-        <div class="page-title">Мои заказы</div>
-    </div>
-    <div class="page-content">
-        <div class="placeholder-content">
-            <h3>История заказов</h3>
-            <p>Здесь будет список ваших заказов</p>
-        </div>
-    </div>
-</div>
-
-<!-- Страница "Реферальная программа" -->
-<div id="referral" class="page">
-    <div class="page-header">
-        <div class="page-title">Реферальная программа</div>
-    </div>
-    <div class="page-content">
-        <div class="placeholder-content">
-            <h3>Пригласите друзей</h3>
-            <p>Получайте бонусы за приглашенных друзей</p>
-        </div>
-    </div>
-</div>
-
-<!-- Страница "Панель менеджера" -->
-<div id="manager-panel" class="page">
-    <div class="page-header">
-        <div class="page-title">Панель менеджера</div>
-    </div>
-    <div class="page-content">
-        <div class="placeholder-content">
-            <h3>Управление системой</h3>
-            <p>Инструменты для менеджеров</p>
-        </div>
-    </div>
-</div>
-
-    <script>
-        // SPA Navigation System
-        let currentPage = 'home';
-        let previousPage = 'home';
-
-function navigateTo(pageId) {
-    // Сохранить текущую страницу как предыдущую
-    previousPage = currentPage;
-    
-    // Скрыть текущую страницу
-    const currentPageElement = document.getElementById(currentPage);
-    if (currentPageElement) {
-        currentPageElement.classList.remove('active');
-    }
-
-    // Показать новую страницу
-    const newPageElement = document.getElementById(pageId);
-    if (newPageElement) {
-        newPageElement.classList.add('active');
-        currentPage = pageId;
-    }
-
-    // Управление навигацией и кнопкой назад
-    const mainNav = document.getElementById('mainNav');
-    const backButton = document.getElementById('backButton');
-
-    if (pageId === 'home') {
-        // Показать навигацию, скрыть кнопку назад
-        setTimeout(() => {
-            mainNav.classList.add('show');
-        }, 100);
-        backButton.classList.remove('show');
-    } else {
-        // Скрыть навигацию, показать кнопку назад
-        mainNav.classList.remove('show');
-        setTimeout(() => {
-            backButton.classList.add('show');
-        }, 100);
-    }
-
-    // Обновить активную кнопку в навигации
-    updateActiveNavButton(pageId);
-
-    // Вибрация при навигации
-    if (navigator.vibrate) {
-        navigator.vibrate(50);
-    }
-
-    console.log(`Navigated to: ${pageId}, Previous: ${previousPage}`);
-}
-
-function goBack() {
-    // Определить, куда возвращаться
-    let targetPage = 'home';
-    
-    // Если текущая страница - подстраница профиля, вернуться к профилю
-    if (['my-profile', 'my-orders', 'referral', 'manager-panel'].includes(currentPage)) {
-        targetPage = 'profile';
-    } else {
-        targetPage = 'home';
-    }
-    
-    navigateTo(targetPage);
-}
-
-        function updateActiveNavButton(pageId) {
-            // Убрать активный класс со всех кнопок
-            document.querySelectorAll('.nav-button').forEach(btn => {
-                btn.classList.remove('active');
-            });
-
-            // Добавить активный класс к соответствующей кнопке
-            const activeButton = document.querySelector(`[data-page="${pageId}"]`);
-            if (activeButton) {
-                activeButton.classList.add('active');
-            }
-        }
-
-        function handleImageError(img, fallbackText) {
-            img.style.display = 'none';
-            const fallback = img.nextElementSibling;
-            if (fallback && fallback.classList.contains('image-fallback')) {
-                fallback.style.display = 'flex';
-                fallback.textContent = fallbackText;
-            }
-            console.warn('Failed to load image:', img.src);
-        }
-
-        function handleImageLoad(img) {
-            img.classList.remove('loading');
-        }
-
-        // Telegram WebApp integration
-let telegramUser = null;
-const managerIds = [919034275, 372145026, 6432717873];
-
-// Инициализация Telegram WebApp
-function initTelegramWebApp() {
-    if (window.Telegram && window.Telegram.WebApp) {
-        const tg = window.Telegram.WebApp;
-        tg.ready();
-        
-        telegramUser = tg.initDataUnsafe?.user;
-        
-        if (telegramUser) {
-            // Установить аватарку пользователя
-            if (telegramUser.photo_url) {
-                const avatarImg = document.getElementById('userAvatar');
-                const avatarFallback = document.querySelector('.profile-avatar-fallback');
-                
-                avatarImg.src = telegramUser.photo_url;
-                avatarImg.style.display = 'block';
-                avatarFallback.style.display = 'none';
-            }
-            
-            // Проверить, является ли пользователь менеджером
-            if (managerIds.includes(telegramUser.id)) {
-                const managerPanel = document.querySelector('.manager-panel');
-                if (managerPanel) {
-                    managerPanel.classList.add('show');
-                }
-            }
-            
-            console.log('Telegram user:', telegramUser);
-        }
-    } else {
-        console.log('Telegram WebApp not available');
-        // Fallback для тестирования
-        const testUserId = 919034275; // Для тестирования менеджерской панели
-        if (managerIds.includes(testUserId)) {
-            const managerPanel = document.querySelector('.manager-panel');
-            if (managerPanel) {
-                managerPanel.classList.add('show');
-            }
-        }
-    }
-}
-
-        // Инициализация при загрузке
-        window.addEventListener('load', function() {
-            console.log('Volt Logistics SPA loaded successfully');
-            updateActiveNavButton('home');
-            initTelegramWebApp();
-            
-            // Показать навигацию на главной странице с задержкой
-            setTimeout(() => {
-                document.getElementById('mainNav').classList.add('show');
-            }, 500);
-        });
-
-        // Обработка кнопки "назад" браузера
-        window.addEventListener('popstate', function(event) {
-            if (event.state && event.state.page) {
-                navigateTo(event.state.page);
-            }
-        });
-
-        // Добавление состояния в историю браузера
-        function pushState(pageId) {
-            history.pushState({page: pageId}, '', `#${pageId}`);
-        }
-
-        // Обновленная функция навигации с историей
-        const originalNavigateTo = navigateTo;
-        navigateTo = function(pageId) {
-            originalNavigateTo(pageId);
-            pushState(pageId);
-        };
-
-        function openTelegramChannel() {
-            // Вибрация при нажатии
-            if (navigator.vibrate) {
-                navigator.vibrate(75);
-            }
-            
-            // Открыть Telegram канал
-            window.open('https://t.me/VoltLogistics', '_blank');
-            
-            console.log('Opening Telegram channel: https://t.me/VoltLogistics');
-        }
-    </script>
+    <!-- Подключение JavaScript из GitHub репозитория -->
+    <script src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/script.js"></script>
 </body>
 </html>
