@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Оформить заказ - Volt Logistics</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="figma-order-page">
+        <!-- Заголовок с изображением из GitHub -->
+        <div class="figma-header">
+            <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/order_table.png" 
+                 alt="Volt Logistics - Оформить заказ" 
+                 style="width: 100%; height: auto; object-fit: contain;"
+                 onerror="handleImageError(this, 'ОФОРМИТЬ ЗАКАЗ')"
+                 onload="handleImageLoad(this)">
+            <div class="image-fallback" style="display: none;">
+                <div style="display: flex; align-items: center; gap: 12px; padding: 16px; background-color: #4A4A4A; border-radius: 20px; color: white;">
+                    <div style="width: 24px; height: 24px; background-color: #00BCD4; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 14px;">🛒</div>
+                    <div>
+                        <div style="font-size: 18px; font-weight: 600;">Volt Logistics</div>
+                        <div style="font-size: 14px; opacity: 0.8;">оформить заказ</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Форма заказа -->
+        <form id="figmaOrderForm">
+            <!-- Выбор страны выкупа -->
+            <label class="figma-label">Выберите страну выкупа</label>
+            <select id="figmaCountry" class="figma-select" onchange="handleFigmaCountryChange(this.value)">
+                <option value="">Выберите страну</option>
+                <option value="china">Китай</option>
+                <option value="japan">Япония</option>
+            </select>
+
+            <!-- Секция товаров -->
+            <div id="figmaProductsSection" style="display: none;">
+                <label class="figma-label">Добавьте товар[ы]</label>
+                <div class="figma-product-tabs">
+                    <button type="button" class="figma-product-tab active" onclick="selectFigmaProduct(1)">
+                        <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/order_item1.png" alt="Товар 1">
+                    </button>
+                    <button type="button" class="figma-product-tab" onclick="selectFigmaProduct(2)" style="display: none;">
+                        <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/order_item2.png" alt="Товар 2">
+                    </button>
+                    <button type="button" class="figma-product-tab" onclick="selectFigmaProduct(3)" style="display: none;">
+                        <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/order_item3.png" alt="Товар 3">
+                    </button>
+                    <button type="button" class="figma-add-product" onclick="addFigmaProduct()">
+                        <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/order_add_item.png" alt="Добавить товар">
+                    </button>
+                </div>
+
+                <!-- Выбор площадки (только для Китая) -->
+                <div id="figmaMarketplaceSection">
+                    <label class="figma-label">Выберите площадку</label>
+                    <select id="figmaMarketplace" class="figma-select">
+                        <option value="">Выберите площадку</option>
+                        <option value="category1">Категория 1 (POIZON, TaoBao, Weidan)</option>
+                        <option value="category2">Категория 2 (WeChat, Yupoo, GooFish)</option>
+                    </select>
+                </div>
+
+                <!-- Загрузка фото с изображением из GitHub -->
+                <label class="figma-label">Загрузите фото товара</label>
+                <button type="button" class="figma-photo-button" onclick="uploadFigmaPhoto()">
+                    <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/order_add_photo.png" 
+                         alt="Добавить фото">
+                </button>
+                <input type="file" id="figmaPhotoInput" accept="image/*" multiple style="display: none;" onchange="handleFigmaPhotoUpload(this)">
+                
+                <!-- Контейнер для предпросмотра фото -->
+                <div id="photoPreviewContainer" class="photo-preview-container"></div>
+
+                <!-- Поля товара -->
+                <label class="figma-label" id="figmaLinkLabel">Вставьте ссылку</label>
+                <input type="url" id="figmaLink" class="figma-input" placeholder="">
+
+                <label class="figma-label">Введите цену</label>
+                <input type="number" id="figmaPrice" class="figma-input" placeholder="" step="0.01" min="0">
+
+                <label class="figma-label">Введите цвет</label>
+                <input type="text" id="figmaColor" class="figma-input" placeholder="">
+
+                <label class="figma-label">Введите размер</label>
+                <input type="text" id="figmaSize" class="figma-input" placeholder="">
+
+                <label class="figma-label">Введите количество</label>
+                <input type="number" id="figmaQuantity" class="figma-input" placeholder="" min="1" max="99" value="1">
+
+                <label class="figma-label">Введите комментарий</label>
+                <textarea id="figmaComment" class="figma-textarea" placeholder=""></textarea>
+
+                <!-- Кнопка удаления товара с изображением из GitHub -->
+                <button type="button" class="figma-delete-button-image" onclick="deleteFigmaProduct()">
+                    <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/order_button2.png" 
+                         alt="Удалить товар">
+                </button>
+            </div>
+
+            <!-- Данные получателя -->
+            <div id="figmaRecipientSection" style="display: none;">
+                <!-- Выбор способа доставки -->
+                <label class="figma-label">Выберите способ доставки</label>
+                <select id="deliveryType" class="figma-select" onchange="handleDeliveryTypeChange(this.value)">
+                    <option value="same">Доставить все товары на один адрес</option>
+                    <option value="different">Доставить товары на разные адреса</option>
+                </select>
+
+                <!-- Контейнер для ошибок валидации -->
+                <div id="validationError" class="validation-error"></div>
+
+                <!-- Общие данные получателя (для одного адреса) -->
+                <div id="commonRecipientData">
+                    <label class="figma-label">Введите Ваше ФИО</label>
+                    <input type="text" id="figmaRecipientName" class="figma-input" placeholder="">
+
+                    <label class="figma-label">Введите Ваш юзернейм</label>
+                    <input type="text" id="figmaRecipientUsername" class="figma-input" placeholder="">
+
+                    <label class="figma-label">Введите Ваш ПВЗ СДЭК</label>
+                    <textarea id="figmaRecipientAddress" class="figma-textarea" placeholder=""></textarea>
+                </div>
+
+                <!-- Индивидуальные данные для каждого товара (для разных адресов) -->
+                <div id="individualRecipientData" style="display: none;">
+                    <div id="recipientDataContainer"></div>
+                </div>
+
+                <!-- Кнопка создания заказа с изображением из GitHub -->
+                <button type="button" class="figma-submit-button-image" onclick="submitFigmaOrder()">
+                    <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/order_button1.png" 
+                         alt="Создать заказ">
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Кнопка назад -->
+    <button class="stylish-back-button show" onclick="window.history.back()">
+        <span class="back-arrow-icon">←</span>
+        Назад
+    </button>
+
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

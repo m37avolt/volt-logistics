@@ -1,0 +1,1126 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: #141414;
+    color: white;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+.container {
+    max-width: 375px;
+    margin: 0 auto;
+    padding: 16px;
+    padding-bottom: 100px;
+}
+
+/* SPA Navigation */
+.page {
+    display: none;
+}
+
+.page.active {
+    display: block;
+}
+
+/* Кнопка акций с изображением - исправленная версия */
+.promotions-image-button {
+    width: 100%;
+    height: 160px;
+    border: none;
+    background: transparent;
+    padding: 0;
+    margin: 0 0 12px 0;
+    cursor: pointer;
+    transition: transform 0.15s ease;
+    border-radius: 20px;
+    overflow: hidden;
+    display: block;
+}
+
+.promotions-image-button:active {
+    transform: scale(0.98);
+}
+
+.promotions-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 20px;
+    filter: drop-shadow(2px 2px 6px rgba(0, 0, 0, 0.3));
+    display: block;
+}
+
+/* Основная сетка квадратных карточек */
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.card {
+    background-color: #2e2e2e;
+    border-radius: 20px;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.15s ease;
+    cursor: pointer;
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.card:active {
+    transform: scale(0.98);
+}
+
+.card-gray {
+    background-color: #626262;
+}
+
+/* Главный логотип с закруглением */
+.logo-button {
+    border: none;
+    aspect-ratio: 1;
+    cursor: pointer;
+    transition: transform 0.15s ease;
+    padding: 0;
+    background: transparent;
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.logo-button:active {
+    transform: scale(0.98);
+}
+
+/* Логотип с закругленными краями и тенью */
+.company-logo {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 20px;
+    filter: drop-shadow(2px 2px 6px rgba(0, 0, 0, 0.4));
+}
+
+/* Иконки в карточках с тенью */
+.card-icon {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    margin-bottom: 12px;
+    filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.5));
+}
+
+.card-title {
+    font-size: 18px;
+    font-weight: 500;
+    line-height: 1.1;
+    color: white;
+}
+
+/* Нижняя секция */
+.bottom-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.reviews-card {
+    background-color: #2e2e2e;
+    border-radius: 20px;
+    padding: 20px;
+    min-height: 160px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: transform 0.15s ease;
+}
+
+.reviews-card:active {
+    transform: scale(0.98);
+}
+
+/* Виджет приложений - единый стиль */
+.apps-widget {
+    background-color: #2e2e2e;
+    border-radius: 20px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 160px;
+}
+
+/* Сетка 2x2 для всех 4 приложений */
+.apps-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 8px;
+    width: 100%;
+    height: 100%;
+}
+
+.small-app {
+    border-radius: 16px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.15s ease;
+    position: relative;
+}
+
+.small-app:active {
+    transform: scale(0.95);
+}
+
+.small-app img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.6));
+}
+
+/* Специальные закругления для POIZON, Taobao и Yellow - 13 градусов */
+.small-app.poizon-app img,
+.small-app.taobao-app img,
+.small-app.yellow-app img {
+    border-radius: 13px;
+}
+
+/* Черный фон для help приложения */
+.small-app.help-app {
+    background-color: #000000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.small-app.help-app img {
+    width: 80%;
+    height: 80%;
+    object-fit: contain;
+}
+
+/* Текст внизу */
+.bottom-text {
+    text-align: center;
+    color: #737373;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+/* Фиксированное меню - более узкое и длинное, с анимацией */
+.fixed-nav {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    width: 320px;
+    height: 60px;
+    background-color: rgba(46, 46, 46, 0.9);
+    backdrop-filter: blur(15px);
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    padding: 8px 16px;
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fixed-nav.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+}
+
+/* Кнопки меню - меньше */
+.nav-button {
+    width: 44px;
+    height: 44px;
+    background-color: #000000;
+    border: none;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    position: relative;
+}
+
+.nav-button:active {
+    transform: scale(0.95);
+}
+
+.nav-button.active {
+    background-color: #008BA2;
+}
+
+/* Размеры иконок в меню с тенью */
+.nav-button-profile img {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+    filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.5));
+}
+
+.nav-button-chat img {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.5));
+}
+
+.nav-button-lock img {
+    width: 34px;
+    height: 34px;
+    object-fit: contain;
+    filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.5));
+}
+
+/* Стильная кнопка назад с blur */
+.stylish-back-button {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(15px);
+    border: none;
+    border-radius: 20px;
+    padding: 12px 24px;
+    color: white;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 1000;
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.stylish-back-button.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+}
+
+.stylish-back-button:hover {
+    background-color: rgba(0, 0, 0, 0.8);
+    transform: translateX(-50%) translateY(-2px);
+}
+
+.stylish-back-button:active {
+    transform: translateX(-50%) translateY(0);
+}
+
+.back-arrow-icon {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+/* Страницы SPA */
+.page-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+    padding: 16px 0;
+}
+
+.page-title {
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.page-content {
+    padding: 20px 0;
+}
+
+.placeholder-content {
+    background-color: #2e2e2e;
+    border-radius: 20px;
+    padding: 40px 20px;
+    text-align: center;
+    color: #737373;
+}
+
+/* Fallback styles */
+.image-fallback {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background-color: #008BA2;
+    border-radius: 20px;
+    color: white;
+    font-weight: bold;
+}
+
+.loading {
+    opacity: 0.7;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 0.7; }
+    50% { opacity: 0.3; }
+    100% { opacity: 0.7; }
+}
+
+/* НОВЫЕ СТИЛИ ДЛЯ ТОЧНОГО КОПИРОВАНИЯ FIGMA ДИЗАЙНА */
+.figma-order-page {
+    padding: 20px;
+    max-width: 375px;
+    margin: 0 auto;
+    background-color: #141414;
+}
+
+/* Заголовок с иконкой корзины */
+.figma-header {
+  background: transparent;
+  border-radius: 20px;
+  padding: 0;
+  margin-bottom: 24px;
+  overflow: hidden;
+}
+
+.figma-header img {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(2px 2px 6px rgba(0, 0, 0, 0.3));
+}
+
+/* Лейблы полей */
+.figma-label {
+    color: white;
+    font-size: 16px;
+    font-weight: 400;
+    margin-bottom: 12px;
+    display: block;
+}
+
+/* Селекты и инпуты в стиле Figma */
+.figma-select,
+.figma-input,
+.figma-textarea {
+    background-color: #00BCD4;
+    border: none;
+    border-radius: 11px;
+    padding: 16px 20px;
+    color: white;
+    font-size: 16px;
+    font-weight: 500;
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 24px;
+}
+
+.figma-select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 16px center;
+    background-repeat: no-repeat;
+    background-size: 16px;
+    padding-right: 50px;
+}
+
+.figma-select option {
+    background-color: #00BCD4;
+    color: white;
+}
+
+.figma-select option:disabled {
+    background-color: #666;
+    color: #999;
+}
+
+.figma-textarea {
+    resize: none;
+    min-height: 60px;
+}
+
+.figma-select:focus,
+.figma-input:focus,
+.figma-textarea:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 188, 212, 0.5);
+}
+
+.figma-select::placeholder,
+.figma-input::placeholder,
+.figma-textarea::placeholder {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/* Секция товаров с горизонтальным скроллом */
+.figma-products-section {
+    margin-bottom: 24px;
+}
+
+.figma-product-tabs {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+    overflow-x: auto;
+    overflow-y: visible;
+    padding: 4px 0;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    scroll-behavior: smooth;
+}
+
+.figma-product-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+/* Добавить индикатор скролла */
+.figma-product-tabs::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 20px;
+    background: linear-gradient(to right, transparent, #141414);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.figma-product-tabs.scrollable::after {
+    opacity: 1;
+}
+
+.figma-product-tab {
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    padding: 0;
+    opacity: 0.6;
+    flex-shrink: 0;
+}
+
+.figma-product-tab img {
+    height: 35px;
+    width: auto;
+    transition: transform 0.15s ease;
+}
+
+.figma-product-tab:hover img {
+    transform: scale(1.05);
+}
+
+.figma-product-tab.active {
+    opacity: 1;
+}
+
+.figma-add-product {
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    padding: 0;
+    opacity: 0.7;
+    flex-shrink: 0;
+}
+
+.figma-add-product img {
+    width: 35px;
+    height: 35px;
+    transition: transform 0.15s ease;
+}
+
+.figma-add-product:hover img {
+    transform: scale(1.05);
+}
+
+.figma-add-product:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+/* Кнопка добавления фото - ПРИЖАТА К ЛЕВОМУ КРАЮ */
+.figma-photo-button,
+.figma-delete-button-image, 
+.figma-submit-button-image {
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+  padding: 0;
+  margin: 24px 0;
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.figma-photo-button img {
+  width: 60%;
+  max-width: 180px;
+  height: auto;
+}
+
+.figma-delete-button-image img,
+.figma-submit-button-image img {
+  width: 100%;
+  max-width: 300px;
+  height: auto;
+}
+
+.figma-delete-button-image,
+.figma-submit-button-image {
+  justify-content: center;
+}
+
+.figma-photo-button:hover,
+.figma-delete-button-image:hover,
+.figma-submit-button-image:hover {
+  transform: scale(1.02);
+}
+
+.figma-photo-button:active,
+.figma-delete-button-image:active,
+.figma-submit-button-image:active {
+  transform: scale(0.98);
+}
+
+.figma-submit-button-image:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Чекбокс для выбора доставки */
+.delivery-option {
+    margin-bottom: 24px;
+}
+
+.delivery-option label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    color: white;
+    font-size: 16px;
+}
+
+.delivery-option input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    accent-color: #00BCD4;
+}
+
+/* Анимация для кнопки подписаться на странице main */
+.main-button-image {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+.main-button-image img {
+    width: 100%;
+    max-width: 280px;
+    height: auto;
+    object-fit: contain;
+    filter: drop-shadow(2px 2px 8px rgba(0, 0, 0, 0.3));
+}
+
+.main-button-image:active {
+    transform: scale(0.95);
+    filter: brightness(1.1) drop-shadow(2px 2px 8px rgba(0, 0, 0, 0.3));
+}
+
+.main-button-image.clicked {
+    animation: subscribeClick 0.6s ease-out;
+}
+
+@keyframes subscribeClick {
+    0% {
+        transform: scale(1);
+    }
+    25% {
+        transform: scale(0.95) rotate(-2deg);
+    }
+    50% {
+        transform: scale(1.05) rotate(1deg);
+    }
+    75% {
+        transform: scale(0.98) rotate(-0.5deg);
+    }
+    100% {
+        transform: scale(1) rotate(0deg);
+    }
+}
+
+/* Модальное окно */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+}
+
+.modal.show {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background-color: #2e2e2e;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 400px;
+    max-height: 80vh;
+    overflow-y: auto;
+    animation: modalSlideIn 0.3s ease;
+}
+
+@keyframes modalSlideIn {
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid #444;
+}
+
+.modal-header h3 {
+    color: white;
+    margin: 0;
+    font-size: 18px;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    color: #999;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-close:hover {
+    color: white;
+}
+
+.modal-body {
+    padding: 20px;
+    color: white;
+}
+
+.modal-footer {
+    display: flex;
+    gap: 10px;
+    padding: 20px;
+    border-top: 1px solid #444;
+}
+
+.modal-btn {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.cancel-btn {
+    background-color: #666;
+    color: white;
+}
+
+.cancel-btn:hover {
+    background-color: #555;
+}
+
+.submit-btn {
+    background-color: #00BCD4;
+    color: white;
+}
+
+.submit-btn:hover {
+    background-color: #00ACC1;
+}
+
+.preview-item {
+    background-color: #1a1a1a;
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 15px;
+}
+
+.preview-item h4 {
+    color: #00BCD4;
+    margin: 0 0 10px 0;
+    font-size: 16px;
+}
+
+.preview-field {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.preview-field-label {
+    color: #999;
+}
+
+.preview-field-value {
+    color: white;
+    font-weight: 500;
+}
+
+/* Стили для страницы main с изображением */
+.main-image-container {
+    position: relative;
+    width: 100%;
+    height: calc(100vh - 32px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+
+.main-background-image {
+    width: 100%;
+    max-width: 300px;
+    height: auto;
+    object-fit: contain;
+    filter: drop-shadow(2px 2px 8px rgba(0, 0, 0, 0.3));
+}
+
+/* Невидимая кнопка поверх области подписки на изображении */
+.invisible-subscribe-button {
+    position: absolute;
+    bottom: 25%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 200px;
+    height: 40px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    z-index: 10;
+    transition: all 0.15s ease;
+}
+
+.invisible-subscribe-button:active {
+    transform: translateX(-50%) scale(0.98);
+}
+
+/* Fallback стили для случая, если изображение не загрузится */
+.main-fallback {
+    width: 100%;
+    max-width: 300px;
+    height: 400px;
+    background-color: #2e2e2e;
+    border-radius: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Стили для страницы main с отдельными компонентами */
+.main-page-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 32px);
+    padding: 20px;
+    gap: 30px;
+}
+
+/* Фиксированная полоска с Telegram вверху экрана */
+.telegram-fixed-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: center;
+    padding: 8px 16px;
+    background: transparent;
+}
+
+.telegram-bar-content {
+    max-width: 320px;
+    width: 100%;
+}
+
+.main-tg-image-fixed {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+    filter: drop-shadow(2px 2px 6px rgba(0, 0, 0, 0.3));
+}
+
+.main-center-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    position: relative;
+}
+
+.main-content-block {
+    position: relative;
+}
+
+.main-block-image {
+    width: 100%;
+    max-width: 280px;
+    height: auto;
+    object-fit: contain;
+    filter: drop-shadow(2px 2px 8px rgba(0, 0, 0, 0.3));
+}
+
+/* Fallback стили */
+.main-tg-fallback,
+.main-block-fallback,
+.main-button-fallback {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Стили для страницы профиля */
+.profile-page-container {
+    padding: 20px;
+    min-height: calc(100vh - 32px);
+}
+
+.profile-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.profile-card {
+    background-color: #2e2e2e;
+    border-radius: 20px;
+    aspect-ratio: 1;
+    cursor: pointer;
+    transition: transform 0.15s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.profile-card:active {
+    transform: scale(0.98);
+}
+
+.profile-card-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    text-align: center;
+    padding: 20px;
+}
+
+.profile-avatar-container {
+    position: relative;
+    width: 60px;
+    height: 60px;
+}
+
+.profile-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #00BCD4;
+}
+
+.profile-avatar-fallback {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: #00BCD4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: white;
+}
+
+.profile-card-text {
+    color: white;
+}
+
+.profile-card-title {
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.1;
+    text-transform: uppercase;
+}
+
+.profile-card-image {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: transform 0.15s ease;
+    filter: drop-shadow(2px 2px 6px rgba(0, 0, 0, 0.3));
+}
+
+.profile-card-image:active {
+    transform: scale(0.98);
+}
+
+.manager-panel {
+    display: none;
+}
+
+.manager-panel.show {
+    display: block;
+}
+
+/* Предпросмотр загруженных фото */
+.photo-preview-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 16px 0;
+}
+
+.photo-preview-item {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: #2e2e2e;
+}
+
+.photo-preview-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.photo-delete-btn {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: rgba(255, 68, 68, 0.9);
+    border: 1px solid white;
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+    backdrop-filter: blur(4px);
+}
+
+.photo-delete-btn:hover {
+    background-color: rgba(204, 0, 0, 0.9);
+    transform: scale(1.1);
+}
+
+/* Стили для валидации */
+.validation-error {
+    background-color: rgba(255, 68, 68, 0.1);
+    border: 1px solid #ff4444;
+    color: #ff6666;
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    font-size: 14px;
+    display: none;
+}
+
+.validation-error.show {
+    display: block;
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.field-error {
+    border-color: #ff4444 !important;
+    box-shadow: 0 0 0 2px rgba(255, 68, 68, 0.2) !important;
+}
+
+/* Стили для фото в модальном окне */
+.modal-photos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.modal-photo {
+    width: 40px;
+    height: 40px;
+    border-radius: 4px;
+    object-fit: cover;
+    border: 1px solid #444;
+}
