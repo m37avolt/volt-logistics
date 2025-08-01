@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест WebApp</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #1a1a1a;
+            color: white;
+        }
+        button {
+            background: #007AFF;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px;
+            display: block;
+            width: 100%;
+        }
+        button:hover {
+            background: #0056CC;
+        }
+        .info {
+            background: #2a2a2a;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .log {
+            background: #333;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 5px 0;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Тест WebApp подключения</h1>
+    
+    <div class="info">
+        <h3>📊 Информация о WebApp:</h3>
+        <div id="webappInfo">Загрузка...</div>
+    </div>
+    
+    <button onclick="sendTestData()">🚀 Отправить тестовые данные</button>
+    <button onclick="checkConnection()">🔍 Проверить подключение</button>
+    
+    <div class="info">
+        <h3>📋 Логи:</h3>
+        <div id="logs"></div>
+    </div>
+
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script>
+        function log(message) {
+            const logs = document.getElementById('logs');
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log';
+            logEntry.textContent = new Date().toLocaleTimeString() + ': ' + message;
+            logs.appendChild(logEntry);
+            console.log(message);
+        }
+
+        function updateWebAppInfo() {
+            const info = document.getElementById('webappInfo');
+            
+            if (window.Telegram?.WebApp) {
+                const webApp = window.Telegram.WebApp;
+                info.innerHTML = `
+                    ✅ WebApp доступен<br>
+                    📱 Версия: ${webApp.version}<br>
+                    💻 Платформа: ${webApp.platform}<br>
+                    🎨 Тема: ${webApp.colorScheme}<br>
+                    👤 Пользователь: ${webApp.initDataUnsafe?.user?.first_name || 'Не определен'}
+                `;
+                log('WebApp инициализирован успешно');
+            } else {
+                info.innerHTML = '❌ WebApp недоступен';
+                log('WebApp недоступен');
+            }
+        }
+
+        function sendTestData() {
+            log('Отправка тестовых данных...');
+            
+            const testData = {
+                command: 'create_order',
+                country: 'china',
+                delivery_type: 'same',
+                common_recipient: {
+                    name: 'Тест WebApp',
+                    username: 'test_webapp',
+                    address: 'Тестовый адрес'
+                },
+                items: [{
+                    marketplace: 'category1',
+                    link_or_id: 'https://test-webapp.com/item',
+                    color: 'Красный',
+                    size: 'L',
+                    quantity: 1,
+                    comment: 'Тест из простого WebApp',
+                    photos: ['[TEST_PHOTO]'],
+                    photo_count: 1,
+                    has_photos: true
+                }],
+                full_name: 'Тест WebApp',
+                telegram_username: 'test_webapp'
+            };
+
+            if (window.Telegram?.WebApp) {
+                try {
+                    const dataString = JSON.stringify(testData);
+                    log(`Размер данных: ${dataString.length} символов`);
+                    log(`Данные: ${dataString.substring(0, 100)}...`);
+                    
+                    window.Telegram.WebApp.sendData(dataString);
+                    log('✅ Данные отправлены успешно!');
+                    
+                } catch (error) {
+                    log(`❌ Ошибка отправки: ${error.message}`);
+                }
+            } else {
+                log('❌ WebApp недоступен для отправки данных');
+            }
+        }
+
+        function checkConnection() {
+            log('Проверка подключения...');
+            updateWebAppInfo();
+            
+            if (window.Telegram?.WebApp) {
+                log('✅ Telegram WebApp API доступен');
+                log(`Версия API: ${window.Telegram.WebApp.version}`);
+            } else {
+                log('❌ Telegram WebApp API недоступен');
+            }
+        }
+
+        // Инициализация при загрузке
+        document.addEventListener('DOMContentLoaded', function() {
+            log('Страница загружена');
+            updateWebAppInfo();
+        });
+    </script>
+</body>
+</html>
