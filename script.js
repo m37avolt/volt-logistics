@@ -21,51 +21,64 @@ window.handleImageError = handleImageError;
 
 // Функция для отправки тестовых данных
 function sendTestData() {
-  console.log('Sending test data...');
+  console.log('🚀 sendTestData() вызвана');
+  
+  // Проверяем доступность Telegram WebApp
+  console.log('🔍 Проверка Telegram WebApp...');
+  console.log('window.Telegram:', !!window.Telegram);
+  console.log('window.Telegram.WebApp:', !!window.Telegram?.WebApp);
+  
+  if (!window.Telegram) {
+    console.error('❌ window.Telegram не найден');
+    alert('❌ Telegram объект не найден. Убедитесь, что приложение открыто через Telegram бот.');
+    return;
+  }
+  
+  if (!window.Telegram.WebApp) {
+    console.error('❌ window.Telegram.WebApp не найден');
+    alert('❌ Telegram WebApp не найден. Убедитесь, что приложение открыто через Telegram бот.');
+    return;
+  }
 
   const testData = {
     command: 'create_order',
     country: 'china',
     delivery_type: 'same',
     common_recipient: {
-      name: 'Тест Пользователь',
-      username: 'testuser',
-      address: 'Тестовый адрес ПВЗ'
+      name: 'Тест Пользователь WebApp',
+      username: 'testuser_webapp',
+      address: 'Тестовый адрес ПВЗ для WebApp'
     },
     items: [{
       marketplace: 'category1',
-      link_or_id: 'https://test.com/item',
-      color: 'Синий',
-      size: 'M',
-      quantity: 1,
-      comment: 'Тестовый заказ из WebApp',
-      photos: ['[TEST_PHOTO]'],
-      photo_count: 1,
+      link_or_id: 'https://test-webapp.com/item123',
+      color: 'Красный',
+      size: 'L',
+      quantity: 2,
+      comment: 'Тестовый заказ из WebApp - проверка записи в Excel',
+      photos: ['[WEBAPP_TEST_PHOTO_1]', '[WEBAPP_TEST_PHOTO_2]'],
+      photo_count: 2,
       has_photos: true
     }],
-    full_name: 'Тест Пользователь',
-    telegram_username: 'testuser'
+    full_name: 'Тест Пользователь WebApp',
+    telegram_username: 'testuser_webapp'
   };
 
-  if (window.Telegram?.WebApp) {
-    try {
-      const dataString = JSON.stringify(testData);
-      console.log('Test data size:', dataString.length, 'characters');
-      console.log('Test data:', testData);
+  try {
+    const dataString = JSON.stringify(testData);
+    console.log('📊 Размер данных:', dataString.length, 'символов');
+    console.log('📋 Данные для отправки:', testData);
+    
+    console.log('📤 Отправка данных через Telegram WebApp...');
+    window.Telegram.WebApp.sendData(dataString);
+    console.log('✅ Данные отправлены успешно!');
+    
+    // Показываем уведомление
+    alert('✅ Тестовые данные отправлены в бот!\n\n📊 Размер: ' + dataString.length + ' символов\n🎯 Проверьте логи бота');
 
-      window.Telegram.WebApp.sendData(dataString);
-      console.log('Test data sent successfully!');
-
-      // Показываем уведомление
-      alert('✅ Тестовые данные отправлены в бот!');
-
-    } catch (error) {
-      console.error('Error sending test data:', error);
-      alert('❌ Ошибка отправки тестовых данных: ' + error.message);
-    }
-  } else {
-    console.log('Telegram WebApp not available');
-    alert('⚠️ Telegram WebApp недоступен. Откройте приложение через Telegram бот.');
+  } catch (error) {
+    console.error('❌ Ошибка отправки данных:', error);
+    alert('❌ Ошибка отправки тестовых данных:\n' + error.message);
   }
 }
 
