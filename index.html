@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Volt Logistics Mobile App</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <!-- Кнопка акций с изображением -->
+        <img src="img/v1.svg" alt="Акции" class="promotions-image-button loading" onclick="navigateTo('promotions')"
+            onerror="handleImageError(this, 'АКЦИИ')" onload="handleImageLoad(this)" style="cursor: pointer;">
+        <div class="image-fallback"
+            style="width: 100%; height: 160px; margin-bottom: 12px; font-size: 18px; display: none;">АКЦИИ</div>
+
+        <!-- Первый ряд квадратных карточек -->
+        <div class="grid">
+            <!-- Оформить заказ -->
+            <img src="img/v2.svg" alt="Оформить заказ" class="card loading" onclick="navigateTo('order')"
+                onerror="handleImageError(this, 'ЗАКАЗ')" onload="handleImageLoad(this)"
+                style="cursor: pointer; padding: 0; object-fit: cover;">
+
+            <!-- Логотип Volt Logistics с закруглением -->
+            <button class="logo-button" onclick="navigateTo('main')" aria-label="Volt Logistics - Главное меню">
+                <img src="img/logo.svg" alt="Volt Logistics Logo" class="company-logo loading"
+                    onerror="handleImageError(this, 'V')" onload="handleImageLoad(this)">
+                <div class="image-fallback" style="width: 100%; height: 100%; font-size: 36px; aspect-ratio: 1;">V</div>
+            </button>
+        </div>
+
+        <!-- Второй ряд квадратных карточек -->
+        <div class="grid">
+            <!-- Актуальный курс -->
+            <img src="img/v3.svg" alt="Актуальный курс" class="card loading" onclick="navigateTo('currency')"
+                onerror="handleImageError(this, 'КУРС')" onload="handleImageLoad(this)"
+                style="cursor: pointer; padding: 0; object-fit: cover;">
+
+            <!-- Рассчитать заказ -->
+            <img src="img/v4.svg" alt="Рассчитать заказ" class="card loading" onclick="navigateTo('calculator')"
+                onerror="handleImageError(this, 'РАСЧЕТ')" onload="handleImageLoad(this)"
+                style="cursor: pointer; padding: 0; object-fit: cover;">
+        </div>
+
+        <!-- Нижняя секция -->
+        <div class="bottom-section">
+            <!-- Наши отзывы -->
+            <img src="img/v5.svg" alt="Наши отзывы" class="reviews-card loading" onclick="navigateTo('reviews')"
+                onerror="handleImageError(this, 'ОТЗЫВЫ')" onload="handleImageLoad(this)"
+                style="cursor: pointer; padding: 0; object-fit: cover;">
+
+            <!-- Виджет приложений в едином стиле -->
+            <div class="apps-widget">
+                <div class="apps-grid">
+                    <!-- Help приложение с черным фоном -->
+                    <div class="small-app help-app" onclick="navigateTo('help')">
+                        <img src="img/user_guide.svg" alt="Help App" class="loading"
+                            onerror="handleImageError(this, 'Help')" onload="handleImageLoad(this)">
+                    </div>
+                    <!-- Taobao приложение с закруглением 13px -->
+                    <div class="small-app taobao-app" onclick="navigateTo('taobao')">
+                        <img src="img/taobao.svg" alt="Taobao App" class="loading"
+                            onerror="handleImageError(this, 'Taobao')" onload="handleImageLoad(this)">
+                    </div>
+                    <!-- Yellow/GooFish приложение с закруглением 13px -->
+                    <div class="small-app yellow-app" onclick="navigateTo('yellow')">
+                        <img src="img/goofish.svg" alt="GooFish App" class="loading"
+                            onerror="handleImageError(this, 'GooFish')" onload="handleImageLoad(this)">
+                    </div>
+                    <!-- POIZON приложение с закруглением 13px -->
+                    <div class="small-app poizon-app" onclick="navigateTo('poizon')">
+                        <img src="img/poizon.svg" alt="POIZON App" class="loading"
+                            onerror="handleImageError(this, 'POIZON')" onload="handleImageLoad(this)">
+                    </div>
+                </div>
+                
+                <!-- Кнопки тестирования (только для разработки) -->
+                <div class="test-buttons" style="margin-top: 20px; text-align: center;">
+                    <button onclick="checkTelegramConnection()" 
+                            style="background: #007AFF; color: white; border: none; padding: 10px 15px; border-radius: 8px; margin: 5px; font-size: 12px;">
+                        🔍 Проверить подключение
+                    </button>
+                    <button onclick="sendTestData()" 
+                            style="background: #34C759; color: white; border: none; padding: 10px 15px; border-radius: 8px; margin: 5px; font-size: 12px;">
+                        🧪 Отправить тест
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Текст внизу -->
+        <div class="bottom-text">агентский договор</div>
+    </div>
+
+    <!-- Фиксированное меню -->
+    <div class="fixed-nav" id="mainNav">
+        <button class="nav-button nav-button-profile" onclick="navigateTo('profile')" aria-label="Профиль">
+            <img src="img/profile.svg" alt="Profile" onerror="handleImageError(this, 'Профиль')"
+                onload="handleImageLoad(this)">
+        </button>
+        <button class="nav-button nav-button-chat" onclick="openTelegramManager()" aria-label="Чат">
+            <img src="img/chat.svg" alt="Chat" onerror="handleImageError(this, 'Чат')" onload="handleImageLoad(this)">
+        </button>
+        <button class="nav-button nav-button-lock" onclick="navigateTo('order')" aria-label="Заказ">
+            <img src="img/order.svg" alt="Order" onerror="handleImageError(this, 'Заказ')"
+                onload="handleImageLoad(this)">
+        </button>
+    </div>
+
+
+
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>

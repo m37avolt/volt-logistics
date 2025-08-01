@@ -1,0 +1,2654 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Volt Logistics Mobile App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #141414;
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 375px;
+            margin: 0 auto;
+            padding: 16px;
+            padding-bottom: 100px;
+        }
+
+        /* SPA Navigation */
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* Кнопка акций с изображением - исправленная версия */
+        .promotions-image-button {
+            width: 100%;
+            height: 160px;
+            border: none;
+            background: transparent;
+            padding: 0;
+            margin: 0 0 12px 0;
+            cursor: pointer;
+            transition: transform 0.15s ease;
+            border-radius: 20px;
+            overflow: hidden;
+            display: block;
+        }
+
+        .promotions-image-button:active {
+            transform: scale(0.98);
+        }
+
+        .promotions-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 20px;
+            filter: drop-shadow(2px 2px 6px rgba(0, 0, 0, 0.3));
+            display: block;
+        }
+
+        /* Основная сетка квадратных карточек */
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .card {
+            background-color: #2e2e2e;
+            border-radius: 20px;
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.15s ease;
+            cursor: pointer;
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .card:active {
+            transform: scale(0.98);
+        }
+
+        .card-gray {
+            background-color: #626262;
+        }
+
+        /* Главный логотип с закруглением */
+        .logo-button {
+            border: none;
+            aspect-ratio: 1;
+            cursor: pointer;
+            transition: transform 0.15s ease;
+            padding: 0;
+            background: transparent;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .logo-button:active {
+            transform: scale(0.98);
+        }
+
+        /* Логотип с закругленными краями и тенью */
+        .company-logo {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 20px;
+            filter: drop-shadow(2px 2px 6px rgba(0, 0, 0, 0.4));
+        }
+
+        /* Иконки в карточках с тенью */
+        .card-icon {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            margin-bottom: 12px;
+            filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.5));
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 500;
+            line-height: 1.1;
+            color: white;
+        }
+
+        /* Нижняя секция */
+        .bottom-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .reviews-card {
+            background-color: #2e2e2e;
+            border-radius: 20px;
+            padding: 20px;
+            min-height: 160px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: transform 0.15s ease;
+        }
+
+        .reviews-card:active {
+            transform: scale(0.98);
+        }
+
+        /* Виджет приложений - единый стиль */
+        .apps-widget {
+            background-color: #2e2e2e;
+            border-radius: 20px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-height: 160px;
+        }
+
+        /* Сетка 2x2 для всех 4 приложений */
+        .apps-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 8px;
+            width: 100%;
+            height: 100%;
+        }
+
+        .small-app {
+            border-radius: 16px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.15s ease;
+            position: relative;
+        }
+
+        .small-app:active {
+            transform: scale(0.95);
+        }
+
+        .small-app img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.6));
+        }
+
+        /* Специальные закругления для POIZON, Taobao и Yellow - 13 градусов */
+        .small-app.poizon-app img,
+        .small-app.taobao-app img,
+        .small-app.yellow-app img {
+            border-radius: 13px;
+        }
+
+        /* Черный фон для help приложения */
+        .small-app.help-app {
+            background-color: #000000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .small-app.help-app img {
+            width: 80%;
+            height: 80%;
+            object-fit: contain;
+        }
+
+        /* Текст внизу */
+        .bottom-text {
+            text-align: center;
+            color: #737373;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        /* Фиксированное меню - более узкое и длинное, с анимацией */
+        .fixed-nav {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            width: 320px;
+            height: 60px;
+            background-color: rgba(46, 46, 46, 0.9);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            padding: 8px 16px;
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .fixed-nav.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        /* Кнопки меню - меньше */
+        .nav-button {
+            width: 44px;
+            height: 44px;
+            background-color: #000000;
+            border: none;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            position: relative;
+        }
+
+        .nav-button:active {
+            transform: scale(0.95);
+        }
+
+        .nav-button.active {
+            background-color: #008BA2;
+        }
+
+        /* Размеры иконок в меню с тенью */
+        .nav-button-profile img {
+            width: 32px;
+            height: 32px;
+            object-fit: contain;
+            filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.5));
+        }
+
+        .nav-button-chat img {
+            width: 48px;
+            height: 48px;
+            object-fit: contain;
+            filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.5));
+        }
+
+        .nav-button-lock img {
+            width: 34px;
+            height: 34px;
+            object-fit: contain;
+            filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.5));
+        }
+
+        /* Стильная кнопка назад с blur */
+        .stylish-back-button {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(15px);
+            border: none;
+            border-radius: 20px;
+            padding: 12px 24px;
+            color: white;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 1000;
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .stylish-back-button.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .stylish-back-button:hover {
+            background-color: rgba(0, 0, 0, 0.8);
+            transform: translateX(-50%) translateY(-2px);
+        }
+
+        .stylish-back-button:active {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .back-arrow-icon {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        /* Страницы SPA */
+        .page-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+            padding: 16px 0;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .page-content {
+            padding: 20px 0;
+        }
+
+        .placeholder-content {
+            background-color: #2e2e2e;
+            border-radius: 20px;
+            padding: 40px 20px;
+            text-align: center;
+            color: #737373;
+        }
+
+        /* Fallback styles */
+        .image-fallback {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background-color: #008BA2;
+            border-radius: 20px;
+            color: white;
+            font-weight: bold;
+        }
+
+        .loading {
+            opacity: 0.7;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.7; }
+            50% { opacity: 0.3; }
+            100% { opacity: 0.7; }
+        }
+
+        /* НОВЫЕ СТИЛИ ДЛЯ ТОЧНОГО КОПИРОВАНИЯ FIGMA ДИЗАЙНА */
+        .figma-order-page {
+            padding: 20px;
+            max-width: 375px;
+            margin: 0 auto;
+            background-color: #141414;
+        }
+
+        /* Заголовок с иконкой корзины */
+        .figma-header {
+          background: transparent;
+          border-radius: 20px;
+          padding: 0;
+          margin-bottom: 24px;
+          overflow: hidden;
+        }
+
+        .figma-header img {
+          width: 100%;
+          height: auto;
+          object-fit: contain;
+          filter: drop-shadow(2px 2px 6px rgba(0, 0, 0, 0.3));
+        }
+
+        /* Лейблы полей */
+        .figma-label {
+            color: white;
+            font-size: 16px;
+            font-weight: 400;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        /* Селекты и инпуты в стиле Figma */
+        .figma-select,
+        .figma-input,
+        .figma-textarea {
+            background-color: #00BCD4;
+            border: none;
+            border-radius: 11px;
+            padding: 16px 20px;
+            color: white;
+            font-size: 16px;
+            font-weight: 500;
+            width: 100%;
+            box-sizing: border-box;
+            margin-bottom: 24px;
+        }
+
+        .figma-select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 16px center;
+            background-repeat: no-repeat;
+            background-size: 16px;
+            padding-right: 50px;
+        }
+
+        .figma-select option {
+            background-color: #00BCD4;
+            color: white;
+        }
+
+        .figma-select option:disabled {
+            background-color: #666;
+            color: #999;
+        }
+
+        .figma-textarea {
+            resize: none;
+            min-height: 60px;
+        }
+
+        .figma-select:focus,
+        .figma-input:focus,
+        .figma-textarea:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(0, 188, 212, 0.5);
+        }
+
+        .figma-select::placeholder,
+        .figma-input::placeholder,
+        .figma-textarea::placeholder {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* Секция товаров с горизонтальным скроллом */
+        .figma-products-section {
+            margin-bottom: 24px;
+        }
+
+        .figma-product-tabs {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            overflow-x: auto;
+            overflow-y: visible;
+            padding: 4px 0;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            scroll-behavior: smooth;
+        }
+
+        .figma-product-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Добавить индикатор скролла */
+        .figma-product-tabs::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 20px;
+            background: linear-gradient(to right, transparent, #141414);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .figma-product-tabs.scrollable::after {
+            opacity: 1;
+        }
+
+        .figma-product-tab {
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            padding: 0;
+            opacity: 0.6;
+            flex-shrink: 0;
+        }
+
+        .figma-product-tab img {
+            height: 35px;
+            width: auto;
+            transition: transform 0.15s ease;
+        }
+
+        .figma-product-tab:hover img {
+            transform: scale(1.05);
+        }
+
+        .figma-product-tab.active {
+            opacity: 1;
+        }
+
+        .figma-add-product {
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            padding: 0;
+            opacity: 0.7;
+            flex-shrink: 0;
+        }
+
+        .figma-add-product img {
+            width: 35px;
+            height: 35px;
+            transition: transform 0.15s ease;
+        }
+
+        .figma-add-product:hover img {
+            transform: scale(1.05);
+        }
+
+        .figma-add-product:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        /* Кнопка добавления фото - ПРИЖАТА К ЛЕВОМУ КРАЮ */
+        .figma-photo-button,
+        .figma-delete-button-image, 
+        .figma-submit-button-image {
+          background: none;
+          border: none;
+          cursor: pointer;
+          transition: transform 0.15s ease;
+          padding: 0;
+          margin: 24px 0;
+          width: 100%;
+          display: flex;
+          justify-content: flex-start;
+        }
+
+        .figma-photo-button img {
+          width: 60%;
+          max-width: 180px;
+          height: auto;
+        }
+
+        .figma-delete-button-image img,
+        .figma-submit-button-image img {
+          width: 100%;
+          max-width: 300px;
+          height: auto;
+        }
+
+        .figma-delete-button-image,
+        .figma-submit-button-image {
+          justify-content: center;
+        }
+
+        .figma-photo-button:hover,
+        .figma-delete-button-image:hover,
+        .figma-submit-button-image:hover {
+          transform: scale(1.02);
+        }
+
+        .figma-photo-button:active,
+        .figma-delete-button-image:active,
+        .figma-submit-button-image:active {
+          transform: scale(0.98);
+        }
+
+        .figma-submit-button-image:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+
+        /* Чекбокс для выбора доставки */
+        .delivery-option {
+            margin-bottom: 24px;
+        }
+
+        .delivery-option label {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            color: white;
+            font-size: 16px;
+        }
+
+        .delivery-option input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: #00BCD4;
+        }
+
+        /* Анимация для кнопки подписаться на странице main */
+        .main-button-image {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .main-button-image:active {
+            transform: scale(0.95);
+            filter: brightness(1.1) drop-shadow(2px 2px 8px rgba(0, 0, 0, 0.3));
+        }
+
+        .main-button-image.clicked {
+            animation: subscribeClick 0.6s ease-out;
+        }
+
+        @keyframes subscribeClick {
+            0% {
+                transform: scale(1);
+            }
+            25% {
+                transform: scale(0.95) rotate(-2deg);
+            }
+            50% {
+                transform: scale(1.05) rotate(1deg);
+            }
+            75% {
+                transform: scale(0.98) rotate(-0.5deg);
+            }
+            100% {
+                transform: scale(1) rotate(0deg);
+            }
+        }
+
+        /* Модальное окно */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: #2e2e2e;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid #444;
+        }
+
+        .modal-header h3 {
+            color: white;
+            margin: 0;
+            font-size: 18px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: #999;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-close:hover {
+            color: white;
+        }
+
+        .modal-body {
+            padding: 20px;
+            color: white;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 10px;
+            padding: 20px;
+            border-top: 1px solid #444;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.15s ease;
+        }
+
+        .cancel-btn {
+            background-color: #666;
+            color: white;
+        }
+
+        .cancel-btn:hover {
+            background-color: #555;
+        }
+
+        .submit-btn {
+            background-color: #00BCD4;
+            color: white;
+        }
+
+        .submit-btn:hover {
+            background-color: #00ACC1;
+        }
+
+        .preview-item {
+            background-color: #1a1a1a;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .preview-item h4 {
+            color: #00BCD4;
+            margin: 0 0 10px 0;
+            font-size: 16px;
+        }
+
+        .preview-field {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .preview-field-label {
+            color: #999;
+        }
+
+        .preview-field-value {
+            color: white;
+            font-weight: 500;
+        }
+
+        /* Стили для страницы main с изображением */
+        .main-image-container {
+            position: relative;
+            width: 100%;
+            height: calc(100vh - 32px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .main-background-image {
+            width: 100%;
+            max-width: 300px;
+            height: auto;
+            object-fit: contain;
+            filter: drop-shadow(2px 2px 8px rgba(0, 0, 0, 0.3));
+        }
+
+        /* Невидимая кнопка поверх области подписки на изображении */
+        .invisible-subscribe-button {
+            position: absolute;
+            bottom: 25%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 40px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            z-index: 10;
+            transition: all 0.15s ease;
+        }
+
+        .invisible-subscribe-button:active {
+            transform: translateX(-50%) scale(0.98);
+        }
+
+        /* Fallback стили для случая, если изображение не загрузится */
+        .main-fallback {
+            width: 100%;
+            max-width: 300px;
+            height: 400px;
+            background-color: #2e2e2e;
+            border-radius: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Стили для страницы main с отдельными компонентами */
+        .main-page-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: calc(100vh - 32px);
+            padding: 20px;
+            gap: 30px;
+        }
+
+        /* Фиксированная полоска с Telegram вверху экрана */
+        .telegram-fixed-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+            padding: 8px 16px;
+            background: transparent;
+        }
+
+        .telegram-bar-content {
+            max-width: 320px;
+            width: 100%;
+        }
+
+        .main-tg-image-fixed {
+            width: 100%;
+            height: auto;
+            object-fit: contain;
+            filter: drop-shadow(2px 2px 6px rgba(0, 0, 0, 0.3));
+        }
+
+        .main-center-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            position: relative;
+        }
+
+        .main-content-block {
+            position: relative;
+        }
+
+        .main-block-image {
+            width: 100%;
+            max-width: 280px;
+            height: auto;
+            object-fit: contain;
+            filter: drop-shadow(2px 2px 8px rgba(0, 0, 0, 0.3));
+        }
+
+        /* Fallback стили */
+        .main-tg-fallback,
+        .main-block-fallback,
+        .main-button-fallback {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Стили для страницы профиля */
+        .profile-page-container {
+            padding: 20px;
+            min-height: calc(100vh - 32px);
+        }
+
+        .profile-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .profile-card {
+            background-color: #2e2e2e;
+            border-radius: 20px;
+            aspect-ratio: 1;
+            cursor: pointer;
+            transition: transform 0.15s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .profile-card:active {
+            transform: scale(0.98);
+        }
+
+        .profile-card-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .profile-avatar-container {
+            position: relative;
+            width: 60px;
+            height: 60px;
+        }
+
+        .profile-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #00BCD4;
+        }
+
+        .profile-avatar-fallback {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: #00BCD4;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+        }
+
+        .profile-card-text {
+            color: white;
+        }
+
+        .profile-card-title {
+            font-size: 16px;
+            font-weight: 500;
+            line-height: 1.1;
+            text-transform: uppercase;
+        }
+
+        .profile-card-image {
+            width: 100%;
+            height: auto;
+            aspect-ratio: 1;
+            object-fit: cover;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: transform 0.15s ease;
+            filter: drop-shadow(2px 2px 6px rgba(0, 0, 0, 0.3));
+        }
+
+        .profile-card-image:active {
+            transform: scale(0.98);
+        }
+
+        .manager-panel {
+            display: none;
+        }
+
+        .manager-panel.show {
+            display: block;
+        }
+
+        /* Предпросмотр загруженных фото */
+        .photo-preview-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin: 16px 0;
+        }
+
+        .photo-preview-item {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: #2e2e2e;
+        }
+
+        .photo-preview-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .photo-delete-btn {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: rgba(255, 68, 68, 0.9);
+            border: 1px solid white;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s ease;
+            backdrop-filter: blur(4px);
+        }
+
+        .photo-delete-btn:hover {
+            background-color: rgba(204, 0, 0, 0.9);
+            transform: scale(1.1);
+        }
+    
+
+        /* Стили для валидации */
+        .validation-error {
+            background-color: rgba(255, 68, 68, 0.1);
+            border: 1px solid #ff4444;
+            color: #ff6666;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .validation-error.show {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .field-error {
+            border-color: #ff4444 !important;
+            box-shadow: 0 0 0 2px rgba(255, 68, 68, 0.2) !important;
+        }
+
+        /* Стили для фото в модальном окне */
+        .modal-photos {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .modal-photo {
+            width: 40px;
+            height: 40px;
+            border-radius: 4px;
+            object-fit: cover;
+            border: 1px solid #444;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Главная страница -->
+        <div id="home" class="page active">
+            <!-- Кнопка акций с изображением -->
+            <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/v1.png" 
+                 alt="Акции" 
+                 class="promotions-image-button loading"
+                 onclick="navigateTo('promotions')"
+                 onerror="handleImageError(this, 'АКЦИИ')"
+                 onload="handleImageLoad(this)"
+                 style="cursor: pointer;">
+            <div class="image-fallback" style="width: 100%; height: 160px; margin-bottom: 12px; font-size: 18px; display: none;">АКЦИИ</div>
+
+            <!-- Первый ряд квадратных карточек -->
+            <div class="grid">
+                <!-- Оформить заказ -->
+                <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/v2.png" 
+                     alt="Оформить заказ" 
+                     class="card loading"
+                     onclick="navigateTo('order')"
+                     onerror="handleImageError(this, 'ЗАКАЗ')"
+                     onload="handleImageLoad(this)"
+                     style="cursor: pointer; padding: 0; object-fit: cover;">
+
+                <!-- Логотип Volt Logistics с закруглением -->
+                <button class="logo-button" onclick="navigateTo('main')" aria-label="Volt Logistics - Главное меню">
+                    <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/v1_14.png" 
+                         alt="Volt Logistics Logo" 
+                         class="company-logo loading"
+                         onerror="handleImageError(this, 'V')"
+                         onload="handleImageLoad(this)">
+                    <div class="image-fallback" style="width: 100%; height: 100%; font-size: 36px; aspect-ratio: 1;">V</div>
+                </button>
+            </div>
+
+            <!-- Второй ряд квадратных карточек -->
+            <div class="grid">
+                <!-- Актуальный курс -->
+                <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/v3.png" 
+                     alt="Актуальный курс" 
+                     class="card loading"
+                     onclick="navigateTo('currency')"
+                     onerror="handleImageError(this, 'КУРС')"
+                     onload="handleImageLoad(this)"
+                     style="cursor: pointer; padding: 0; object-fit: cover;">
+
+                <!-- Рассчитать заказ -->
+                <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/v4.png" 
+                     alt="Рассчитать заказ" 
+                     class="card loading"
+                     onclick="navigateTo('calculator')"
+                     onerror="handleImageError(this, 'РАСЧЕТ')"
+                     onload="handleImageLoad(this)"
+                     style="cursor: pointer; padding: 0; object-fit: cover;">
+            </div>
+
+            <!-- Нижняя секция -->
+            <div class="bottom-section">
+                <!-- Наши отзывы -->
+                <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/v5.png" 
+                     alt="Наши отзывы" 
+                     class="reviews-card loading"
+                     onclick="navigateTo('reviews')"
+                     onerror="handleImageError(this, 'ОТЗЫВЫ')"
+                     onload="handleImageLoad(this)"
+                     style="cursor: pointer; padding: 0; object-fit: cover;">
+                
+                <!-- Виджет приложений в едином стиле -->
+                <div class="apps-widget">
+                    <div class="apps-grid">
+                        <!-- Help приложение с черным фоном -->
+                        <div class="small-app help-app" onclick="navigateTo('help')">
+                            <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/v55_13.png" alt="Help App">
+                        </div>
+                        <!-- Taobao приложение с закруглением 13px -->
+                        <div class="small-app taobao-app" onclick="navigateTo('taobao')">
+                            <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/v1_9.png" alt="Taobao App">
+                        </div>
+                        <!-- Yellow приложение с закруглением 13px -->
+                        <div class="small-app yellow-app" onclick="navigateTo('yellow')">
+                            <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/v1_11.png" alt="Yellow App">
+                        </div>
+                        <!-- POIZON приложение с закруглением 13px -->
+                        <div class="small-app poizon-app" onclick="navigateTo('poizon')">
+                            <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/v1_8.png" alt="POIZON App">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Текст внизу -->
+            <div class="bottom-text">агентский договор</div>
+        </div>
+
+        <!-- Страница main с отдельными компонентами -->
+        <div id="main" class="page">
+            <!-- Фиксированная полоска с Telegram вверху экрана -->
+            <div class="telegram-fixed-bar">
+                <div class="telegram-bar-content">
+                    <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/main_tg.png" 
+                         alt="Volt Logistics Telegram" 
+                         class="main-tg-image-fixed"
+                         onerror="handleImageError(this, 'Telegram')"
+                         onload="handleImageLoad(this)">
+                    <div class="image-fallback main-tg-fallback" style="display: none;">
+                        <div style="display: flex; align-items: center; gap: 12px; padding: 16px; background-color: #2e2e2e; border-radius: 20px;">
+                            <div style="width: 40px; height: 40px; background-color: #00BCD4; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px;">✈</div>
+                            <div>
+                                <div style="color: white; font-weight: 600;">Volt Logistics</div>
+                                <div style="color: #737373; font-size: 13px;">наш телеграм канал</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="main-page-container" style="padding-top: 80px;">
+                <!-- Центральная секция с основным блоком и интегрированной кнопкой -->
+                <div class="main-center-section">
+                    <div class="main-content-block" style="position: relative;">
+                        <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/main.png" 
+                             alt="Volt Logistics Main Block" 
+                             class="main-block-image"
+                             onerror="handleImageError(this, 'Main Block')"
+                             onload="handleImageLoad(this)">
+                        
+                        <!-- Кнопка поверх основного блока -->
+                        <div style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);">
+                            <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/main_button.png" 
+                                 alt="Подписаться" 
+                                 class="main-button-image"
+                                 onclick="openTelegramChannel()"
+                                 onerror="handleImageError(this, 'Button')"
+                                 onload="handleImageLoad(this)"
+                                 style="cursor: pointer; width: 250px; height: auto;">
+                            <div class="image-fallback main-button-fallback" style="display: none;">
+                                <button style="background-color: #00BCD4; color: #000000; border: none; border-radius: 20px; padding: 12px 40px; font-size: 14px; font-weight: 600; cursor: pointer; text-transform: uppercase; min-width: 200px;" onclick="openTelegramChannel()">ПОДПИСАТЬСЯ</button>
+                            </div>
+                        </div>
+
+                        <div class="image-fallback main-block-fallback" style="display: none;">
+                            <div style="background-color: #2e2e2e; border-radius: 25px; padding: 40px 20px; text-align: center; position: relative;">
+                                <div style="width: 80px; height: 80px; background-color: #000; border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; color: #00BCD4; font-size: 36px; font-weight: bold;">V</div>
+                                <div style="color: white; font-size: 18px; font-weight: 600; letter-spacing: 1px; margin-bottom: 20px;">VOLT LOGISTICS</div>
+                                <button style="background-color: #00BCD4; color: #000000; border: none; border-radius: 20px; padding: 12px 40px; font-size: 14px; font-weight: 600; cursor: pointer; text-transform: uppercase; min-width: 200px;" onclick="openTelegramChannel()">ПОДПИСАТЬСЯ</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Страница профиля -->
+        <div id="profile" class="page">
+            <div class="profile-page-container">
+                <!-- Сетка карточек профиля -->
+                <div class="profile-grid">
+                    <!-- Мой профиль -->
+                    <div class="profile-card" onclick="navigateTo('my-profile')">
+                        <div class="profile-card-content">
+                            <div class="profile-avatar-container">
+                                <img id="userAvatar" src="/placeholder.svg" alt="User Avatar" class="profile-avatar" style="display: none;">
+                                <div class="profile-avatar-fallback">👤</div>
+                            </div>
+                            <div class="profile-card-text">
+                                <div class="profile-card-title">МОЙ</div>
+                                <div class="profile-card-title">ПРОФИЛЬ</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Мои заказы -->
+                    <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/profile_orders.png" 
+                         alt="Мои заказы" 
+                         class="profile-card-image"
+                         onclick="navigateTo('my-orders')"
+                         onerror="handleImageError(this, 'ЗАКАЗЫ')"
+                         onload="handleImageLoad(this)">
+
+                    <!-- Реферальная программа -->
+                    <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/profile_referal.png" 
+                         alt="Реферальная программа" 
+                         class="profile-card-image"
+                         onclick="navigateTo('referral')"
+                         onerror="handleImageError(this, 'РЕФЕРАЛ')"
+                         onload="handleImageLoad(this)">
+
+                    <!-- Панель менеджера (только для определенных пользователей) -->
+                    <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/profile_mgmt.png" 
+                         alt="Панель менеджера" 
+                         class="profile-card-image manager-panel"
+                         onclick="navigateTo('manager-panel')"
+                         onerror="handleImageError(this, 'МЕНЕДЖЕР')"
+                         onload="handleImageLoad(this)"
+                         style="display: none;">
+                </div>
+            </div>
+        </div>
+
+        <!-- Страница чата -->
+        <div id="chat" class="page">
+            <div class="page-header">
+                <div class="page-title">Чат поддержки</div>
+            </div>
+            <div class="page-content">
+                <div class="placeholder-content">
+                    <h3>Чат с поддержкой</h3>
+                    <p>Здесь будет интерфейс чата</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Страница безопасности -->
+        <div id="security" class="page">
+            <div class="page-header">
+                <div class="page-title">Безопасность</div>
+            </div>
+            <div class="page-content">
+                <div class="placeholder-content">
+                    <h3>Настройки безопасности</h3>
+                    <p>Здесь будут настройки безопасности</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Дополнительные страницы для карточек -->
+        <div id="promotions" class="page">
+            <div class="page-header">
+                <div class="page-title">Акции</div>
+            </div>
+            <div class="page-content">
+                <div class="placeholder-content">
+                    <h3>Текущие акции</h3>
+                    <p>Здесь будут актуальные акции и скидки</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- СТРАНИЦА ЗАКАЗА В ТОЧНОМ СООТВЕТСТВИИ С FIGMA ДИЗАЙНОМ -->
+        <div id="order" class="page">
+            <div class="figma-order-page">
+                <!-- Заголовок с изображением из GitHub -->
+                <div class="figma-header">
+                    <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/order_table.png" 
+                         alt="Volt Logistics - Оформить заказ" 
+                         style="width: 100%; height: auto; object-fit: contain;"
+                         onerror="handleImageError(this, 'ОФОРМИТЬ ЗАКАЗ')"
+                         onload="handleImageLoad(this)">
+                    <div class="image-fallback" style="display: none;">
+                        <div style="display: flex; align-items: center; gap: 12px; padding: 16px; background-color: #4A4A4A; border-radius: 20px; color: white;">
+                            <div style="width: 24px; height: 24px; background-color: #00BCD4; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 14px;">🛒</div>
+                            <div>
+                                <div style="font-size: 18px; font-weight: 600;">Volt Logistics</div>
+                                <div style="font-size: 14px; opacity: 0.8;">оформить заказ</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Форма заказа -->
+                <form id="figmaOrderForm">
+                    <!-- Выбор страны выкупа -->
+                    <label class="figma-label">Выберите страну выкупа</label>
+                    <select id="figmaCountry" class="figma-select" onchange="handleFigmaCountryChange(this.value)">
+                        <option value="">Выберите страну</option>
+                        <option value="china">Китай</option>
+                        <option value="japan">Япония</option>
+                    </select>
+
+                    <!-- Секция товаров -->
+                    <div id="figmaProductsSection" style="display: none;">
+                        <label class="figma-label">Добавьте товар[ы]</label>
+                        <div class="figma-product-tabs">
+                            <button type="button" class="figma-product-tab active" onclick="selectFigmaProduct(1)">
+                                <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/order_item1.png" alt="Товар 1">
+                            </button>
+                            <button type="button" class="figma-product-tab" onclick="selectFigmaProduct(2)" style="display: none;">
+                                <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/order_item2.png" alt="Товар 2">
+                            </button>
+                            <button type="button" class="figma-product-tab" onclick="selectFigmaProduct(3)" style="display: none;">
+                                <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/order_item3.png" alt="Товар 3">
+                            </button>
+                            <button type="button" class="figma-add-product" onclick="addFigmaProduct()">
+                                <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/order_add_item.png" alt="Добавить товар">
+                            </button>
+                        </div>
+
+    <!-- Выбор площадки (только для Китая) -->
+    <div id="figmaMarketplaceSection">
+        <label class="figma-label">Выберите площадку</label>
+        <select id="figmaMarketplace" class="figma-select">
+            <option value="">Выберите площадку</option>
+            <option value="category1">Категория 1 (POIZON, TaoBao, Weidan)</option>
+            <option value="category2">Категория 2 (WeChat, Yupoo, GooFish)</option>
+        </select>
+    </div>
+
+    <!-- Загрузка фото с изображением из GitHub -->
+    <label class="figma-label">Загрузите фото товара</label>
+    <button type="button" class="figma-photo-button" onclick="uploadFigmaPhoto()">
+        <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/order_add_photo.png" 
+             alt="Добавить фото">
+    </button>
+    <input type="file" id="figmaPhotoInput" accept="image/*" multiple style="display: none;" onchange="handleFigmaPhotoUpload(this)">
+    
+    <!-- Контейнер для предпросмотра фото -->
+    <div id="photoPreviewContainer" class="photo-preview-container"></div>
+
+    <!-- Поля товара -->
+    <label class="figma-label" id="figmaLinkLabel">Вставьте ссылку</label>
+    <input type="url" id="figmaLink" class="figma-input" placeholder="">
+
+    <label class="figma-label">Введите цену</label>
+    <input type="number" id="figmaPrice" class="figma-input" placeholder="" step="0.01" min="0">
+
+    <label class="figma-label">Введите цвет</label>
+    <input type="text" id="figmaColor" class="figma-input" placeholder="">
+
+    <label class="figma-label">Введите размер</label>
+    <input type="text" id="figmaSize" class="figma-input" placeholder="">
+
+    <label class="figma-label">Введите количество</label>
+    <input type="number" id="figmaQuantity" class="figma-input" placeholder="" min="1" max="99" value="1">
+
+    <label class="figma-label">Введите комментарий</label>
+    <textarea id="figmaComment" class="figma-textarea" placeholder=""></textarea>
+
+    <!-- Кнопка удаления товара с изображением из GitHub -->
+    <button type="button" class="figma-delete-button-image" onclick="deleteFigmaProduct()">
+        <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/order_button2.png" 
+             alt="Удалить товар">
+    </button>
+</div>
+
+<!-- Данные получателя -->
+<div id="figmaRecipientSection" style="display: none;">
+    <!-- Выбор способа доставки -->
+    <label class="figma-label">Выберите способ доставки</label>
+    <select id="deliveryType" class="figma-select" onchange="handleDeliveryTypeChange(this.value)">
+        <option value="same">Доставить все товары на один адрес</option>
+        <option value="different">Доставить товары на разные адреса</option>
+    </select>
+
+    <!-- Контейнер для ошибок валидации -->
+    <div id="validationError" class="validation-error"></div>
+
+    <!-- Общие данные получателя (для одного адреса) -->
+    <div id="commonRecipientData">
+        <label class="figma-label">Введите Ваше ФИО</label>
+        <input type="text" id="figmaRecipientName" class="figma-input" placeholder="">
+
+        <label class="figma-label">Введите Ваш юзернейм</label>
+        <input type="text" id="figmaRecipientUsername" class="figma-input" placeholder="">
+
+        <label class="figma-label">Введите Ваш ПВЗ СДЭК</label>
+        <textarea id="figmaRecipientAddress" class="figma-textarea" placeholder=""></textarea>
+    </div>
+
+    <!-- Индивидуальные данные для каждого товара (для разных адресов) -->
+    <div id="individualRecipientData" style="display: none;">
+        <div id="recipientDataContainer"></div>
+    </div>
+
+    <!-- Кнопка создания заказа с изображением из GitHub -->
+    <button type="button" class="figma-submit-button-image" onclick="submitFigmaOrder()">
+        <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/order_button1.png" 
+             alt="Создать заказ">
+    </button>
+</div>
+</form>
+            </div>
+        </div>
+
+        <!-- Остальные страницы -->
+        <div id="currency" class="page">
+            <div class="page-header">
+                <div class="page-title">Актуальный курс</div>
+            </div>
+            <div class="page-content">
+                <div class="placeholder-content">
+                    <h3>Курсы валют</h3>
+                    <p>Здесь будут актуальные курсы валют</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="calculator" class="page">
+            <div class="page-header">
+                <div class="page-title">Калькулятор заказа</div>
+            </div>
+            <div class="page-content">
+                <div class="placeholder-content">
+                    <h3>Расчет стоимости</h3>
+                    <p>Здесь будет калькулятор для расчета заказа</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="reviews" class="page">
+            <div class="page-header">
+                <div class="page-title">Отзывы</div>
+            </div>
+            <div class="page-content">
+                <div class="placeholder-content">
+                    <h3>Отзывы клиентов</h3>
+                    <p>Здесь будут отзывы о наших услугах</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Страница "Мой профиль" -->
+        <div id="my-profile" class="page">
+            <div class="page-header">
+                <div class="page-title">Мой профиль</div>
+            </div>
+            <div class="page-content">
+                <div class="placeholder-content">
+                    <h3>Информация о профиле</h3>
+                    <p>Здесь будет информация о пользователе</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Страница "Мои заказы" -->
+        <div id="my-orders" class="page">
+            <div class="page-header">
+                <div class="page-title">Мои заказы</div>
+            </div>
+            <div class="page-content">
+                <div class="placeholder-content">
+                    <h3>История заказов</h3>
+                    <p>Здесь будет список ваших заказов</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Страница "Реферальная программа" -->
+        <div id="referral" class="page">
+            <div class="page-header">
+                <div class="page-title">Реферальная программа</div>
+            </div>
+            <div class="page-content">
+                <div class="placeholder-content">
+                    <h3>Пригласите друзей</h3>
+                    <p>Получайте бонусы за приглашенных друзей</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Страница "Панель менеджера" -->
+        <div id="manager-panel" class="page">
+            <div class="page-header">
+                <div class="page-title">Панель менеджера</div>
+            </div>
+            <div class="page-content">
+                <div class="placeholder-content">
+                    <h3>Управление системой</h3>
+                    <p>Инструменты для менеджеров</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Дополнительные страницы приложений -->
+        <div id="help" class="page">
+            <div class="page-header">
+                <div class="page-title">Помощь</div>
+            </div>
+            <div class="page-content">
+                <div class="placeholder-content">
+                    <h3>Центр помощи</h3>
+                    <p>Здесь вы найдете ответы на часто задаваемые вопросы</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="taobao" class="page">
+            <div class="page-header">
+                <div class="page-title">Taobao</div>
+            </div>
+            <div class="page-content">
+                <div class="placeholder-content">
+                    <h3>Taobao Marketplace</h3>
+                    <p>Покупки с китайской площадки Taobao</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="yellow" class="page">
+            <div class="page-header">
+                <div class="page-title">Yellow App</div>
+            </div>
+            <div class="page-content">
+                <div class="placeholder-content">
+                    <h3>Yellow Application</h3>
+                    <p>Специальное приложение для заказов</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="poizon" class="page">
+            <div class="page-header">
+                <div class="page-title">POIZON</div>
+            </div>
+            <div class="page-content">
+                <div class="placeholder-content">
+                    <h3>POIZON Marketplace</h3>
+                    <p>Покупки с площадки POIZON</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Фиксированное меню -->
+    <div class="fixed-nav" id="mainNav">
+        <button class="nav-button nav-button-profile" onclick="navigateTo('profile')" aria-label="Профиль">
+            <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/v28_55.png" alt="Profile">
+        </button>
+        <button class="nav-button nav-button-chat" onclick="navigateTo('chat')" aria-label="Чат">
+            <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/v55_7.png" alt="Chat">
+        </button>
+        <button class="nav-button nav-button-lock" onclick="navigateTo('security')" aria-label="Безопасность">
+            <img src="https://raw.githubusercontent.com/m37avolt/volt-logistics/main/img/v177_2.png" alt="Security">
+        </button>
+    </div>
+
+    <!-- Кнопка назад -->
+    <button class="stylish-back-button" id="backButton" onclick="goBack()">
+        <span class="back-arrow-icon">←</span>
+        <span>назад</span>
+    </button>
+
+    <!-- Подключение JavaScript из GitHub репозитория -->
+    <script>
+        // Состояние приложения
+let currentPage = "home"
+let pageHistory = ["home"] // История страниц для кнопки назад
+
+// Улучшенное состояние заказа для тестовой версии
+let figmaOrderState = {
+  country: "",
+  step: "country", // country, products, final
+  currentProductId: 1, // Автоматически открывается товар 1
+  maxProducts: 3, // Максимальное количество товаров
+  activeProducts: [1], // Активные товары (начинаем с товара 1)
+  products: {
+    1: {
+      marketplace: "",
+      link: "",
+      price: "",
+      color: "",
+      size: "",
+      quantity: 1,
+      comment: "",
+      photos: [],
+      recipient: null,
+    },
+    2: {
+      marketplace: "",
+      link: "",
+      price: "",
+      color: "",
+      size: "",
+      quantity: 1,
+      comment: "",
+      photos: [],
+      recipient: null,
+    },
+    3: {
+      marketplace: "",
+      link: "",
+      price: "",
+      color: "",
+      size: "",
+      quantity: 1,
+      comment: "",
+      photos: [],
+      recipient: null,
+    },
+  },
+  deliveryType: "same", // "same" или "different"
+  commonRecipient: {
+    name: "",
+    username: "",
+    address: "",
+  },
+}
+
+// Навигация
+function navigateTo(pageId) {
+  // Добавить текущую страницу в историю, если переходим на новую
+  if (pageId !== currentPage) {
+    pageHistory.push(pageId)
+  }
+
+  // Скрыть текущую страницу
+  document.querySelectorAll(".page").forEach((page) => {
+    page.classList.remove("active")
+  })
+
+  // Показать новую страницу
+  const newPage = document.getElementById(pageId)
+  if (newPage) {
+    newPage.classList.add("active")
+    currentPage = pageId
+  }
+
+  // Управление кнопкой назад - НЕ ПОКАЗЫВАТЬ на главной странице
+  const backButton = document.getElementById("backButton")
+  if (pageHistory.length <= 1 || pageId === "home") {
+    backButton.classList.remove("show")
+  } else {
+    setTimeout(() => {
+      backButton.classList.add("show")
+    }, 100)
+  }
+
+  // Управление навигационным меню
+  const mainNav = document.getElementById("mainNav")
+  if (pageId === "home") {
+    setTimeout(() => {
+      mainNav.classList.add("show")
+    }, 200)
+  } else {
+    mainNav.classList.remove("show")
+  }
+
+  // Инициализация страницы заказа
+  if (pageId === "order") {
+    initFigmaOrderPage()
+  }
+}
+
+function goBack() {
+  // Удалить текущую страницу из истории
+  if (pageHistory.length > 1) {
+    pageHistory.pop()
+    const previousPage = pageHistory[pageHistory.length - 1]
+
+    // Скрыть текущую страницу
+    document.querySelectorAll(".page").forEach((page) => {
+      page.classList.remove("active")
+    })
+
+    // Показать предыдущую страницу
+    const prevPage = document.getElementById(previousPage)
+    if (prevPage) {
+      prevPage.classList.add("active")
+      currentPage = previousPage
+    }
+
+    // Управление кнопкой назад - НЕ ПОКАЗЫВАТЬ на главной странице
+    const backButton = document.getElementById("backButton")
+    if (pageHistory.length <= 1 || previousPage === "home") {
+      backButton.classList.remove("show")
+    }
+
+    // Управление навигационным меню
+    const mainNav = document.getElementById("mainNav")
+    if (previousPage === "home") {
+      setTimeout(() => {
+        mainNav.classList.add("show")
+      }, 200)
+    } else {
+      mainNav.classList.remove("show")
+    }
+  }
+}
+
+// Улучшенная инициализация страницы заказа
+function initFigmaOrderPage() {
+  console.log("Initializing improved Figma order page")
+  resetFigmaOrderState()
+  updateFigmaStepsVisibility()
+  setupFigmaEventListeners()
+}
+
+function resetFigmaOrderState() {
+  figmaOrderState = {
+    country: "",
+    step: "country",
+    currentProductId: 1,
+    maxProducts: 3,
+    activeProducts: [1],
+    products: {
+      1: {
+        marketplace: "",
+        link: "",
+        price: "",
+        color: "",
+        size: "",
+        quantity: 1,
+        comment: "",
+        photos: [],
+        recipient: null,
+      },
+      2: {
+        marketplace: "",
+        link: "",
+        price: "",
+        color: "",
+        size: "",
+        quantity: 1,
+        comment: "",
+        photos: [],
+        recipient: null,
+      },
+      3: {
+        marketplace: "",
+        link: "",
+        price: "",
+        color: "",
+        size: "",
+        quantity: 1,
+        comment: "",
+        photos: [],
+        recipient: null,
+      },
+    },
+    deliveryType: "same",
+    commonRecipient: {
+      name: "",
+      username: "",
+      address: "",
+    },
+  }
+
+  // Сбросить форму
+  const form = document.getElementById("figmaOrderForm")
+  if (form) {
+    form.reset()
+  }
+
+  // Скрыть все секции
+  document.getElementById("figmaProductsSection").style.display = "none"
+  document.getElementById("figmaRecipientSection").style.display = "none"
+  document.getElementById("figmaMarketplaceSection").style.display = "none"
+
+  // Очистить ошибки валидации
+  clearValidationErrors()
+}
+
+function setupFigmaEventListeners() {
+  // Автосохранение данных товара
+  const productFields = [
+    "figmaMarketplace",
+    "figmaLink",
+    "figmaPrice",
+    "figmaColor",
+    "figmaSize",
+    "figmaQuantity",
+    "figmaComment",
+  ]
+
+  productFields.forEach((fieldId) => {
+    const field = document.getElementById(fieldId)
+    if (field) {
+      field.addEventListener("change", saveFigmaCurrentProductData)
+      field.addEventListener("input", saveFigmaCurrentProductData)
+    }
+  })
+
+  // Обработчик изменения маркетплейса
+  document.getElementById("figmaMarketplace")?.addEventListener("change", () => {
+    updateFigmaFieldsVisibility()
+    saveFigmaCurrentProductData()
+  })
+
+  // Обработчик выбора типа доставки
+  document.getElementById("deliveryType")?.addEventListener("change", (e) => {
+    figmaOrderState.recipient.deliveryType = e.target.value
+  })
+}
+
+// Улучшенная обработка выбора страны
+function handleFigmaCountryChange(country) {
+  figmaOrderState.country = country
+
+  if (country === "china") {
+    figmaOrderState.step = "products"
+    document.getElementById("figmaMarketplaceSection").style.display = "block"
+    updateFigmaStepsVisibility()
+    // Автоматически показать товар 1
+    updateFigmaProductTabs()
+  } else if (country === "japan") {
+    figmaOrderState.step = "products"
+    document.getElementById("figmaMarketplaceSection").style.display = "none"
+    updateFigmaStepsVisibility()
+    // Автоматически показать товар 1
+    updateFigmaProductTabs()
+  } else {
+    figmaOrderState.step = "country"
+    updateFigmaStepsVisibility()
+  }
+}
+
+// Улучшенное управление шагами
+function updateFigmaStepsVisibility() {
+  const productsSection = document.getElementById("figmaProductsSection")
+  const recipientSection = document.getElementById("figmaRecipientSection")
+
+  switch (figmaOrderState.step) {
+    case "country":
+      productsSection.style.display = "none"
+      recipientSection.style.display = "none"
+      break
+    case "products":
+      productsSection.style.display = "block"
+      recipientSection.style.display = "none"
+      break
+    case "final":
+      productsSection.style.display = "block"
+      recipientSection.style.display = "block"
+      break
+  }
+
+  updateFigmaSubmitButton()
+}
+
+// Выбор товара (1, 2, 3)
+function selectFigmaProduct(productId) {
+  // Сохранить данные текущего товара перед переключением
+  saveFigmaCurrentProductData()
+
+  figmaOrderState.currentProductId = productId
+  updateFigmaProductTabs()
+  loadFigmaProductData()
+}
+
+// Добавление нового товара через кнопку "+"
+function addFigmaProduct() {
+  // Найти следующий неактивный товар
+  for (let i = 1; i <= figmaOrderState.maxProducts; i++) {
+    if (!figmaOrderState.activeProducts.includes(i)) {
+      figmaOrderState.activeProducts.push(i)
+      figmaOrderState.currentProductId = i
+      updateFigmaProductTabs()
+      loadFigmaProductData()
+      break
+    }
+  }
+}
+
+function updateFigmaProductTabs() {
+  const tabs = document.querySelectorAll(".figma-product-tab")
+  const addButton = document.querySelector(".figma-add-product")
+
+  // Скрыть все табы сначала
+  tabs.forEach((tab, index) => {
+    tab.style.display = "none"
+    tab.classList.remove("active")
+  })
+
+  // Показать только активные товары
+  figmaOrderState.activeProducts.forEach((productId, index) => {
+    const tab = tabs[productId - 1]
+    if (tab) {
+      tab.style.display = "block"
+      if (productId === figmaOrderState.currentProductId) {
+        tab.classList.add("active")
+      }
+    }
+  })
+
+  // Управление кнопкой добавления
+  if (figmaOrderState.activeProducts.length >= figmaOrderState.maxProducts) {
+    addButton.style.display = "none"
+  } else {
+    addButton.style.display = "block"
+  }
+
+  // Обновить индикатор скролла
+  setTimeout(updateScrollIndicator, 100)
+}
+
+function loadFigmaProductData() {
+  const product = figmaOrderState.products[figmaOrderState.currentProductId]
+  if (!product) return
+
+  // Загрузить данные товара в форму
+  document.getElementById("figmaMarketplace").value = product.marketplace || ""
+  document.getElementById("figmaLink").value = product.link || ""
+  document.getElementById("figmaPrice").value = product.price || ""
+  document.getElementById("figmaColor").value = product.color || ""
+  document.getElementById("figmaSize").value = product.size || ""
+  document.getElementById("figmaQuantity").value = product.quantity || 1
+  document.getElementById("figmaComment").value = product.comment || ""
+
+  // Обновить предпросмотр фото
+  updatePhotoPreview()
+
+  // Обновить отображение полей в зависимости от маркетплейса
+  updateFigmaFieldsVisibility()
+}
+
+function saveFigmaCurrentProductData() {
+  const product = figmaOrderState.products[figmaOrderState.currentProductId]
+  if (!product) return
+
+  product.marketplace = document.getElementById("figmaMarketplace").value
+  product.link = document.getElementById("figmaLink").value
+  product.price = document.getElementById("figmaPrice").value
+  product.color = document.getElementById("figmaColor").value
+  product.size = document.getElementById("figmaSize").value
+  product.quantity = document.getElementById("figmaQuantity").value
+  product.comment = document.getElementById("figmaComment").value
+
+  // Проверить, можно ли перейти к финальному шагу
+  if (validateFigmaProductsStep()) {
+    figmaOrderState.step = "final"
+    updateFigmaStepsVisibility()
+  }
+}
+
+function updateFigmaFieldsVisibility() {
+  const marketplace = document.getElementById("figmaMarketplace").value
+  const linkField = document.getElementById("figmaLink")
+  const linkLabel = document.getElementById("figmaLinkLabel")
+
+  if (marketplace === "category2") {
+    if (linkLabel) linkLabel.textContent = "Номер телефона/ссылка на контакт"
+    linkField.placeholder = "Введите контактную информацию"
+  } else {
+    if (linkLabel) linkLabel.textContent = "Вставьте ссылку"
+    linkField.placeholder = "Введите ссылку на товар"
+  }
+}
+
+// Валидация
+function validateFigmaProductsStep() {
+  // Проверить хотя бы один заполненный товар из активных
+  return figmaOrderState.activeProducts.some((productId) => {
+    const product = figmaOrderState.products[productId]
+    return product.link && product.price && product.quantity > 0
+  })
+}
+
+function handleDeliveryTypeChange(deliveryType) {
+  figmaOrderState.deliveryType = deliveryType
+
+  const commonData = document.getElementById("commonRecipientData")
+  const individualData = document.getElementById("individualRecipientData")
+
+  if (deliveryType === "same") {
+    commonData.style.display = "block"
+    individualData.style.display = "none"
+    // Очистить индивидуальные данные
+    figmaOrderState.activeProducts.forEach((productId) => {
+      figmaOrderState.products[productId].recipient = null
+    })
+  } else {
+    commonData.style.display = "none"
+    individualData.style.display = "block"
+    generateIndividualRecipientForms()
+  }
+
+  clearValidationErrors()
+}
+
+function generateIndividualRecipientForms() {
+  const container = document.getElementById("recipientDataContainer")
+  container.innerHTML = ""
+
+  figmaOrderState.activeProducts.forEach((productId) => {
+    const product = figmaOrderState.products[productId]
+    if (!product.recipient) {
+      product.recipient = { name: "", username: "", address: "" }
+    }
+
+    const formHTML = `
+      <div class="preview-item" style="margin-bottom: 24px;">
+        <h4>Данные получателя для товара ${productId}</h4>
+        
+        <label class="figma-label">ФИО получателя</label>
+        <input type="text" id="recipientName${productId}" class="figma-input" 
+               value="${product.recipient.name}" 
+               onchange="updateIndividualRecipient(${productId}, 'name', this.value)"
+               placeholder="">
+
+        <label class="figma-label">Юзернейм получателя</label>
+        <input type="text" id="recipientUsername${productId}" class="figma-input" 
+               value="${product.recipient.username}"
+               onchange="updateIndividualRecipient(${productId}, 'username', this.value)"
+               placeholder="">
+
+        <label class="figma-label">ПВЗ СДЭК</label>
+        <textarea id="recipientAddress${productId}" class="figma-textarea" 
+                  onchange="updateIndividualRecipient(${productId}, 'address', this.value)"
+                  placeholder="">${product.recipient.address}</textarea>
+      </div>
+    `
+    container.innerHTML += formHTML
+  })
+}
+
+function updateIndividualRecipient(productId, field, value) {
+  if (figmaOrderState.products[productId] && figmaOrderState.products[productId].recipient) {
+    figmaOrderState.products[productId].recipient[field] = value
+  }
+  clearValidationErrors()
+}
+
+function validateFigmaOrder() {
+  const errors = []
+
+  // Проверка страны
+  if (!figmaOrderState.country) {
+    errors.push("Выберите страну выкупа")
+  }
+
+  // Проверка товаров
+  const hasValidProduct = figmaOrderState.activeProducts.some((productId) => {
+    const product = figmaOrderState.products[productId]
+    return product.link && product.price && product.quantity > 0
+  })
+
+  if (!hasValidProduct) {
+    errors.push("Заполните данные хотя бы для одного товара")
+  }
+
+  // Проверка получателя в зависимости от типа доставки
+  if (figmaOrderState.deliveryType === "same") {
+    const name = document.getElementById("figmaRecipientName")?.value
+    const username = document.getElementById("figmaRecipientUsername")?.value
+    const address = document.getElementById("figmaRecipientAddress")?.value
+
+    if (!name) errors.push("Введите ФИО получателя")
+    if (!username) errors.push("Введите юзернейм получателя")
+    if (!address) errors.push("Введите адрес ПВЗ СДЭК")
+  } else {
+    // Проверка индивидуальных данных для каждого активного товара
+    figmaOrderState.activeProducts.forEach((productId) => {
+      const product = figmaOrderState.products[productId]
+      if (product.link && product.price) {
+        // Только для заполненных товаров
+        if (!product.recipient || !product.recipient.name) {
+          errors.push(`Введите ФИО получателя для товара ${productId}`)
+        }
+        if (!product.recipient || !product.recipient.username) {
+          errors.push(`Введите юзернейм получателя для товара ${productId}`)
+        }
+        if (!product.recipient || !product.recipient.address) {
+          errors.push(`Введите адрес ПВЗ СДЭК для товара ${productId}`)
+        }
+      }
+    })
+  }
+
+  return errors
+}
+
+function showValidationErrors(errors) {
+  const errorContainer = document.getElementById("validationError")
+  if (errors.length > 0) {
+    errorContainer.innerHTML = errors.map((error) => `• ${error}`).join("<br>")
+    errorContainer.classList.add("show")
+
+    // Подсветить поля с ошибками
+    highlightErrorFields(errors)
+
+    // Прокрутить к ошибкам
+    errorContainer.scrollIntoView({ behavior: "smooth", block: "center" })
+  } else {
+    clearValidationErrors()
+  }
+}
+
+function clearValidationErrors() {
+  const errorContainer = document.getElementById("validationError")
+  errorContainer.classList.remove("show")
+
+  // Убрать подсветку с полей
+  document.querySelectorAll(".field-error").forEach((field) => {
+    field.classList.remove("field-error")
+  })
+}
+
+function highlightErrorFields(errors) {
+  // Простая логика подсветки основных полей
+  if (errors.some((e) => e.includes("ФИО"))) {
+    document.getElementById("figmaRecipientName")?.classList.add("field-error")
+  }
+  if (errors.some((e) => e.includes("юзернейм"))) {
+    document.getElementById("figmaRecipientUsername")?.classList.add("field-error")
+  }
+  if (errors.some((e) => e.includes("адрес"))) {
+    document.getElementById("figmaRecipientAddress")?.classList.add("field-error")
+  }
+}
+
+function updateFigmaSubmitButton() {
+  const btn = document.querySelector(".figma-submit-button-image")
+  if (!btn) return
+
+  const errors = validateFigmaOrder()
+  btn.disabled = errors.length > 0
+  btn.style.opacity = errors.length > 0 ? "0.5" : "1"
+}
+
+// Отправка заказа
+function submitFigmaOrder() {
+  // Сохранить данные текущего товара
+  saveFigmaCurrentProductData()
+
+  // Сохранить общие данные получателя если доставка на один адрес
+  if (figmaOrderState.deliveryType === "same") {
+    figmaOrderState.commonRecipient = {
+      name: document.getElementById("figmaRecipientName")?.value || "",
+      username: document.getElementById("figmaRecipientUsername")?.value || "",
+      address: document.getElementById("figmaRecipientAddress")?.value || "",
+    }
+  }
+
+  const errors = validateFigmaOrder()
+  if (errors.length > 0) {
+    showValidationErrors(errors)
+    return
+  }
+
+  showFigmaOrderPreview()
+}
+
+function uploadFigmaPhoto() {
+  document.getElementById("figmaPhotoInput").click()
+}
+
+function handleFigmaPhotoUpload(input) {
+  const files = input.files
+  const product = figmaOrderState.products[figmaOrderState.currentProductId]
+
+  if (!product) return
+
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i]
+    const reader = new FileReader()
+
+    reader.onload = (e) => {
+      product.photos.push(e.target.result)
+      updatePhotoPreview()
+    }
+
+    reader.readAsDataURL(file)
+  }
+
+  // Очистить input для возможности повторной загрузки
+  input.value = ""
+}
+
+function deleteFigmaProduct() {
+  const currentId = figmaOrderState.currentProductId
+
+  // Если это единственный активный товар, только очистить данные
+  if (figmaOrderState.activeProducts.length === 1) {
+    figmaOrderState.products[currentId] = {
+      marketplace: "",
+      link: "",
+      price: "",
+      color: "",
+      size: "",
+      quantity: 1,
+      comment: "",
+      photos: [],
+      recipient: null,
+    }
+    loadFigmaProductData()
+  } else {
+    // Удалить товар из активных
+    figmaOrderState.activeProducts = figmaOrderState.activeProducts.filter((id) => id !== currentId)
+
+    // Очистить данные товара
+    figmaOrderState.products[currentId] = {
+      marketplace: "",
+      link: "",
+      price: "",
+      color: "",
+      size: "",
+      quantity: 1,
+      comment: "",
+      photos: [],
+      recipient: null,
+    }
+
+    // Переключиться на первый активный товар
+    figmaOrderState.currentProductId = figmaOrderState.activeProducts[0]
+    updateFigmaProductTabs()
+    loadFigmaProductData()
+  }
+
+  updateFigmaSubmitButton()
+}
+
+function updatePhotoPreview() {
+  const container = document.getElementById("photoPreviewContainer")
+  const product = figmaOrderState.products[figmaOrderState.currentProductId]
+
+  if (!container || !product) return
+
+  container.innerHTML = ""
+
+  product.photos.forEach((photo, index) => {
+    const photoItem = document.createElement("div")
+    photoItem.className = "photo-preview-item"
+    photoItem.innerHTML = `
+      <img src="${photo}" alt="Фото ${index + 1}" class="photo-preview-img">
+      <button class="photo-delete-btn" onclick="deletePhoto(${index})" type="button">×</button>
+    `
+    container.appendChild(photoItem)
+  })
+}
+
+function deletePhoto(index) {
+  const product = figmaOrderState.products[figmaOrderState.currentProductId]
+  if (product && product.photos) {
+    product.photos.splice(index, 1)
+    updatePhotoPreview()
+  }
+}
+
+function showFigmaOrderPreview() {
+  // Получить только заполненные товары из активных
+  const filledProducts = figmaOrderState.activeProducts
+    .map((productId) => ({ id: productId, ...figmaOrderState.products[productId] }))
+    .filter((product) => product.link && product.price)
+
+  // Создать модальное окно с предварительным просмотром заказа
+  const modal = document.createElement("div")
+  modal.className = "modal show"
+  modal.innerHTML = `
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Подтверждение заказа</h3>
+        <button class="modal-close" onclick="closeFigmaModal(this)">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="preview-item">
+          <h4>Страна выкупа</h4>
+          <div class="preview-field">
+            <span class="preview-field-label">Страна:</span>
+            <span class="preview-field-value">${figmaOrderState.country.toUpperCase()}</span>
+          </div>
+        </div>
+        
+        <div class="preview-item">
+          <h4>Тип доставки</h4>
+          <div class="preview-field">
+            <span class="preview-field-label">Доставка:</span>
+            <span class="preview-field-value">${figmaOrderState.deliveryType === "same" ? "На один адрес" : "На разные адреса"}</span>
+          </div>
+        </div>
+        
+        ${filledProducts
+          .map(
+            (product) => `
+          <div class="preview-item">
+            <h4>Товар ${product.id}</h4>
+            ${
+              product.marketplace
+                ? `
+              <div class="preview-field">
+                <span class="preview-field-label">Площадка:</span>
+                <span class="preview-field-value">${product.marketplace === "category1" ? "Категория 1 (POIZON, TaoBao, Weidan)" : "Категория 2 (WeChat, Yupoo, GooFish)"}</span>
+              </div>
+            `
+                : ""
+            }
+            <div class="preview-field">
+              <span class="preview-field-label">Ссылка:</span>
+              <span class="preview-field-value">${product.link}</span>
+            </div>
+            <div class="preview-field">
+              <span class="preview-field-label">Цена:</span>
+              <span class="preview-field-value">${product.price}</span>
+            </div>
+            <div class="preview-field">
+              <span class="preview-field-label">Количество:</span>
+              <span class="preview-field-value">${product.quantity}</span>
+            </div>
+            ${
+              product.color
+                ? `
+              <div class="preview-field">
+                <span class="preview-field-label">Цвет:</span>
+                <span class="preview-field-value">${product.color}</span>
+              </div>
+            `
+                : ""
+            }
+            ${
+              product.size
+                ? `
+              <div class="preview-field">
+                <span class="preview-field-label">Размер:</span>
+                <span class="preview-field-value">${product.size}</span>
+              </div>
+            `
+                : ""
+            }
+            ${
+              product.comment
+                ? `
+              <div class="preview-field">
+                <span class="preview-field-label">Комментарий:</span>
+                <span class="preview-field-value">${product.comment}</span>
+              </div>
+            `
+                : ""
+            }
+            ${
+              product.photos && product.photos.length > 0
+                ? `
+              <div class="preview-field">
+                <span class="preview-field-label">Фото (${product.photos.length}):</span>
+                <div class="modal-photos">
+                  ${product.photos.map((photo) => `<img src="${photo}" alt="Фото товара" class="modal-photo">`).join("")}
+                </div>
+              </div>
+            `
+                : ""
+            }
+            ${
+              figmaOrderState.deliveryType === "different" && product.recipient
+                ? `
+              <div class="preview-field">
+                <span class="preview-field-label">Получатель:</span>
+                <span class="preview-field-value">${product.recipient.name} (@${product.recipient.username})</span>
+              </div>
+              <div class="preview-field">
+                <span class="preview-field-label">Адрес:</span>
+                <span class="preview-field-value">${product.recipient.address}</span>
+              </div>
+            `
+                : ""
+            }
+          </div>
+        `,
+          )
+          .join("")}
+
+        ${
+          figmaOrderState.deliveryType === "same"
+            ? `
+        <div class="preview-item">
+          <h4>Получатель (общий)</h4>
+          <div class="preview-field">
+            <span class="preview-field-label">ФИО:</span>
+            <span class="preview-field-value">${figmaOrderState.commonRecipient.name}</span>
+          </div>
+          <div class="preview-field">
+            <span class="preview-field-label">Юзернейм:</span>
+            <span class="preview-field-value">@${figmaOrderState.commonRecipient.username}</span>
+          </div>
+          <div class="preview-field">
+            <span class="preview-field-label">ПВЗ СДЭК:</span>
+            <span class="preview-field-value">${figmaOrderState.commonRecipient.address}</span>
+          </div>
+        </div>
+        `
+            : ""
+        }
+      </div>
+      <div class="modal-footer">
+        <button class="modal-btn cancel-btn" onclick="closeFigmaModal(this)">Отмена</button>
+        <button class="modal-btn submit-btn" onclick="confirmFigmaOrder()">Подтвердить заказ</button>
+      </div>
+    </div>
+  `
+
+  document.body.appendChild(modal)
+}
+
+function closeFigmaModal(element) {
+  const modal = element.closest(".modal")
+  if (modal) {
+    modal.remove()
+  }
+}
+
+function confirmFigmaOrder() {
+  // Здесь будет логика отправки заказа на сервер
+  alert("Заказ успешно отправлен! Мы свяжемся с вами в ближайшее время.")
+
+  // Закрыть модальное окно
+  const modal = document.querySelector(".modal")
+  if (modal) {
+    modal.remove()
+  }
+
+  // ПОЛНОСТЬЮ очистить форму и состояние
+  resetFigmaOrderState()
+
+  // Очистить все поля формы
+  const form = document.getElementById("figmaOrderForm")
+  if (form) {
+    form.reset()
+  }
+
+  // Очистить контейнер предпросмотра фото
+  const photoContainer = document.getElementById("photoPreviewContainer")
+  if (photoContainer) {
+    photoContainer.innerHTML = ""
+  }
+
+  // Очистить контейнер индивидуальных данных получателя
+  const recipientContainer = document.getElementById("recipientDataContainer")
+  if (recipientContainer) {
+    recipientContainer.innerHTML = ""
+  }
+
+  // Вернуться на главную и очистить историю
+  pageHistory = ["home"]
+  navigateTo("home")
+}
+
+// Функции для работы с изображениями
+function handleImageError(img, fallbackText) {
+  img.style.display = "none"
+  const fallback = img.nextElementSibling
+  if (fallback && fallback.classList.contains("image-fallback")) {
+    fallback.style.display = "flex"
+    fallback.textContent = fallbackText
+  }
+}
+
+function handleImageLoad(img) {
+  img.classList.remove("loading")
+}
+
+// Функция для открытия Telegram канала
+function openTelegramChannel(event) {
+  // Добавить анимацию клика
+  const buttonImg = event.target
+  if (buttonImg.classList.contains("main-button-image")) {
+    buttonImg.classList.add("clicked")
+    setTimeout(() => {
+      buttonImg.classList.remove("clicked")
+    }, 600)
+  }
+
+  // Открыть Telegram канал
+  window.open("https://t.me/volt_logistics", "_blank")
+}
+
+// Инициализация при загрузке
+window.addEventListener("load", () => {
+  console.log("Volt Logistics Order System loaded")
+
+  // Показать навигационное меню на главной странице
+  if (currentPage === "home") {
+    setTimeout(() => {
+      const mainNav = document.getElementById("mainNav")
+      if (mainNav) {
+        mainNav.classList.add("show")
+      }
+    }, 500)
+  }
+
+  // Показать кнопку назад если не на главной странице
+  if (currentPage !== "home") {
+    setTimeout(() => {
+      const backButton = document.getElementById("backButton")
+      if (backButton) {
+        backButton.classList.add("show")
+      }
+    }, 100)
+  }
+})
+
+// Добавить обработчики изменений для автосохранения данных товара
+document.addEventListener("DOMContentLoaded", () => {
+  // Инициализация панели менеджера
+  const managerIds = [919034275, 372145026, 6432717873];
+  
+  function isUserManager() {
+    if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe) {
+      const user = window.Telegram.WebApp.initDataUnsafe.user;
+      if (user && user.id) {
+        console.log('Current user ID:', user.id);
+        return managerIds.includes(user.id);
+      }
+    }
+    console.log('Running outside Telegram WebApp - manager panel hidden');
+    return false;
+  }
+  
+  const managerPanel = document.querySelector('.manager-panel');
+  if (managerPanel) {
+    if (isUserManager()) {
+      managerPanel.style.display = 'block';
+      console.log('Manager panel shown - user is a manager');
+    } else {
+      managerPanel.style.display = 'none';
+      console.log('Manager panel hidden - user is not a manager');
+    }
+  }
+
+  // Обработчики для полей товара
+  const productFields = [
+    "figmaMarketplace",
+    "figmaLink",
+    "figmaPrice",
+    "figmaColor",
+    "figmaSize",
+    "figmaQuantity",
+    "figmaComment",
+  ]
+
+  productFields.forEach((fieldId) => {
+    const field = document.getElementById(fieldId)
+    if (field) {
+      field.addEventListener("change", saveFigmaCurrentProductData)
+      field.addEventListener("input", saveFigmaCurrentProductData)
+    }
+  })
+})
+
+function updateScrollIndicator() {
+  const tabsContainer = document.querySelector(".figma-product-tabs")
+  if (tabsContainer) {
+    const isScrollable = tabsContainer.scrollWidth > tabsContainer.clientWidth
+    if (isScrollable) {
+      tabsContainer.classList.add("scrollable")
+    } else {
+      tabsContainer.classList.remove("scrollable")
+    }
+  }
+}
+
+    </script>
+</body>
+</html>
