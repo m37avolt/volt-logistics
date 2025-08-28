@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Курс валют - Volt Logistics</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        @font-face {
+            font-family: 'TT Runs Trial Bold';
+            src: url('TT_Runs_Trial_Bold_HpQxXl.ttf') format('truetype');
+            font-weight: bold;
+            font-style: normal;
+        }
+
+        body {
+            background: #141414;
+            color: white;
+            font-family: 'TT Runs Trial Bold', 'TT Runs', Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            padding-bottom: 100px;
+        }
+
+        .course-container {
+            max-width: 375px;
+            margin: 0 auto;
+            padding: 16px;
+        }
+
+        .course-header {
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        .course-title {
+            font-size: 24px;
+            font-weight: bold;
+            font-family: 'TT Runs Trial Bold', 'TT Runs', Arial, sans-serif;
+            margin-bottom: 10px;
+            color: #00DBFF;
+            text-align: center;
+            width: 100%;
+        }
+
+        .currency-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .currency-card {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            text-align: center;
+            position: relative;
+        }
+
+        .currency-card:hover {
+            background: rgba(255, 255, 255, 0.12);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 219, 255, 0.1);
+        }
+
+        .currency-name {
+            font-size: 18px;
+            color: #888;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .currency-rate {
+            font-size: 32px;
+            font-weight: bold;
+            font-family: 'TT Runs Trial Bold', 'TT Runs', Arial, sans-serif;
+            color: #00DBFF;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(0, 219, 255, 0.3);
+        }
+
+        .currency-formula {
+            font-size: 16px;
+            color: #ccc;
+            margin-bottom: 10px;
+        }
+
+        .currency-updated {
+            font-size: 12px;
+            color: #666;
+        }
+
+        /* Manager Mode Styles */
+        .manager-mode-toggle {
+            background-color: #333;
+            color: #ccc;
+            border: none;
+            border-radius: 10px;
+            padding: 8px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: 20px;
+        }
+
+        .manager-mode-toggle.active {
+            background-color: #00DBFF;
+            color: white;
+        }
+
+        .manager-controls {
+            display: none;
+        }
+
+        .manager-controls.active {
+            display: block;
+        }
+
+        .edit-button {
+            background: #00DBFF;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-top: 10px;
+        }
+
+        .edit-button:hover {
+            background: #00B8E6;
+            transform: translateY(-1px);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .modal-content {
+            background-color: #1e1e1e;
+            margin: 10% auto;
+            padding: 20px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 350px;
+            box-shadow: 0 5px 15px rgba(0, 219, 255, 0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #00DBFF;
+        }
+
+        .close-button {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #999;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-button:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #ccc;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            background-color: #2e2e2e;
+            border: 1px solid #444;
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #00DBFF;
+            box-shadow: 0 0 0 2px rgba(0, 219, 255, 0.2);
+        }
+
+        .form-submit {
+            background-color: #00DBFF;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 20px;
+            font-size: 16px;
+            font-weight: 600;
+            width: 100%;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .form-submit:hover {
+            background-color: #00B8E6;
+        }
+
+        /* SVG Back Button Styles */
+        .svg-back-button {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: none;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .svg-back-button.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .svg-back-button:hover {
+            transform: translateX(-50%) translateY(-4px);
+            filter: brightness(1.1);
+        }
+
+        .svg-back-button:active {
+            transform: translateX(-50%) translateY(-2px);
+        }
+
+        .back-button-svg {
+            width: 180px;
+            height: auto;
+            filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.4));
+            transition: all 0.3s ease;
+        }
+
+        .svg-back-button:hover .back-button-svg {
+            filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.5)) brightness(1.1);
+        }
+
+        .last-updated {
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+            margin-top: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .course-container {
+                padding: 12px;
+            }
+
+            .currency-rate {
+                font-size: 28px;
+            }
+
+            .currency-formula {
+                font-size: 14px;
+            }
+        }
+    </style>
+    <script src="js/common.js"></script>
+    <script src="js/currency-service.js"></script>
+</head>
+<body>
+    <div class="course-container">
+        <div class="course-header">
+            <h1 class="course-title">Актуальный курс</h1>
+            <button id="manager-mode-toggle" class="manager-mode-toggle">Режим менеджера</button>
+        </div>
+
+        <div class="currency-cards">
+            <!-- CNY Card -->
+            <div class="currency-card">
+                <div class="currency-name">Китайский юань</div>
+                <div class="currency-rate" id="cny-rate">12 ₽</div>
+                <div class="currency-formula">1 CNY = <span id="cny-value">12</span> RUB</div>
+                <div class="currency-updated" id="cny-updated">Обновлено: сегодня</div>
+                <div class="manager-controls" id="cny-controls">
+                    <button class="edit-button" onclick="editCurrency('cny')">Редактировать</button>
+                </div>
+            </div>
+
+            <!-- JPY Card -->
+            <div class="currency-card">
+                <div class="currency-name">Японская йена</div>
+                <div class="currency-rate" id="jpy-rate">0.65 ₽</div>
+                <div class="currency-formula">1 JPY = <span id="jpy-value">0.65</span> RUB</div>
+                <div class="currency-updated" id="jpy-updated">Обновлено: сегодня</div>
+                <div class="manager-controls" id="jpy-controls">
+                    <button class="edit-button" onclick="editCurrency('jpy')">Редактировать</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="last-updated" id="last-updated">
+            Последнее обновление: сегодня в 14:32
+        </div>
+
+    </div>
+
+    <!-- Edit Currency Modal -->
+    <div id="edit-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modal-title">Редактировать курс</h2>
+                <button class="close-button" id="close-modal">&times;</button>
+            </div>
+            <form id="currency-form">
+                <input type="hidden" id="currency-type">
+                <div class="form-group">
+                    <label for="currency-rate-input" class="form-label">Новый курс (в рублях)</label>
+                    <input type="number" id="currency-rate-input" class="form-input" step="0.01" min="0" required>
+                </div>
+                <button type="submit" class="form-submit">Сохранить</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- SVG Stylized Back Button -->
+    <button class="svg-back-button show" onclick="goBack()" aria-label="Назад">
+        <img src="img/back_button.svg" alt="Назад" class="back-button-svg" 
+             onerror="handleImageError(this, 'Назад')" 
+             onload="handleImageLoad(this)">
+    </button>
+
+    <script>
+        // Manager IDs (same as promotions page)
+        const managerIds = [
+            919034275,   // ID первого менеджера
+            372145026,   // ID второго менеджера
+            6432717873   // ID третьего менеджера
+        ];
+
+        // Check if user is manager
+        function isUserManager() {
+            if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe) {
+                const user = window.Telegram.WebApp.initDataUnsafe.user;
+                if (user && user.id) {
+                    console.log('Current user ID:', user.id);
+                    return managerIds.includes(user.id);
+                }
+            }
+            // For testing in browser (without Telegram)
+            console.log('Running outside Telegram WebApp - manager mode disabled');
+            return false;
+        }
+
+        // Manager mode flag
+        let isManagerMode = false;
+        const userIsManager = isUserManager();
+
+        // DOM elements
+        const managerModeToggle = document.getElementById('manager-mode-toggle');
+        const editModal = document.getElementById('edit-modal');
+        const closeModalButton = document.getElementById('close-modal');
+        const currencyForm = document.getElementById('currency-form');
+        const modalTitle = document.getElementById('modal-title');
+        const currencyTypeInput = document.getElementById('currency-type');
+        const currencyRateInput = document.getElementById('currency-rate-input');
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', () => {
+            // Hide manager mode toggle for non-managers
+            if (!userIsManager) {
+                managerModeToggle.style.display = 'none';
+                console.log('Manager mode hidden - user is not a manager');
+            } else {
+                console.log('Manager mode available - user is a manager');
+            }
+            
+            updateDisplay();
+            
+            // Subscribe to currency changes
+            window.CurrencyService.subscribe((currency, newRate, allRates) => {
+                console.log(`Currency ${currency} updated to ${newRate}`);
+                updateDisplay();
+            });
+        });
+
+        // Update display with current rates
+        function updateDisplay() {
+            const rates = window.CurrencyService.getRates();
+            
+            // Update CNY
+            const cnyInfo = rates.cny;
+            document.getElementById('cny-rate').textContent = `${window.CurrencyService.formatRate(cnyInfo.rate)} ₽`;
+            document.getElementById('cny-value').textContent = window.CurrencyService.formatRate(cnyInfo.rate);
+            document.getElementById('cny-updated').textContent = `Обновлено: ${window.CurrencyService.formatDate(cnyInfo.updated)}`;
+
+            // Update JPY
+            const jpyInfo = rates.jpy;
+            document.getElementById('jpy-rate').textContent = `${window.CurrencyService.formatRate(jpyInfo.rate)} ₽`;
+            document.getElementById('jpy-value').textContent = window.CurrencyService.formatRate(jpyInfo.rate);
+            document.getElementById('jpy-updated').textContent = `Обновлено: ${window.CurrencyService.formatDate(jpyInfo.updated)}`;
+
+            // Update last updated time
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('ru-RU', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+            document.getElementById('last-updated').textContent = `Последнее обновление: сегодня в ${timeString}`;
+        }
+
+        // Toggle manager mode
+        managerModeToggle.addEventListener('click', () => {
+            if (!userIsManager) {
+                console.log('Access denied - user is not a manager');
+                return;
+            }
+            
+            isManagerMode = !isManagerMode;
+            managerModeToggle.classList.toggle('active', isManagerMode);
+            
+            // Show/hide manager controls
+            const cnyControls = document.getElementById('cny-controls');
+            const jpyControls = document.getElementById('jpy-controls');
+            
+            cnyControls.classList.toggle('active', isManagerMode);
+            jpyControls.classList.toggle('active', isManagerMode);
+            
+            console.log('Manager mode toggled:', isManagerMode);
+        });
+
+        // Edit currency
+        function editCurrency(currencyType) {
+            if (!userIsManager || !isManagerMode) {
+                console.log('Access denied - user is not a manager or not in manager mode');
+                return;
+            }
+            
+            const currencyInfo = window.CurrencyService.getCurrencyInfo(currencyType);
+            modalTitle.textContent = `Редактировать курс ${currencyInfo.fullName}`;
+            currencyTypeInput.value = currencyType;
+            currencyRateInput.value = currencyInfo.rate;
+            editModal.style.display = 'block';
+        }
+
+        // Close modal
+        closeModalButton.addEventListener('click', () => {
+            editModal.style.display = 'none';
+        });
+
+        // Close modal when clicking outside
+        window.addEventListener('click', (event) => {
+            if (event.target === editModal) {
+                editModal.style.display = 'none';
+            }
+        });
+
+        // Handle form submission
+        currencyForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+
+            if (!userIsManager || !isManagerMode) {
+                console.log('Access denied - user is not a manager or not in manager mode');
+                editModal.style.display = 'none';
+                return;
+            }
+
+            const currencyType = currencyTypeInput.value;
+            const newRate = parseFloat(currencyRateInput.value);
+            
+            if (newRate > 0) {
+                const success = window.CurrencyService.updateRate(currencyType, newRate);
+                if (success) {
+                    console.log(`Currency ${currencyType} updated to ${newRate} globally`);
+                    // Display will be updated automatically via subscription
+                } else {
+                    alert('Ошибка при обновлении курса');
+                }
+            } else {
+                alert('Пожалуйста, введите корректный курс');
+                return;
+            }
+            
+            editModal.style.display = 'none';
+        });
+
+        // Back button function
+        function goBack() {
+            console.log('🔙 Возврат назад');
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                window.location.href = 'index.html';
+            }
+        }
+
+        // Image handling functions
+        function handleImageLoad(img) {
+            if (img && img.classList) {
+                img.classList.remove("loading");
+            }
+        }
+        
+        function handleImageError(img, fallbackText) {
+            if (img) {
+                img.style.display = "none";
+                const fallback = img.nextElementSibling;
+                if (fallback && fallback.classList.contains("image-fallback")) {
+                    fallback.style.display = "flex";
+                    fallback.textContent = fallbackText;
+                }
+            }
+        }
+
+        // Make functions globally available
+        window.editCurrency = editCurrency;
+        window.goBack = goBack;
+        window.handleImageLoad = handleImageLoad;
+        window.handleImageError = handleImageError;
+    </script>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</body>
+</html>

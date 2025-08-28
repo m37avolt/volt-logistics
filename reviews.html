@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Отзывы - Volt Logistics</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="js/common.js"></script>
+
+    </head>
+
+<body>
+    <!-- Фиксированная полоска с Telegram вверху экрана -->
+    <div class="telegram-fixed-bar">
+        <div class="telegram-bar-content">
+            <img src="img/reviews_tg.svg" alt="Volt Logistics Отзывы" class="main-tg-image-fixed"
+                onerror="handleImageError(this, 'Отзывы')" onload="handleImageLoad(this)">
+            <div class="image-fallback main-tg-fallback" style="display: none;">
+                <div
+                    style="display: flex; align-items: center; gap: 12px; padding: 16px; background-color: #2e2e2e; border-radius: 20px;">
+                    <div
+                        style="width: 40px; height: 40px; background-color: #00BCD4; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px;">
+                        ⭐</div>
+                    <div>
+                        <div style="color: white; font-weight: 600;">Volt Logistics</div>
+                        <div style="color: #737373; font-size: 13px;">отзывы клиентов</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-page-container" style="padding-top: 80px;">
+        <!-- Центральная секция с основным блоком и интегрированной кнопкой -->
+        <div class="main-center-section">
+            <div class="main-content-block" style="position: relative;">
+                <img src="img/reviews.svg" alt="Volt Logistics Отзывы" class="main-block-image"
+                    onerror="handleImageError(this, 'Reviews Block')" onload="handleImageLoad(this)">
+
+                <!-- Кнопка поверх основного блока -->
+                <div style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);">
+                    <img src="img/reviews_button.svg" alt="Читать отзывы" class="main-button-image"
+                        onclick="openReviewsChannel()" onerror="handleImageError(this, 'Button')"
+                        onload="handleImageLoad(this)" style="cursor: pointer; width: 250px; height: auto;">
+                    <div class="image-fallback main-button-fallback" style="display: none;">
+                        <button
+                            style="background-color: #00BCD4; color: #000000; border: none; border-radius: 20px; padding: 12px 40px; font-size: 14px; font-weight: 600; cursor: pointer; text-transform: uppercase; min-width: 200px;"
+                            onclick="openReviewsChannel()">ЧИТАТЬ ОТЗЫВЫ</button>
+                    </div>
+                </div>
+
+                <div class="image-fallback main-block-fallback" style="display: none;">
+                    <div
+                        style="background-color: #2e2e2e; border-radius: 25px; padding: 40px 20px; text-align: center; position: relative;">
+                        <div
+                            style="width: 80px; height: 80px; background-color: #000; border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; color: #00BCD4; font-size: 36px; font-weight: bold;">
+                            ⭐</div>
+                        <div
+                            style="color: white; font-size: 18px; font-weight: 600; letter-spacing: 1px; margin-bottom: 20px;">
+                            ОТЗЫВЫ КЛИЕНТОВ</div>
+                        <button
+                            style="background-color: #00BCD4; color: #000000; border: none; border-radius: 20px; padding: 12px 40px; font-size: 14px; font-weight: 600; cursor: pointer; text-transform: uppercase; min-width: 200px;"
+                            onclick="openReviewsChannel()">ЧИТАТЬ ОТЗЫВЫ</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- Стильная кнопка "Назад" -->
+    <button class="stylish-back-button show" onclick="goBack()" aria-label="Назад">
+    </button>
+
+    <script>
+        // Определяем функции для изображений
+        function handleImageLoad(img) {
+            if (img && img.classList) {
+                img.classList.remove("loading");
+            }
+        }
+        
+        function handleImageError(img, fallbackText) {
+            if (img) {
+                img.style.display = "none";
+                const fallback = img.nextElementSibling;
+                if (fallback && fallback.classList.contains("image-fallback")) {
+                    fallback.style.display = "flex";
+                    fallback.textContent = fallbackText;
+                }
+            }
+        }
+
+        // Функция для открытия канала отзывов
+        function openReviewsChannel() {
+            console.log('⭐ Открытие канала отзывов');
+            if (window.Telegram && window.Telegram.WebApp) {
+                window.Telegram.WebApp.openTelegramLink('https://t.me/feedbackvolt');
+            } else {
+                window.open('https://t.me/feedbackvolt', '_blank');
+            }
+        }
+
+        // Функция для открытия чата с менеджером
+        function openTelegramManager() {
+            console.log('💬 Открытие чата с менеджером');
+            if (window.Telegram && window.Telegram.WebApp) {
+                window.Telegram.WebApp.openTelegramLink('https://t.me/voltlogistics_manager');
+            } else {
+                window.open('https://t.me/voltlogistics_manager', '_blank');
+            }
+        }
+
+        // Функция навигации
+        function navigateTo(pageId) {
+            console.log('🔘 Навигация к:', pageId);
+            const pageMap = {
+                'profile': 'profile_menu.html',
+                'order': 'order.html',
+                'home': 'index.html'
+            };
+            const targetPage = pageMap[pageId] || 'index.html';
+            window.location.href = targetPage;
+        }
+
+        // Функция возврата назад
+        function goBack() {
+            console.log('🔙 Возврат назад');
+            window.history.back();
+        }
+
+        // Фиксированное меню не нужно на этой странице
+    </script>
+
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    </body>
+
+</html>

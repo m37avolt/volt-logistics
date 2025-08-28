@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Калькулятор заказа - Volt Logistics</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preload" href="TT_Runs_Trial_Regular_zenSkO.ttf" as="font" type="font/ttf" crossorigin>
+    <link rel="preload" href="TT_Runs_Trial_Bold_HpQxXl.ttf" as="font" type="font/ttf" crossorigin>
+    <style>
+        @font-face {
+            font-family: 'TT Runs';
+            src: url('TT_Runs_Trial_Regular_zenSkO.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'TT Runs';
+            src: url('TT_Runs_Trial_Bold_HpQxXl.ttf') format('truetype');
+            font-weight: bold;
+            font-style: normal;
+        }
+
+        body {
+            font-family: 'TT Runs', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+    </style>
+    <script src="js/common.js"></script>
+    <script src="js/currency-service.js"></script>
+
+    </head>
+
+<body>
+    <div class="calculator-container">
+        <div class="calculator-header">
+            <img src="img/calc_table.svg" alt="Volt Logistics - калькулятор стоимости">
+        </div>
+
+        <div class="calculator-form">
+            <div class="form-group">
+                <label class="form-label">Выберите страну выкупа</label>
+                <select id="country-select" class="form-select">
+                    <option value="china">Китай</option>
+                    <option value="japan">Япония</option>
+                </select>
+            </div>
+
+            <div id="marketplace-group" class="form-group">
+                <label class="form-label">Выберите площадку</label>
+                <select id="marketplace-select" class="form-select">
+                    <option value="taobao">POIZON/TAOBAO/WEIDAN</option>
+                    <option value="weechat">WEECHAT/YUPOO/GOOFISH</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Введите цену</label>
+                <input type="text" id="price-input" class="form-input" placeholder="Введите цену в юанях">
+            </div>
+
+            <button id="calculate-button" class="calculate-button">
+                <img src="img/calc_button.svg" alt="Рассчитать">
+            </button>
+        </div>
+
+        <div class="result-section" id="result-section" style="display: none;">
+            <div class="result-label">Итоговая стоимость:</div>
+            <div id="result-value" class="result-value"></div>
+        </div>
+
+        <!-- Кнопка назад -->
+        <button class="stylish-back-button show" onclick="window.history.back()">
+        </button>
+    </div>
+
+    <!-- Стильная кнопка "Назад" -->
+    <button class="stylish-back-button show" onclick="goBack()" aria-label="Назад">
+        <alt="Назад" onerror="this.style.display='none'">
+    </button>
+
+    <script src="js/calculator.js"></script>
+    </body>
+
+</html>

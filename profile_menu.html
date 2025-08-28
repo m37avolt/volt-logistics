@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Меню профиля - Volt Logistics</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="js/common.js"></script>
+    <script src="js/profile_menu.js"></script>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        @font-face {
+            font-family: 'TT Runs';
+            src: url('TT_Runs_Trial_Regular_zenSkO.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        body {
+            font-family: 'TT Runs', Arial, sans-serif;
+        }
+
+        .profile-page-container {
+            padding: 20px;
+            min-height: calc(100vh - 32px);
+        }
+
+        .profile-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .profile-button {
+            background: none;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            width: 100%;
+            height: auto;
+            transition: transform 0.15s ease;
+        }
+
+        .profile-button:active {
+            transform: scale(0.98);
+        }
+
+        .profile-button img {
+            width: 100%;
+            height: auto;
+            border-radius: 20px;
+        }
+
+        /* Стили для аватарки пользователя */
+        .avatar-container {
+            position: relative;
+        }
+
+        .avatar-circle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: #00BCD4;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            border: 2px solid white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            pointer-events: none;
+            /* Чтобы клики проходили сквозь аватарку на кнопку */
+        }
+    </style>
+    <script src="js/common.js"></script>
+    <script src="js/profile_menu.js"></script>
+
+</head>
+
+<body>
+    <div class="profile-page-container">
+        <!-- Сетка карточек профиля -->
+        <div class="profile-grid">
+            <!-- Мой профиль -->
+            <div class="avatar-container">
+                <button class="profile-button" onclick="navigateTo('my-profile')">
+                    <img src="img/my_profile_page.svg" alt="Мой профиль" onerror="handleImageError(this, '👤 Мой профиль')" onload="handleImageLoad(this)">
+                </button>
+                <div class="avatar-circle" id="userAvatar">👤</div>
+            </div>
+
+            <!-- Мои заказы -->
+            <button class="profile-button" onclick="navigateTo('my-orders')">
+                <img src="img/my_orders.svg" alt="Мои заказы" onerror="handleImageError(this, '📦 Мои заказы')" onload="handleImageLoad(this)">
+            </button>
+
+            <!-- Реферальная программа -->
+            <button class="profile-button" onclick="navigateTo('referral')">
+                <img src="img/referral.svg" alt="Реферальная программа" onerror="handleImageError(this, '🎁 Реферальная программа')" onload="handleImageLoad(this)">
+            </button>
+
+            <!-- Панель менеджера (только для менеджеров) -->
+            <button id="managerPanelButton" class="profile-button manager-panel" onclick="window.location.href='manager_panel.html'" style="display: none;">
+                <img src="img/manager_panel.svg" alt="Панель менеджера" onerror="handleImageError(this, '👨‍💼 Панель менеджера')" onload="handleImageLoad(this)">
+            </button>
+        </div>
+    </div>
+
+    <!-- Стильная кнопка "Назад" -->
+    <button class="stylish-back-button show" onclick="goBack()" aria-label="Назад">
+        <alt="Назад" onerror="this.style.display='none'">
+    </button>
+
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script>
+        // Код для получения аватарки пользователя из Telegram
+        document.addEventListener('DOMContentLoaded', function () {
+            // Проверяем, доступен ли Telegram WebApp
+            if (window.Telegram && window.Telegram.WebApp) {
+                const user = window.Telegram.WebApp.initDataUnsafe.user;
+                if (user) {
+                    // Если есть данные пользователя, можно использовать инициалы
+                    const userAvatar = document.getElementById('userAvatar');
+                    if (user.first_name) {
+                        userAvatar.textContent = user.first_name.charAt(0);
+                    }
+                }
+            }
+
+            // Показать панель менеджера только для менеджеров
+            function checkManagerAccess() {
+                // Используем функции из script_clean.js
+                const user = getTelegramUser();
+                const isManagerUser = isManager();
+                
+                console.log('👤 Пользователь в профиле:', user);
+                console.log('👨‍💼 Права менеджера:', isManagerUser);
+                
+                if (isManagerUser) {
+                    const managerButton = document.getElementById('managerPanelButton');
+                    if (managerButton) {
+                        managerButton.style.display = 'block';
+                        console.log('✅ Панель менеджера показана в профиле');
+                    }
+                } else {
+                    console.log('❌ Панель менеджера скрыта - нет прав');
+                }
+            }
+            
+            // Проверяем права менеджера после загрузки script_clean.js
+            setTimeout(checkManagerAccess, 500);
+            
+            const managerPanel = document.querySelector('.manager-panel');
+            if (managerPanel) {
+                if (isManager()) {
+                    managerPanel.style.display = 'block';
+                    console.log('Manager panel shown - user is a manager');
+                } else {
+                    managerPanel.style.display = 'none';
+                    console.log('Manager panel hidden - user is not a manager');
+                }
+            }
+        });
+    </script>
+
+    <!-- Стильная кнопка "Назад" внизу экрана с анимацией -->
+    <button class="stylish-back-button show" onclick="goBack()" aria-label="Назад">
+    </button>
+</body>
+
+</html>

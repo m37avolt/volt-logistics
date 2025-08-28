@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Панель менеджера - Volt Logistics</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #141414;
+            color: white;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #FF6B35 0%, #E74C3C 100%);
+            padding: 20px;
+            text-align: center;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .btn {
+            background: #00DBFF;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn:hover {
+            background: #00B8E6;
+            transform: translateY(-2px);
+        }
+        
+        .btn.success {
+            background: #28a745;
+        }
+        
+        .btn.success:hover {
+            background: #218838;
+        }
+        
+        .btn.danger {
+            background: #dc3545;
+        }
+        
+        .btn.danger:hover {
+            background: #c82333;
+        }
+        
+        .orders-grid {
+            display: grid;
+            gap: 20px;
+        }
+        
+        .order-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .order-card:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+        
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .order-id {
+            font-size: 20px;
+            font-weight: bold;
+            color: #00DBFF;
+        }
+        
+        .order-status {
+            background: #00DBFF;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .order-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .info-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px;
+            border-radius: 8px;
+        }
+        
+        .info-label {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 5px;
+        }
+        
+        .info-value {
+            font-weight: bold;
+        }
+        
+        .order-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .items-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .item-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border-left: 4px solid #00DBFF;
+        }
+        
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .item-title {
+            font-weight: bold;
+            color: #00DBFF;
+        }
+        
+        .item-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .photos-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .photo-item {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .photo-preview {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 10px;
+            border: 3px solid #00DBFF;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .photo-preview:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(0, 219, 255, 0.4);
+        }
+        
+        .photo-actions {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            display: flex;
+            gap: 5px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .photo-item:hover .photo-actions {
+            opacity: 1;
+        }
+        
+        .photo-action-btn {
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        .photo-action-btn:hover {
+            transform: scale(1.1);
+        }
+        
+        .photo-action-btn.download {
+            background: rgba(52, 199, 89, 0.9);
+        }
+        
+        .photo-action-btn.download:hover {
+            background: #34C759;
+        }
+        
+
+        
+        .photo-number {
+            position: absolute;
+            bottom: 5px;
+            left: 5px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.show {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: #2a2a2a;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 90vw;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #555;
+        }
+        
+        .modal-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #00DBFF;
+        }
+        
+        .close-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        
+        .close-btn:hover {
+            background: #c82333;
+            transform: scale(1.1);
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #888;
+            font-size: 18px;
+        }
+        
+        .error {
+            background: rgba(220, 53, 69, 0.2);
+            border: 2px solid #dc3545;
+            color: #ff6b6b;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .success {
+            background: rgba(40, 167, 69, 0.2);
+            border: 2px solid #28a745;
+            color: #51cf66;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .order-info {
+                grid-template-columns: 1fr;
+            }
+            
+            .item-details {
+                grid-template-columns: 1fr;
+            }
+            
+            .photos-container {
+                justify-content: center;
+            }
+            
+            .photo-preview {
+                width: 100px;
+                height: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>👨‍💼 Панель менеджера</h1>
+            <p>Управление заказами и фотографиями</p>
+        </div>
+        
+        <div class="controls">
+            <div>
+                <button class="btn" onclick="loadOrders()">🔄 Обновить заказы</button>
+                <button class="btn success" onclick="createTestOrder()">🧪 Создать тестовый заказ</button>
+            </div>
+            <div id="stats" style="color: #888; font-size: 14px;">
+                Загрузка...
+            </div>
+        </div>
+        
+        <div id="ordersContainer">
+            <div class="loading">Нажмите "Обновить заказы" для загрузки</div>
+        </div>
+    </div>
+
+    <!-- Модальное окно для просмотра фото -->
+    <div id="photoModal" class="modal">
+        <div class="modal-content" style="max-width: 800px; text-align: center;">
+            <div class="modal-header">
+                <h3 class="modal-title">📷 Просмотр фотографии</h3>
+                <button class="close-btn" onclick="closePhotoModal()">&times;</button>
+            </div>
+            <div id="photoContent">
+                <!-- Содержимое будет добавлено динамически -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allOrders = [];
+        
+        // Функция для скачивания фотографии
+        async function downloadPhoto(photoSrc, filename) {
+            try {
+                console.log('📥 Скачиваем фото:', filename);
+                
+                if (photoSrc.startsWith('data:image/')) {
+                    // Base64 изображение
+                    const link = document.createElement('a');
+                    link.href = photoSrc;
+                    link.download = filename || 'photo.jpg';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    console.log('✅ Base64 фото скачано');
+                    return;
+                }
+
+                // URL изображение
+                const response = await fetch(photoSrc);
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = filename || 'photo.jpg';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                window.URL.revokeObjectURL(url);
+                console.log('✅ URL фото скачано');
+            } catch (error) {
+                console.error('❌ Ошибка скачивания:', error);
+                alert('Ошибка при скачивании фотографии: ' + error.message);
+            }
+        }
+
+
+
+        // Показать модальное окно с фото
+        function showPhotoModal(photoSrc, filename, orderId, itemIndex, photoIndex) {
+            const modal = document.getElementById('photoModal');
+            const content = document.getElementById('photoContent');
+            
+            content.innerHTML = `
+                <img src="${photoSrc}" alt="Фото товара" style="max-width: 100%; max-height: 60vh; border-radius: 10px; margin-bottom: 20px;">
+                
+                <div style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
+                    <button class="btn" onclick="downloadPhoto('${photoSrc}', '${filename}')">
+                        💾 Скачать фото
+                    </button>
+                    <button class="btn danger" onclick="closePhotoModal()">
+                        ❌ Закрыть
+                    </button>
+                </div>
+            `;
+            
+            modal.classList.add('show');
+        }
+
+        // Закрыть модальное окно с фото
+        function closePhotoModal() {
+            const modal = document.getElementById('photoModal');
+            modal.classList.remove('show');
+        }
+
+
+
+        // Загрузить заказы
+        async function loadOrders() {
+            const container = document.getElementById('ordersContainer');
+            const stats = document.getElementById('stats');
+            
+            container.innerHTML = '<div class="loading">Загрузка заказов...</div>';
+            stats.textContent = 'Загрузка...';
+
+            try {
+                console.log('🔄 Загружаем заказы...');
+                const response = await fetch('http://localhost:5000/api/orders/all');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                console.log('📊 Получены данные:', data);
+
+                if (data.status === 'success' && data.orders) {
+                    allOrders = data.orders;
+                    displayOrders();
+                    updateStats();
+                } else {
+                    throw new Error(data.message || 'Неизвестная ошибка API');
+                }
+            } catch (error) {
+                console.error('❌ Ошибка загрузки:', error);
+                container.innerHTML = `
+                    <div class="error">
+                        <h3>❌ Ошибка загрузки заказов</h3>
+                        <p>${error.message}</p>
+                        <button class="btn" onclick="loadOrders()">🔄 Попробовать снова</button>
+                    </div>
+                `;
+                stats.textContent = 'Ошибка загрузки';
+            }
+        }
+
+        // Отобразить заказы
+        function displayOrders() {
+            const container = document.getElementById('ordersContainer');
+
+            if (allOrders.length === 0) {
+                container.innerHTML = `
+                    <div class="loading">
+                        📦 Заказы не найдены
+                        <br><br>
+                        <button class="btn success" onclick="createTestOrder()">🧪 Создать тестовый заказ</button>
+                    </div>
+                `;
+                return;
+            }
+
+            const ordersHTML = allOrders.map(order => createOrderCard(order)).join('');
+            container.innerHTML = ordersHTML;
+        }
+
+        // Создать карточку заказа
+        function createOrderCard(order) {
+            const itemsCount = order.total_items || (order.items && order.items.length) || 0;
+            const photosCount = order.total_photos || (order.items ? order.items.reduce((sum, item) => sum + (item.photos ? item.photos.length : 0), 0) : 0);
+
+            return `
+                <div class="order-card">
+                    <div class="order-header">
+                        <div class="order-id">
+                            ${order.order_number ? `#${order.order_number}` : `ID: ${order.id}`}
+                        </div>
+                        <div class="order-status">
+                            ${order.status || 'pending_check'}
+                        </div>
+                    </div>
+                    
+                    <div class="order-info">
+                        <div class="info-item">
+                            <div class="info-label">Клиент</div>
+                            <div class="info-value">${order.full_name || order.telegram_username || 'Не указан'}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Страна</div>
+                            <div class="info-value">${order.country === 'china' ? 'Китай' : order.country === 'japan' ? 'Япония' : order.country || 'Не указана'}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Создан</div>
+                            <div class="info-value">${new Date(order.created_at).toLocaleDateString('ru-RU')}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Товаров / Фото</div>
+                            <div class="info-value">${itemsCount} / ${photosCount}</div>
+                        </div>
+                    </div>
+
+                    ${order.items && order.items.length > 0 ? `
+                        <div class="items-section">
+                            <h4>🛍️ Товары (${order.items.length}):</h4>
+                            ${order.items.map((item, itemIndex) => `
+                                <div class="item-card">
+                                    <div class="item-header">
+                                        <div class="item-title">Товар ${itemIndex + 1}</div>
+                                        <div style="font-size: 12px; color: #888;">
+                                            ${item.photos ? item.photos.length : 0} фото
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="item-details">
+                                        <div>
+                                            <div class="info-label">Ссылка/ID</div>
+                                            <div class="info-value">${item.link_or_id || 'Не указано'}</div>
+                                        </div>
+                                        <div>
+                                            <div class="info-label">Цвет</div>
+                                            <div class="info-value">${item.color || 'Не указан'}</div>
+                                        </div>
+                                        <div>
+                                            <div class="info-label">Размер</div>
+                                            <div class="info-value">${item.size || 'Не указан'}</div>
+                                        </div>
+                                        <div>
+                                            <div class="info-label">Количество</div>
+                                            <div class="info-value">${item.quantity || 1}</div>
+                                        </div>
+                                    </div>
+                                    
+                                    ${item.comment ? `
+                                        <div style="margin-top: 10px;">
+                                            <div class="info-label">Комментарий</div>
+                                            <div class="info-value">${item.comment}</div>
+                                        </div>
+                                    ` : ''}
+                                    
+                                    ${item.photos && item.photos.length > 0 ? `
+                                        <div class="photos-container">
+                                            ${item.photos.map((photo, photoIndex) => `
+                                                <div class="photo-item">
+                                                    <img src="${photo}" 
+                                                         alt="Фото товара ${photoIndex + 1}" 
+                                                         class="photo-preview"
+                                                         onclick="showPhotoModal('${photo}', 'order_${order.id}_item_${itemIndex}_photo_${photoIndex + 1}.jpg', '${order.id}', ${itemIndex}, ${photoIndex})">
+                                                    
+                                                    <div class="photo-actions">
+                                                        <button class="photo-action-btn download" 
+                                                                onclick="event.stopPropagation(); downloadPhoto('${photo}', 'order_${order.id}_item_${itemIndex}_photo_${photoIndex + 1}.jpg')"
+                                                                title="Скачать фото">
+                                                            💾
+                                                        </button>
+                                                    </div>
+                                                    
+                                                    <div class="photo-number">${photoIndex + 1}</div>
+                                                </div>
+                                            `).join('')}
+                                        </div>
+                                    ` : '<div style="color: #888; font-style: italic; margin-top: 10px;">Фото не приложены</div>'}
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : '<div style="color: #888; font-style: italic;">Товары не найдены</div>'}
+                </div>
+            `;
+        }
+
+        // Обновить статистику
+        function updateStats() {
+            const stats = document.getElementById('stats');
+            const totalOrders = allOrders.length;
+            const totalPhotos = allOrders.reduce((sum, order) => {
+                return sum + (order.total_photos || (order.items ? order.items.reduce((itemSum, item) => itemSum + (item.photos ? item.photos.length : 0), 0) : 0));
+            }, 0);
+            
+            stats.innerHTML = `📊 Заказов: ${totalOrders} | 📷 Фото: ${totalPhotos}`;
+        }
+
+        // Создать тестовый заказ
+        async function createTestOrder() {
+            try {
+                console.log('🧪 Создаем тестовый заказ...');
+                const response = await fetch('/create_test_order.py');
+                // Здесь можно добавить логику создания тестового заказа
+                alert('🧪 Функция создания тестового заказа\nИспользуйте скрипт create_test_order.py');
+            } catch (error) {
+                console.error('❌ Ошибка создания тестового заказа:', error);
+            }
+        }
+
+        // Закрытие модального окна по клику вне его
+        document.addEventListener('click', function(e) {
+            const modal = document.getElementById('photoModal');
+            if (e.target === modal) {
+                closePhotoModal();
+            }
+        });
+
+        // Закрытие модального окна по клавише Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closePhotoModal();
+            }
+        });
+
+        // Автозагрузка при открытии страницы
+        window.addEventListener('load', function() {
+            console.log('🚀 Простая панель менеджера загружена');
+            loadOrders();
+        });
+    </script>
+</body>
+</html>

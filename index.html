@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Volt Logistics Mobile App</title>
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Встроенные функции для изображений (должны быть доступны сразу) -->
+    <script>
+        function handleImageError(img, fallbackText) {
+            try {
+                img.style.display = "none";
+                const fallback = img.nextElementSibling;
+                if (fallback && fallback.classList.contains("image-fallback")) {
+                    fallback.style.display = "flex";
+                    fallback.textContent = fallbackText;
+                }
+            } catch (e) {
+                console.error('Error in handleImageError:', e);
+            }
+        }
+
+        function handleImageLoad(img) {
+            try {
+                console.log('handleImageLoad called for:', img);
+                if (img && img.classList) {
+                    img.classList.remove("loading");
+                }
+            } catch (e) {
+                console.error('Error in handleImageLoad:', e);
+            }
+        }
+
+        // Делаем функции глобально доступными
+        window.handleImageError = handleImageError;
+        window.handleImageLoad = handleImageLoad;
+
+        console.log('✅ Inline image functions loaded');
+    </script>
+
+    <script src="js/common.js"></script>
+    <script src="js/index.js"></script>
+
+</head>
+
+<body class="home-page">
+    <div class="container">
+        <!-- Кнопка акций с изображением -->
+        <img src="img/v1.svg" alt="Акции" class="promotions-image-button loading" onclick="navigateTo('promotions')"
+            onerror="handleImageError(this, 'АКЦИИ')" onload="handleImageLoad(this)" style="cursor: pointer;">
+        <div class="image-fallback"
+            style="width: 100%; height: 160px; margin-bottom: 12px; font-size: 18px; display: none;">АКЦИИ</div>
+
+        <!-- Первый ряд квадратных карточек -->
+        <div class="grid">
+            <!-- Оформить заказ -->
+            <img src="img/v2.svg" alt="Оформить заказ" class="card loading" onclick="navigateTo('order')"
+                onerror="handleImageError(this, 'ЗАКАЗ')" onload="handleImageLoad(this)"
+                style="cursor: pointer; padding: 0; object-fit: cover;">
+
+            <!-- Логотип Volt Logistics с закруглением -->
+            <button class="logo-button" onclick="console.log('Logo clicked!'); navigateTo('main'); console.log('navigateTo called');" aria-label="Volt Logistics - Главное меню">
+                <img src="img/logo.svg" alt="Volt Logistics Logo" class="company-logo loading"
+                    onerror="handleImageError(this, 'V')" onload="handleImageLoad(this)">
+                <div class="image-fallback" style="width: 100%; height: 100%; font-size: 36px; aspect-ratio: 1;">V</div>
+            </button>
+        </div>
+
+        <!-- Второй ряд квадратных карточек -->
+        <div class="grid">
+            <!-- Актуальный курс -->
+            <img src="img/v3.svg" alt="Актуальный курс" class="card loading" onclick="navigateTo('currency')"
+                onerror="handleImageError(this, 'КУРС')" onload="handleImageLoad(this)"
+                style="cursor: pointer; padding: 0; object-fit: cover;">
+
+            <!-- Рассчитать заказ -->
+            <img src="img/v4.svg" alt="Рассчитать заказ" class="card loading" onclick="navigateTo('calculator')"
+                onerror="handleImageError(this, 'РАСЧЕТ')" onload="handleImageLoad(this)"
+                style="cursor: pointer; padding: 0; object-fit: cover;">
+        </div>
+
+        <!-- Нижняя секция -->
+        <div class="bottom-section">
+            <!-- Наши отзывы -->
+            <img src="img/v5.svg" alt="Наши отзывы" class="reviews-card loading" onclick="navigateTo('reviews')"
+                onerror="handleImageError(this, 'ОТЗЫВЫ')" onload="handleImageLoad(this)"
+                style="cursor: pointer; padding: 0; object-fit: cover;">
+
+            <!-- Виджет приложений в едином стиле -->
+            <div class="apps-widget">
+                <div class="apps-grid">
+                    <!-- Help приложение с черным фоном -->
+                    <div class="small-app help-app" onclick="navigateTo('help')">
+                        <img src="img/user_guide.svg" alt="Help App" class="loading"
+                            onerror="handleImageError(this, 'Help')" onload="handleImageLoad(this)">
+                    </div>
+                    <!-- Taobao приложение с закруглением 13px -->
+                    <div class="small-app taobao-app" onclick="navigateTo('taobao')">
+                        <img src="img/taobao.svg" alt="Taobao App" class="loading"
+                            onerror="handleImageError(this, 'Taobao')" onload="handleImageLoad(this)">
+                    </div>
+                    <!-- Yellow/GooFish приложение с закруглением 13px -->
+                    <div class="small-app yellow-app" onclick="navigateTo('yellow')">
+                        <img src="img/goofish.svg" alt="GooFish App" class="loading"
+                            onerror="handleImageError(this, 'GooFish')" onload="handleImageLoad(this)">
+                    </div>
+                    <!-- POIZON приложение с закруглением 13px -->
+                    <div class="small-app poizon-app" onclick="navigateTo('poizon')">
+                        <img src="img/poizon.svg" alt="POIZON App" class="loading"
+                            onerror="handleImageError(this, 'POIZON')" onload="handleImageLoad(this)">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Текст внизу -->
+        <div class="bottom-text">агентский договор</div>
+    </div>
+
+    <!-- Фиксированное меню -->
+    <div class="fixed-nav show" id="mainNav">
+        <img src="img/profile.svg" alt="Профиль" class="nav-button loading" onclick="navigateTo('profile')"
+            onerror="handleImageError(this, 'Профиль')" onload="handleImageLoad(this)">
+        <img src="img/chat.svg" alt="Чат" class="nav-button loading" onclick="openTelegramManager()"
+            onerror="handleImageError(this, 'Чат')" onload="handleImageLoad(this)">
+        <img src="img/order.svg" alt="Заказ" class="nav-button loading" onclick="navigateTo('order')"
+            onerror="handleImageError(this, 'Заказ')" onload="handleImageLoad(this)">
+    </div>
+
+
+
+    <script>
+
+
+        // Определяем функции изображений НЕМЕДЛЕННО, до загрузки основного скрипта
+        function handleImageError(img, fallbackText) {
+            try {
+                img.style.display = "none";
+                const fallback = img.nextElementSibling;
+                if (fallback && fallback.classList.contains("image-fallback")) {
+                    fallback.style.display = "flex";
+                    fallback.textContent = fallbackText;
+                }
+            } catch (e) {
+                console.error('Error in handleImageError:', e);
+            }
+        }
+
+        function handleImageLoad(img) {
+            try {
+                console.log('handleImageLoad called for:', img);
+                if (img && img.classList) {
+                    img.classList.remove("loading");
+                }
+            } catch (e) {
+                console.error('Error in handleImageLoad:', e);
+            }
+        }
+
+        // Делаем функции глобально доступными НЕМЕДЛЕННО
+        window.handleImageLoad = handleImageLoad;
+        window.handleImageError = handleImageError;
+
+        console.log('✅ Image functions defined in HTML:', {
+            handleImageLoad: typeof window.handleImageLoad,
+            handleImageError: typeof window.handleImageError
+        });
+    </script>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+    <!-- Production version - clean implementation -->
+    <script>
+        // Initialize Telegram WebApp
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('📱 Index page loaded');
+
+            // Telegram WebApp integration
+            if (window.Telegram && window.Telegram.WebApp) {
+                window.Telegram.WebApp.ready();
+                window.Telegram.WebApp.expand();
+                console.log('Telegram WebApp initialized');
+            }
+
+            // Initialize navigation functions
+            if (typeof window.navigateTo !== 'function') {
+                window.navigateTo = function(pageId) {
+                    console.log('navigateTo called with:', pageId);
+
+                    const pageMap = {
+                        'home': 'index.html',
+                        'main': 'main.html',
+                        'order': 'order.html',
+                        'calculator': 'calculator.html',
+                        'currency': 'course.html',
+                        'promotions': 'promotions.html',
+                        'reviews': 'reviews.html',
+                        'help': 'index.html',
+                        'taobao': 'index.html',
+                        'yellow': 'index.html',
+                        'poizon': 'index.html',
+                        'my-profile': 'profile.html',
+                        'my_orders': 'my_orders.html',
+                        'manager-panel': 'manager_panel.html',
+                        'profile': 'profile_menu.html',
+                        'referral': 'index.html'
+                    };
+
+                    const targetPage = pageMap[pageId] || 'index.html';
+                    window.location.href = targetPage;
+                };
+            }
+
+            // Initialize other functions
+            if (typeof window.goBack !== 'function') {
+                window.goBack = function() {
+                    console.log('goBack called');
+                    window.history.back();
+                };
+            }
+
+            if (typeof window.openTelegramManager !== 'function') {
+                window.openTelegramManager = function() {
+                    console.log('openTelegramManager called');
+                    if (window.Telegram && window.Telegram.WebApp) {
+                        window.Telegram.WebApp.openTelegramLink('https://t.me/voltlogistics_manager');
+                    } else {
+                        window.open('https://t.me/voltlogistics_manager', '_blank');
+                    }
+                };
+            }
+
+            if (typeof window.openReviewsChannel !== 'function') {
+                window.openReviewsChannel = function() {
+                    console.log('openReviewsChannel called');
+                    if (window.Telegram && window.Telegram.WebApp) {
+                        window.Telegram.WebApp.openTelegramLink('https://t.me/feedbackvolt');
+                    } else {
+                        window.open('https://t.me/feedbackvolt', '_blank');
+                    }
+                };
+            }
+
+            console.log('✅ Production functions initialized');
+        });
+    </script>
+
+    <!-- Резервная функция для тестирования -->
+    <script>
+        // Резервная функция на случай, если основная не загрузилась
+        window.addEventListener('load', function () {
+            console.log('🔍 Page loaded - checking functions...');
+
+            if (typeof window.createTestOrder !== 'function') {
+                console.log('⚠️ createTestOrder not found, creating backup...');
+
+                window.createTestOrder = function () {
+                    console.log('🧪 Backup createTestOrder called');
+
+                    // Показать индикатор загрузки
+                    const btn = document.querySelector('.test-order-btn');
+                    if (btn) {
+                        const originalText = btn.textContent;
+                        btn.textContent = '⏳ Создание заказа...';
+                        btn.disabled = true;
+
+                        // Тестовые данные заказа
+                        const testOrderData = {
+                            user_id: 919034275,
+                            user_name: "Тестовый Пользователь",
+                            telegram_username: "test_user",
+                            full_name: "Иван Тестовый",
+                            phone: "+7 (999) 123-45-67",
+                            items: [{
+                                name: "Тестовый товар",
+                                price: "100",
+                                quantity: "1",
+                                link: "https://example.com/test-item",
+                                size: "M",
+                                color: "Красный",
+                                comment: "Тестовый комментарий",
+                                photos: []
+                            }],
+                            delivery_address: "Тестовый адрес доставки",
+                            comment: "Тестовый заказ (резервная функция)"
+                        };
+
+                        // Отправка на API сервер
+                        fetch('http://localhost:5000/api/orders', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(testOrderData)
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                console.log('✅ Заказ отправлен:', data);
+                                if (data.status === 'success') {
+                                    alert('✅ Заказ успешно создан!\n\nID заказа: ' + data.order_id + '\n\n🧪 Режим: Резервная функция');
+                                } else {
+                                    alert('❌ Ошибка создания заказа:\n' + data.message);
+                                }
+                            })
+                            .catch(error => {
+                                console.error('❌ Ошибка отправки:', error);
+                                alert('❌ Ошибка отправки данных:\n' + error.message + '\n\n💡 Убедитесь, что API сервер запущен на порту 5000');
+                            })
+                            .finally(() => {
+                                if (btn) {
+                                    btn.textContent = originalText;
+                                    btn.disabled = false;
+                                }
+                            });
+                    }
+                };
+            }
+
+            if (typeof window.handleTestOrderClick !== 'function') {
+                console.log('⚠️ handleTestOrderClick not found, creating backup...');
+
+                window.handleTestOrderClick = function () {
+                    console.log('🔘 Backup handleTestOrderClick called');
+                    if (typeof window.createTestOrder === 'function') {
+                        window.createTestOrder();
+                    } else {
+                        alert('❌ Функция createTestOrder недоступна');
+                    }
+                };
+            }
+
+            // Добавляем функцию навигации если её нет
+            if (typeof window.navigateTo !== 'function') {
+                console.log('⚠️ navigateTo not found, creating backup...');
+
+                window.navigateTo = function (pageId) {
+                    console.log('🔘 Backup navigateTo called with:', pageId);
+
+                    const pageMap = {
+                        'home': 'index.html',
+                        'main': 'main.html',
+                        'order': 'order.html',
+                        'calculator': 'calculator.html',
+                        'currency': 'index.html',
+                        'promotions': 'promotions.html',
+                        'reviews': 'reviews.html',
+                        'help': 'index.html',
+                        'taobao': 'index.html',
+                        'yellow': 'index.html',
+                        'poizon': 'index.html',
+                        'my-profile': 'profile.html',
+                        'my_orders': 'my_orders.html',
+                        'manager-panel': 'manager_test.html',
+                        'test-page': 'test_page.html',
+                        'profile': 'profile_menu.html',
+                        'currency': 'calculator.html',
+                        'referral': 'index.html'
+                    };
+
+                    const targetPage = pageMap[pageId] || 'index.html';
+                    window.location.href = targetPage;
+                };
+            }
+
+            // Добавляем функцию goBack если её нет
+            if (typeof window.goBack !== 'function') {
+                console.log('⚠️ goBack not found, creating backup...');
+
+                window.goBack = function () {
+                    console.log('🔙 Backup goBack called');
+                    window.history.back();
+                };
+            }
+
+            // Добавляем функцию openTelegramManager если её нет
+            if (typeof window.openTelegramManager !== 'function') {
+                console.log('⚠️ openTelegramManager not found, creating backup...');
+
+                window.openTelegramManager = function () {
+                    console.log('💬 Backup openTelegramManager called');
+                    alert('💬 Открытие чата с менеджером:\n@voltlogistics_manager\n\n🧪 Резервная функция');
+                };
+            }
+
+            // Добавляем функцию openReviewsChannel если её нет
+            if (typeof window.openReviewsChannel !== 'function') {
+                console.log('⚠️ openReviewsChannel not found, creating backup...');
+
+                window.openReviewsChannel = function () {
+                    console.log('⭐ Backup openReviewsChannel called');
+                    alert('⭐ Открытие канала отзывов:\n@feedbackvolt\n\n🧪 Резервная функция');
+                };
+            }
+
+            // Добавляем функции управления навигацией
+            if (typeof window.showBackButton !== 'function') {
+                window.showBackButton = function () {
+                    console.log('🔙 Показываем кнопку назад');
+                    // Простая реализация - можно расширить
+                };
+            }
+
+            if (typeof window.showFixedMenu !== 'function') {
+                window.showFixedMenu = function () {
+                    console.log('📱 Показываем фиксированное меню');
+                    const mainNav = document.getElementById('mainNav');
+                    if (mainNav) {
+                        mainNav.style.display = 'flex';
+                        mainNav.classList.add('show');
+                    }
+                };
+            }
+
+            console.log('✅ Final function status:');
+            console.log('  createTestOrder:', typeof window.createTestOrder);
+            console.log('  handleTestOrderClick:', typeof window.handleTestOrderClick);
+            console.log('  navigateTo:', typeof window.navigateTo);
+            console.log('  handleImageLoad:', typeof window.handleImageLoad);
+            console.log('  handleImageError:', typeof window.handleImageError);
+
+            // Показываем фиксированное меню с анимацией
+            const mainNav = document.getElementById('mainNav');
+            if (mainNav) {
+                console.log('📱 Показываем фиксированное меню');
+                
+                // Убираем класс show и добавляем его с задержкой для анимации
+                mainNav.classList.remove('show');
+                setTimeout(() => {
+                    mainNav.classList.add('show');
+                }, 100);
+
+                // Добавляем обработчики кликов для кнопок навигации
+                const navButtons = mainNav.querySelectorAll('.nav-button');
+                navButtons.forEach((button, index) => {
+                    button.addEventListener('click', function (e) {
+                        console.log('🔘 Навигационная кнопка нажата:', this);
+                        
+                        // Добавляем активный класс
+                        navButtons.forEach(btn => btn.classList.remove('active'));
+                        this.classList.add('active');
+                    });
+                    
+                    // Делаем первую кнопку активной по умолчанию (профиль)
+                    if (index === 0) {
+                        button.classList.add('active');
+                    }
+                });
+            } else {
+                console.log('❌ Фиксированное меню не найдено');
+            }
+
+            // Вызываем функцию показа меню если она есть
+            if (typeof window.showFixedMenu === 'function') {
+                window.showFixedMenu();
+            }
+            
+        });
+    </script>
+</body>
+
+</html>

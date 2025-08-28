@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Профиль - Volt Logistics</title>
+    <link rel="stylesheet" href="style.css?v=1.0.1">
+    <style>
+        @font-face {
+            font-family: 'TT Runs Trial Regular';
+            src: url('TT_Runs_Trial_Regular_zenSkO.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        body {
+            background-color: #141414;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        /* Profile container */
+        .profile-container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #141414;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Profile main tab (at top) */
+        .profile-main-tab {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 15px;
+            margin-top: 20px;
+            margin-left: 20px;
+            margin-right: 20px;
+            width: calc(100% - 40px);
+            max-width: 400px;
+        }
+
+        /* Order tabs (below) */
+        .order-tabs-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 20px;
+            margin-left: 20px;
+            margin-right: 20px;
+            width: calc(100% - 40px);
+            max-width: 400px;
+        }
+
+        .profile-tab {
+            background: none;
+            border: none;
+            padding: 0;
+            pointer-events: none; /* Make tabs non-clickable */
+        }
+
+        .profile-tab.main {
+            flex: none;
+            width: 100%; /* Profile tab spans full container width */
+        }
+
+        .profile-tab.order {
+            flex: 1;
+        }
+
+        .profile-tab svg {
+            width: 100%;
+            height: auto;
+            filter: drop-shadow(2px 2px 6px rgba(0, 0, 0, 0.3));
+        }
+    </style>
+    <script src="js/common.js"></script>
+</head>
+<body>
+    <div class="profile-container">
+        <!-- Profile Main Tab (at top) -->
+        <div class="profile-main-tab">
+            <div class="profile-tab main">
+                <div id="profile-main-svg"></div>
+            </div>
+        </div>
+
+        <!-- Order Tabs (below) -->
+        <div class="order-tabs-container">
+            <div class="profile-tab order">
+                <div id="active-orders-svg"></div>
+            </div>
+            <div class="profile-tab order">
+                <div id="completed-orders-svg"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stylish back button (following memory specifications) -->
+    <button class="stylish-back-button show" onclick="goBack()" aria-label="Назад">
+    </button>
+
+    <script>
+        // Function to go back
+        function goBack() {
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                window.location.href = 'main.html';
+            }
+        }
+
+        // Initialize profile page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load SVGs for display only
+            loadTabSVGs();
+            
+            // Set up auto-refresh to keep order counts current
+            // Refresh every 2 seconds to catch status changes quickly
+            setInterval(() => {
+                console.log('Refreshing order counts...');
+                loadTabSVGs();
+            }, 2000);
+        });
+        
+        // Load SVG content for display
+        function loadTabSVGs() {
+            // Get user info first, then load SVGs
+            const userInfo = getUserInfo();
+            
+            // Load profile main SVG with user name
+            loadSVGFile('img/profile_main.svg', 'profile-main-svg', null, userInfo);
+            
+            // Get real user order counts
+            getUserOrderCounts().then(orderCounts => {
+                // Load active orders SVG with real count
+                loadSVGFile('img/active_orders.svg', 'active-orders-svg', orderCounts.active);
+                
+                // Load completed orders SVG with real count
+                loadSVGFile('img/completed_orders.svg', 'completed-orders-svg', orderCounts.completed);
+            });
+        }
+        
+        // Get user information from Telegram WebApp
+        function getUserInfo() {
+            try {
+                if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe) {
+                    const user = window.Telegram.WebApp.initDataUnsafe.user;
+                    if (user) {
+                        console.log('User data from Telegram:', user);
+                        
+                        // Return structured user info object for multi-line display
+                        const userInfo = {
+                            firstName: null,
+                            lastName: null,
+                            username: null,
+                            id: user.id
+                        };
+                        
+                        // Get first name if valid
+                        if (user.first_name && !user.first_name.toLowerCase().includes('undefined')) {
+                            userInfo.firstName = user.first_name;
+                        }
+                        
+                        // Get last name if valid
+                        if (user.last_name && !user.last_name.toLowerCase().includes('undefined')) {
+                            userInfo.lastName = user.last_name;
+                        }
+                        
+                        // Get username if valid
+                        if (user.username && !user.username.toLowerCase().includes('undefined')) {
+                            userInfo.username = user.username;
+                        }
+                        
+                        return userInfo;
+                    }
+                }
+                
+                // No fallback for production - require real Telegram data
+                console.log('No Telegram WebApp data available in production');
+                return {
+                    firstName: null,
+                    lastName: null,
+                    username: null,
+                    id: null
+                };
+            } catch (error) {
+                console.error('Error getting user info:', error);
+                return {
+                    firstName: null,
+                    lastName: null,
+                    username: null,
+                    id: null
+                };
+            }
+        }
+        
+        // Get user avatar URL from Telegram WebApp
+        function getAvatarUrl(userInfo) {
+            try {
+                if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe) {
+                    const user = window.Telegram.WebApp.initDataUnsafe.user;
+                    if (user && user.photo_url) {
+                        console.log('Found user photo URL:', user.photo_url);
+                        return user.photo_url;
+                    }
+                }
+                
+                // Fallback: generate initials-based avatar
+                console.log('No photo URL found, generating initials avatar');
+                return generateInitialsAvatar(userInfo);
+            } catch (error) {
+                console.error('Error getting avatar URL:', error);
+                return generateInitialsAvatar(userInfo);
+            }
+        }
+        
+        // Generate data URL for initials-based avatar
+        function generateInitialsAvatar(userInfo) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 90;
+            canvas.height = 90;
+            const ctx = canvas.getContext('2d');
+            
+            // Background circle
+            ctx.fillStyle = '#00DBFF';
+            ctx.beginPath();
+            ctx.arc(45, 45, 45, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Get initials
+            let initials = '?';
+            if (userInfo.firstName) {
+                initials = userInfo.firstName.charAt(0).toUpperCase();
+                if (userInfo.lastName) {
+                    initials += userInfo.lastName.charAt(0).toUpperCase();
+                }
+            } else if (userInfo.username) {
+                initials = userInfo.username.charAt(0).toUpperCase();
+            }
+            
+            // Draw initials
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 32px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(initials, 45, 45);
+            
+            return canvas.toDataURL();
+        }
+        
+        // Load SVG file and inject into container
+        function loadSVGFile(url, containerId, orderCount = null, userInfo = null) {
+            fetch(url)
+                .then(response => response.text())
+                .then(svgContent => {
+                    // Handle profile main tab user info replacement
+                    if (containerId === 'profile-main-svg' && userInfo) {
+                        console.log('Replacing user info in profile main tab with:', userInfo);
+                        
+                        // Remove the existing "НИК ТЕЛЕГРАМ" text paths completely
+                        // The SVG contains multiple path elements that form this text
+                        svgContent = svgContent.replace(/<path d="M[^"]*"/g, (match) => {
+                            // Keep only the background paths, remove text paths
+                            if (match.includes('M20.9 112.68') || match.includes('M16.58 146') || 
+                                match.includes('M28.9672 146.2') || match.includes('M35.493 145.86') ||
+                                match.includes('M55.4711 146.2') || match.includes('M64.7969 146') ||
+                                match.includes('M74.0805 149.8') || match.includes('M92.7605 146.2') ||
+                                match.includes('M115.493 136.34')) {
+                                return ''; // Remove the text paths
+                            }
+                            return match; // Keep other paths (background, etc.)
+                        });
+                        
+                        // Create multi-line user info display
+                        let userInfoText = '';
+                        
+                        // Add avatar circle on the right side
+                        const avatarUrl = getAvatarUrl(userInfo);
+                        const avatarElement = `
+                            <defs>
+                                <clipPath id="avatarClip">
+                                    <circle cx="284" cy="100" r="45"/>
+                                </clipPath>
+                            </defs>
+                            <circle cx="284" cy="100" r="45" fill="#333" stroke="#00DBFF" stroke-width="2"/>
+                            <image x="239" y="55" width="90" height="90" 
+                                   href="${avatarUrl}" 
+                                   clip-path="url(#avatarClip)"/>`;
+                        
+                        if (userInfo.firstName && userInfo.lastName) {
+                            // Both first name and last name available - display on separate lines
+                            userInfoText = `
+                                <text x="28" y="120" 
+                                      fill="white" 
+                                      font-family="TT Runs Trial Regular, TT Runs, Arial, sans-serif" 
+                                      font-size="28" 
+                                      font-weight="400" 
+                                      text-anchor="start">${userInfo.firstName}</text>
+                                <text x="28" y="150" 
+                                      fill="white" 
+                                      font-family="TT Runs Trial Regular, TT Runs, Arial, sans-serif" 
+                                      font-size="28" 
+                                      font-weight="400" 
+                                      text-anchor="start">${userInfo.lastName}</text>`;
+                        } else if (userInfo.firstName && userInfo.username) {
+                            // Only first name + username - show username in blue with smaller font
+                            userInfoText = `
+                                <text x="28" y="125" 
+                                      fill="white" 
+                                      font-family="TT Runs Trial Regular, TT Runs, Arial, sans-serif" 
+                                      font-size="28" 
+                                      font-weight="400" 
+                                      text-anchor="start">${userInfo.firstName}</text>
+                                <text x="28" y="150" 
+                                      fill="#00DBFF" 
+                                      font-family="TT Runs Trial Regular, TT Runs, Arial, sans-serif" 
+                                      font-size="18" 
+                                      font-weight="400" 
+                                      text-anchor="start">@${userInfo.username}</text>`;
+                        } else if (userInfo.firstName) {
+                            // Only first name available - center it
+                            userInfoText = `
+                                <text x="28" y="140" 
+                                      fill="white" 
+                                      font-family="TT Runs Trial Regular, TT Runs, Arial, sans-serif" 
+                                      font-size="28" 
+                                      font-weight="400" 
+                                      text-anchor="start">${userInfo.firstName}</text>`;
+                        } else if (userInfo.username) {
+                            // Only username available - center it in blue
+                            userInfoText = `
+                                <text x="28" y="140" 
+                                      fill="#00DBFF" 
+                                      font-family="TT Runs Trial Regular, TT Runs, Arial, sans-serif" 
+                                      font-size="24" 
+                                      font-weight="400" 
+                                      text-anchor="start">@${userInfo.username}</text>`;
+                        } else {
+                            // No valid user data available
+                            userInfoText = `
+                                <text x="28" y="140" 
+                                      fill="white" 
+                                      font-family="TT Runs Trial Regular, TT Runs, Arial, sans-serif" 
+                                      font-size="20" 
+                                      font-weight="400" 
+                                      text-anchor="start">Пользователь</text>`;
+                        }
+                        
+                        // Insert user info text and avatar before closing SVG
+                        svgContent = svgContent.replace('</svg>', avatarElement + userInfoText + '</svg>');
+                    }
+                    
+                    if (orderCount !== null) {
+                        // AGGRESSIVE METHOD: Complete SVG reconstruction with forced clipping
+                        
+                        // Remove ALL existing number elements completely
+                        svgContent = svgContent.replace(/<path id="\d+"[^>]*>/g, '');
+                        svgContent = svgContent.replace(/<text[^>]*>[^<]*<\/text>/g, '');
+                        
+                        // Force add custom clipping path for rounded corners (less aggressive)
+                        const customClipId = `aggressiveClip_${containerId}_${Date.now()}`;
+                        const customClipPath = `<clipPath id="${customClipId}"><rect x="0" y="0" width="250" height="200" rx="25" ry="25"/></clipPath>`;
+                        
+                        // Force insert custom clip path
+                        if (svgContent.includes('<defs>')) {
+                            svgContent = svgContent.replace('<defs>', `<defs>${customClipPath}`);
+                        } else {
+                            svgContent = svgContent.replace(/<svg[^>]*>/, match => `${match}<defs>${customClipPath}</defs>`);
+                        }
+                        
+                        // Create number with TRIPLE clipping layers
+                        const fontSize = orderCount >= 10 ? "100" : "120";
+                        const xPos = orderCount >= 10 ? "150" : "145";
+                        const yPos = "170";
+                        
+                        // Less aggressive single-layer clipping
+                        const aggressiveNumber = `
+                            <g clip-path="url(#${customClipId})">
+                                <text x="${xPos}" y="${yPos}" 
+                                      fill="#00DBFF" 
+                                      font-family="TT Runs Trial Bold, TT Runs, Arial, sans-serif" 
+                                      font-size="${fontSize}" 
+                                      font-weight="900" 
+                                      text-anchor="middle">${orderCount}</text>
+                            </g>`;
+                        
+                        // Force insert before closing SVG
+                        svgContent = svgContent.replace('</svg>', aggressiveNumber + '</svg>');
+                        
+                        // Additional CSS-based clipping
+                        svgContent = svgContent.replace('<svg', '<svg style="overflow: hidden; border-radius: 25px;"');
+                    }
+                    document.getElementById(containerId).innerHTML = svgContent;
+                })
+                .catch(error => console.error('Error loading SVG:', error));
+        }
+        
+        // Get user order counts from Telegram WebApp
+        async function getUserOrderCounts() {
+            try {
+                console.log('Fetching orders from API...');
+                
+                // Use the working API endpoint
+                const response = await fetch(`http://localhost:5000/api/orders/all?t=${Date.now()}`);
+                console.log('API response status:', response.status);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('API response data:', data);
+                    
+                    // Check if data is an array or has orders property
+                    let orders = [];
+                    if (Array.isArray(data)) {
+                        orders = data;
+                    } else if (data.orders && Array.isArray(data.orders)) {
+                        orders = data.orders;
+                    } else {
+                        console.error('Unexpected API response format:', data);
+                        return { active: 0, completed: 0 };
+                    }
+                    
+                    console.log('Orders array:', orders);
+                    console.log('Number of orders:', orders.length);
+                    
+                    // Count active and completed orders
+                    let activeCount = 0;
+                    let completedCount = 0;
+                    
+                    orders.forEach((order, index) => {
+                        // Check order status to determine if active or completed
+                        const status = (order.status || '').toLowerCase().trim();
+                        console.log(`Order ${index + 1} (ID: ${order.id}):`);
+                        console.log(`  Raw status: "${order.status}"`);
+                        console.log(`  Normalized status: "${status}"`);
+                        
+                        // Completed statuses (delivered orders and СДЭК transfers)
+                        if (status === 'доставлен' || status === 'delivered' || 
+                            status === 'сдэк' || status === 'cdek' || status === 'cdek_shipping' ||
+                            status.includes('сдэк') || status.includes('cdek') ||
+                            status === 'в пути сдэк' || status === 'передано в сдэк') {
+                            completedCount++;
+                            console.log(`  -> Counted as COMPLETED (delivered/СДЭК status)`);
+                        } 
+                        // Canceled orders are not counted at all (neither active nor completed)
+                        else if (status === 'отменен' || status === 'отмененный' || status === 'canceled' || status === 'cancelled') {
+                            console.log(`  -> CANCELED - not counted`);
+                        }
+                        // Orders waiting for initial review are not counted
+                        else if (status === 'ожидает проверки' || status === 'pending review') {
+                            console.log(`  -> Not counted (waiting for initial review)`);
+                        }
+                        // All other statuses from the workflow are ACTIVE:
+                        // Ожидает выкупа, Ожидает отправки на склад, Отправлено на склад, 
+                        // На складе (фотоотчет), Отправлено в Москву, В Москве ожидает отправки, СДЭК (с номером накладной)
+                        else if (status) {
+                            activeCount++;
+                            console.log(`  -> Counted as ACTIVE (workflow status)`);
+                        } else {
+                            console.log(`  -> Not counted (empty status)`);
+                        }
+                    });
+                    
+                    console.log(`Final counts: Active = ${activeCount}, Completed = ${completedCount}`);
+                    
+                    return {
+                        active: activeCount,
+                        completed: completedCount
+                    };
+                } else {
+                    console.error('API failed with status:', response.status);
+                    const errorText = await response.text();
+                    console.error('Error response:', errorText);
+                }
+                
+                // Fallback: return zero counts
+                return {
+                    active: 0,
+                    completed: 0
+                };
+            } catch (error) {
+                console.error('Error fetching user order counts:', error);
+                return {
+                    active: 0,
+                    completed: 0
+                };
+            }
+        }
+
+    </script>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</body>
+</html>

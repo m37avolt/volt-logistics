@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Отладка заказов - Volt Logistics</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #141414;
+            color: white;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .order-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            margin: 10px 0;
+            border-radius: 10px;
+            border: 1px solid #555;
+        }
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .order-id {
+            font-size: 18px;
+            font-weight: bold;
+            color: #00DBFF;
+        }
+        .order-status {
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .order-details {
+            margin: 10px 0;
+        }
+        .items-section {
+            margin-top: 15px;
+        }
+        .item-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #00DBFF;
+        }
+        .photos-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .photo-item {
+            position: relative;
+            display: inline-block;
+        }
+        .photo-preview {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 2px solid #00DBFF;
+            cursor: pointer;
+        }
+        .photo-actions {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            display: flex;
+            gap: 5px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .photo-item:hover .photo-actions {
+            opacity: 1;
+        }
+        .photo-action-btn {
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        .photo-action-btn:hover {
+            background: #00DBFF;
+            transform: scale(1.1);
+        }
+        .photo-action-btn.download {
+            background: rgba(52, 199, 89, 0.9);
+        }
+        .photo-action-btn.download:hover {
+            background: #34C759;
+        }
+        .photo-action-btn.enhance {
+            background: rgba(255, 107, 53, 0.9);
+        }
+        .photo-action-btn.enhance:hover {
+            background: #FF6B35;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #888;
+        }
+        .error {
+            background: rgba(231, 76, 60, 0.2);
+            border: 1px solid #E74C3C;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .btn {
+            background: #00DBFF;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+        }
+        .btn:hover {
+            background: #00B8E6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Отладка заказов</h1>
+        <button class="btn" onclick="loadOrders()">🔄 Загрузить заказы</button>
+        <button class="btn" onclick="showRawData()">📊 Показать сырые данные</button>
+        
+        <div id="ordersContainer">
+            <div class="loading">Нажмите "Загрузить заказы" для начала</div>
+        </div>
+        
+        <div id="rawDataContainer" style="display: none;">
+            <h3>📊 Сырые данные API:</h3>
+            <pre id="rawData" style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; overflow-x: auto; font-size: 12px;"></pre>
+        </div>
+    </div>
+
+    <script>
+        let allOrders = [];
+        let rawApiData = null;
+
+        // Функция для скачивания фотографии
+        async function downloadPhoto(photoSrc, filename) {
+            try {
+                if (photoSrc.startsWith('data:image/')) {
+                    const link = document.createElement('a');
+                    link.href = photoSrc;
+                    link.download = filename || 'photo.jpg';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    return;
+                }
+
+                const response = await fetch(photoSrc);
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = filename || 'photo.jpg';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                window.URL.revokeObjectURL(url);
+                console.log('✅ Фото скачано:', filename);
+            } catch (error) {
+                console.error('❌ Ошибка скачивания фото:', error);
+                alert('Ошибка при скачивании фотографии');
+            }
+        }
+
+        // Функция для улучшения качества изображения (упрощенная версия)
+        function enhancePhoto(photoSrc, filename) {
+            alert(`🎨 Функция улучшения качества для ${filename}\nВ полной версии здесь будет редактор изображений`);
+            console.log('🎨 Запрос на улучшение фото:', filename);
+        }
+
+        async function loadOrders() {
+            const container = document.getElementById('ordersContainer');
+            container.innerHTML = '<div class="loading">Загрузка заказов...</div>';
+
+            try {
+                console.log('🔄 Загружаем заказы с API...');
+                const response = await fetch('http://localhost:5000/api/orders/all');
+                console.log('📡 Ответ API:', response.status);
+                
+                const data = await response.json();
+                console.log('📊 Полученные данные:', data);
+                rawApiData = data;
+
+                if (data.status === 'success' && data.orders) {
+                    allOrders = data.orders;
+                    console.log(`✅ Загружено заказов: ${allOrders.length}`);
+                    displayOrders();
+                } else {
+                    showError('Ошибка: ' + (data.message || 'Неизвестная ошибка'));
+                }
+            } catch (error) {
+                console.error('❌ Ошибка загрузки:', error);
+                showError('Ошибка соединения с сервером: ' + error.message);
+            }
+        }
+
+        function displayOrders() {
+            const container = document.getElementById('ordersContainer');
+
+            if (allOrders.length === 0) {
+                container.innerHTML = '<div class="loading">Заказы не найдены</div>';
+                return;
+            }
+
+            const ordersHTML = allOrders.map(order => createOrderCard(order)).join('');
+            container.innerHTML = ordersHTML;
+        }
+
+        function createOrderCard(order) {
+            const itemsCount = order.total_items || (order.items && order.items.length) || 0;
+            const photosCount = order.total_photos || (order.items ? order.items.reduce((sum, item) => sum + (item.photos ? item.photos.length : 0), 0) : 0);
+
+            return `
+                <div class="order-card">
+                    <div class="order-header">
+                        <div class="order-id">
+                            ${order.order_number ? `#${order.order_number}` : `ID: ${order.id}`}
+                        </div>
+                        <div class="order-status" style="background: #00DBFF;">
+                            ${order.status || 'pending_check'}
+                        </div>
+                    </div>
+                    
+                    <div class="order-details">
+                        <div><strong>Клиент:</strong> ${order.full_name || order.telegram_username || 'Не указан'}</div>
+                        <div><strong>Страна:</strong> ${order.country === 'china' ? 'Китай' : order.country === 'japan' ? 'Япония' : order.country || 'Не указана'}</div>
+                        <div><strong>Создан:</strong> ${new Date(order.created_at).toLocaleString('ru-RU')}</div>
+                        <div><strong>Товаров:</strong> ${itemsCount} | <strong>Фото:</strong> ${photosCount}</div>
+                    </div>
+
+                    ${order.items && order.items.length > 0 ? `
+                        <div class="items-section">
+                            <h4>🛍️ Товары:</h4>
+                            ${order.items.map((item, itemIndex) => `
+                                <div class="item-card">
+                                    <div><strong>Товар ${itemIndex + 1}:</strong> ${item.link_or_id || 'Не указано'}</div>
+                                    <div><strong>Цвет:</strong> ${item.color || 'Не указан'} | <strong>Размер:</strong> ${item.size || 'Не указан'} | <strong>Количество:</strong> ${item.quantity || 1}</div>
+                                    ${item.comment ? `<div><strong>Комментарий:</strong> ${item.comment}</div>` : ''}
+                                    
+                                    ${item.photos && item.photos.length > 0 ? `
+                                        <div class="photos-container">
+                                            ${item.photos.map((photo, photoIndex) => `
+                                                <div class="photo-item">
+                                                    <img src="${photo}" alt="Фото товара ${photoIndex + 1}" 
+                                                         class="photo-preview"
+                                                         onclick="window.open('${photo}', '_blank')">
+                                                    
+                                                    <div class="photo-actions">
+                                                        <button class="photo-action-btn download" 
+                                                                onclick="event.stopPropagation(); downloadPhoto('${photo}', 'order_${order.id}_item_${itemIndex}_photo_${photoIndex + 1}.jpg')"
+                                                                title="Скачать фото">
+                                                            💾
+                                                        </button>
+                                                        <button class="photo-action-btn enhance" 
+                                                                onclick="event.stopPropagation(); enhancePhoto('${photo}', 'order_${order.id}_item_${itemIndex}_photo_${photoIndex + 1}.jpg')"
+                                                                title="Улучшить качество">
+                                                            🎨
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            `).join('')}
+                                        </div>
+                                    ` : '<div><em>Фото не приложены</em></div>'}
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : '<div><em>Товары не найдены</em></div>'}
+                </div>
+            `;
+        }
+
+        function showError(message) {
+            const container = document.getElementById('ordersContainer');
+            container.innerHTML = `<div class="error">${message}</div>`;
+        }
+
+        function showRawData() {
+            const container = document.getElementById('rawDataContainer');
+            const dataElement = document.getElementById('rawData');
+            
+            if (rawApiData) {
+                dataElement.textContent = JSON.stringify(rawApiData, null, 2);
+                container.style.display = 'block';
+            } else {
+                alert('Сначала загрузите заказы');
+            }
+        }
+
+        // Автозагрузка при открытии страницы
+        window.onload = function() {
+            console.log('🚀 Страница отладки загружена');
+            loadOrders();
+        };
+    </script>
+</body>
+</html>

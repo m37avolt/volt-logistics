@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Акции - Volt Logistics</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .promotions-container {
+            max-width: 375px;
+            margin: 0 auto;
+            padding: 16px;
+        }
+
+        .promotions-header {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .promotions-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .promotions-subtitle {
+            font-size: 16px;
+            color: #999;
+            margin-bottom: 20px;
+        }
+
+        .promotions-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .promotion-card {
+            background-color: #0F0F0F;
+            border-radius: 14px;
+            overflow: hidden;
+            transition: transform 0.15s ease;
+            position: relative;
+            width: 100%;
+            height: 83px;
+            margin-bottom: 16px;
+            box-shadow: 0 3px 8px rgba(0, 188, 212, 0.29),
+                0 14px 14px rgba(0, 188, 212, 0.26),
+                0 31px 19px rgba(0, 188, 212, 0.15),
+                0 56px 22px rgba(0, 188, 212, 0.04),
+                0 87px 24px rgba(0, 188, 212, 0.01);
+        }
+
+        .promotion-card:active {
+            transform: scale(0.98);
+        }
+
+        .promotion-content {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            height: 100%;
+        }
+
+        .promotion-title {
+            font-size: 16px;
+            font-weight: 400;
+            margin-bottom: 4px;
+            font-family: 'TT Runs Trial Regular', sans-serif;
+        }
+
+        .promotion-description {
+            font-size: 12px;
+            color: #ccc;
+            margin-bottom: 4px;
+            font-family: 'TT Runs Trial Regular', sans-serif;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .promotion-date {
+            font-size: 10px;
+            color: #00BCD4;
+            font-family: 'TT Runs Trial Regular', sans-serif;
+        }
+
+        .no-promotions {
+            text-align: center;
+            padding: 30px 20px;
+            background-color: #0F0F0F;
+            border-radius: 14px;
+            color: #fff;
+            font-weight: 700;
+            font-size: 16px;
+            box-shadow: 0 3px 8px rgba(0, 188, 212, 0.29),
+                0 14px 14px rgba(0, 188, 212, 0.26),
+                0 31px 19px rgba(0, 188, 212, 0.15),
+                0 56px 22px rgba(0, 188, 212, 0.04),
+                0 87px 24px rgba(0, 188, 212, 0.01);
+        }
+
+        .empty-state {
+            position: relative;
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .add-promotion-button {
+            background-color: #00BCD4;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .add-promotion-button:hover {
+            background-color: #00ACC1;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .modal-content {
+            background-color: #1e1e1e;
+            margin: 10% auto;
+            padding: 20px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 350px;
+            box-shadow: 0 5px 15px rgba(0, 188, 212, 0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .close-button {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #999;
+            cursor: pointer;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #ccc;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 10px;
+            background-color: #2e2e2e;
+            border: 1px solid #444;
+            border-radius: 10px;
+            color: white;
+            font-size: 14px;
+        }
+
+        .form-textarea {
+            width: 100%;
+            padding: 10px;
+            background-color: #2e2e2e;
+            border: 1px solid #444;
+            border-radius: 10px;
+            color: white;
+            font-size: 14px;
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-submit {
+            background-color: #00BCD4;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 20px;
+            font-size: 16px;
+            font-weight: 600;
+            width: 100%;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .form-submit:hover {
+            background-color: #00ACC1;
+        }
+
+        .delete-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(255, 59, 48, 0.8);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .promotion-card:hover .delete-button {
+            opacity: 1;
+        }
+
+        .manager-mode-toggle {
+            background-color: #333;
+            color: #ccc;
+            border: none;
+            border-radius: 10px;
+            padding: 8px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-left: auto;
+        }
+
+        .manager-mode-toggle.active {
+            background-color: #00BCD4;
+            color: white;
+        }
+
+        .manager-controls {
+            display: none;
+        }
+
+        .manager-controls.active {
+            display: block;
+        }
+
+        /* SVG Back Button Styles */
+        .svg-back-button {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: none;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .svg-back-button.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .svg-back-button:hover {
+            transform: translateX(-50%) translateY(-4px);
+            filter: brightness(1.1);
+        }
+
+        .svg-back-button:active {
+            transform: translateX(-50%) translateY(-2px);
+        }
+
+        .back-button-svg {
+            width: 180px;
+            height: auto;
+            filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.4));
+            transition: all 0.3s ease;
+        }
+
+        .svg-back-button:hover .back-button-svg {
+            filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.5)) brightness(1.1);
+        }
+    </style>
+    <script src="js/common.js"></script>
+
+    </head>
+
+<body>
+    <div class="promotions-container">
+        <img src="img/promo_table.svg" alt="Volt Logistics актуальные акции" class="promo-header-image">
+
+        <div class="promotions-header">
+            <button id="manager-mode-toggle" class="manager-mode-toggle">Режим менеджера</button>
+            <div id="manager-controls" class="manager-controls">
+                <button id="add-promotion-button" class="add-promotion-button">+</button>
+            </div>
+        </div>
+
+        <div class="promotions-list" id="promotions-list">
+            <!-- Карточки акций будут добавляться динамически -->
+        </div>
+    </div>
+
+    <!-- Модальное окно для добавления/редактирования акции -->
+    <div id="promotion-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modal-title">Добавить акцию</h2>
+                <button class="close-button" id="close-modal">&times;</button>
+            </div>
+            <form id="promotion-form">
+                <input type="hidden" id="promotion-id">
+                <div class="form-group">
+                    <label for="promotion-title" class="form-label">Название акции</label>
+                    <input type="text" id="promotion-title" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label for="promotion-description" class="form-label">Описание</label>
+                    <textarea id="promotion-description" class="form-textarea" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="promotion-image" class="form-label">URL изображения</label>
+                    <input type="text" id="promotion-image" class="form-input"
+                        placeholder="https://example.com/image.jpg">
+                </div>
+                <div class="form-group">
+                    <label for="promotion-date" class="form-label">Срок действия</label>
+                    <input type="text" id="promotion-date" class="form-input" placeholder="Например: до 31.12.2025">
+                </div>
+                <button type="submit" class="form-submit" id="save-promotion">Сохранить</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Кнопка "Назад" -->
+    <div class="stylish-back-button" onclick="goBack()">
+    </div>
+
+    <script>
+        // Массив для хранения акций (в реальном приложении должны храниться на сервере)
+        let promotions = [];
+
+        // Переменные для работы с DOM
+        const promotionsList = document.getElementById('promotions-list');
+        const managerModeToggle = document.getElementById('manager-mode-toggle');
+        const managerControls = document.getElementById('manager-controls');
+        const addPromotionButton = document.getElementById('add-promotion-button');
+        const promotionModal = document.getElementById('promotion-modal');
+        const closeModalButton = document.getElementById('close-modal');
+        const promotionForm = document.getElementById('promotion-form');
+        const modalTitle = document.getElementById('modal-title');
+        const promotionIdInput = document.getElementById('promotion-id');
+        const promotionTitleInput = document.getElementById('promotion-title');
+        const promotionDescriptionInput = document.getElementById('promotion-description');
+        const promotionImageInput = document.getElementById('promotion-image');
+        const promotionDateInput = document.getElementById('promotion-date');
+
+        // Список ID менеджеров (из Python бота)
+        const managerIds = [
+            919034275,   // ID первого менеджера
+            372145026,   // ID второго менеджера
+            6432717873   // ID третьего менеджера
+        ];
+
+        // Проверка является ли пользователь менеджером
+        function isUserManager() {
+            if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe) {
+                const user = window.Telegram.WebApp.initDataUnsafe.user;
+                if (user && user.id) {
+                    console.log('Current user ID:', user.id);
+                    return managerIds.includes(user.id);
+                }
+            }
+            // Для тестирования в браузере (без Telegram)
+            console.log('Running outside Telegram WebApp - manager mode disabled');
+            return false;
+        }
+
+        // Флаг режима менеджера
+        let isManagerMode = false;
+        const userIsManager = isUserManager();
+
+        // Функция для отображения списка акций
+        function renderPromotions() {
+            promotionsList.innerHTML = '';
+
+            if (promotions.length === 0) {
+                if (isManagerMode) {
+                    // Для менеджера показываем пустое состояние с кнопкой добавления по центру
+                    promotionsList.innerHTML = `
+                        <div class="empty-state">
+                            <button id="center-add-button" class="add-promotion-button" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">+</button>
+                        </div>
+                    `;
+                    // Добавляем обработчик для центральной кнопки
+                    document.getElementById('center-add-button').addEventListener('click', () => {
+                        modalTitle.textContent = 'Добавить акцию';
+                        promotionIdInput.value = '';
+                        promotionForm.reset();
+                        promotionModal.style.display = 'block';
+                    });
+                } else {
+                    // Для обычного пользователя показываем сообщение
+                    promotionsList.innerHTML = `
+                        <div class="no-promotions">
+                            <p style="font-weight: 700;">Тут пока ничего нет...</p>
+                        </div>
+                    `;
+                }
+                return;
+            }
+
+            promotions.forEach(promotion => {
+                const promotionCard = document.createElement('div');
+                promotionCard.className = 'promotion-card';
+                promotionCard.setAttribute('data-id', promotion.id);
+                promotionCard.onclick = () => showPromotionDetails(promotion.id);
+
+                promotionCard.innerHTML = `
+                    ${isManagerMode ? `<button class="delete-button" data-id="${promotion.id}" onclick="deletePromotion(event, ${promotion.id})">×</button>` : ''}
+                    <div class="promotion-content">
+                        <h3 class="promotion-title">${promotion.title}</h3>
+                        <p class="promotion-description">${promotion.description}</p>
+                        <p class="promotion-date">${promotion.date}</p>
+                    </div>
+                `;
+
+                promotionsList.appendChild(promotionCard);
+            });
+        }
+
+        // Функция для отображения деталей акции
+        function showPromotionDetails(id) {
+            if (isManagerMode) {
+                // В режиме менеджера открываем модальное окно для редактирования
+                const promotion = promotions.find(p => p.id === id);
+                if (promotion) {
+                    modalTitle.textContent = 'Редактировать акцию';
+                    promotionIdInput.value = promotion.id;
+                    promotionTitleInput.value = promotion.title;
+                    promotionDescriptionInput.value = promotion.description;
+                    promotionImageInput.value = promotion.image;
+                    promotionDateInput.value = promotion.date;
+                    promotionModal.style.display = 'block';
+                }
+            } else {
+                // В обычном режиме показываем детали акции
+                console.log(`Показать детали акции ${id}`);
+                // В будущем можно реализовать модальное окно или переход на страницу с деталями
+            }
+        }
+
+        // Функция для удаления акции
+        function deletePromotion(event, id) {
+            event.stopPropagation(); // Предотвращаем всплытие события клика
+
+            // Проверка прав доступа
+            if (!userIsManager || !isManagerMode) {
+                console.log('Access denied - user is not a manager or not in manager mode');
+                return;
+            }
+
+            if (confirm('Вы уверены, что хотите удалить эту акцию?')) {
+                promotions = promotions.filter(promotion => promotion.id !== id);
+                renderPromotions();
+
+                // В реальном приложении здесь должен быть запрос к серверу для удаления акции
+                console.log(`Акция с ID ${id} удалена`);
+            }
+        }
+
+        // Обработчик переключения режима менеджера
+        managerModeToggle.addEventListener('click', () => {
+            // Дополнительная проверка безопасности
+            if (!userIsManager) {
+                console.log('Access denied - user is not a manager');
+                return;
+            }
+            
+            isManagerMode = !isManagerMode;
+            managerModeToggle.classList.toggle('active', isManagerMode);
+            managerControls.classList.toggle('active', isManagerMode);
+            renderPromotions();
+            
+            console.log('Manager mode toggled:', isManagerMode);
+        });
+
+        // Обработчик кнопки добавления акции
+        addPromotionButton.addEventListener('click', () => {
+            // Проверка прав доступа
+            if (!userIsManager || !isManagerMode) {
+                console.log('Access denied - user is not a manager or not in manager mode');
+                return;
+            }
+            
+            modalTitle.textContent = 'Добавить акцию';
+            promotionIdInput.value = '';
+            promotionForm.reset();
+            promotionModal.style.display = 'block';
+        });
+
+        // Обработчик закрытия модального окна
+        closeModalButton.addEventListener('click', () => {
+            promotionModal.style.display = 'none';
+        });
+
+        // Закрытие модального окна при клике вне его области
+        window.addEventListener('click', (event) => {
+            if (event.target === promotionModal) {
+                promotionModal.style.display = 'none';
+            }
+        });
+
+        // Обработчик отправки формы
+        promotionForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+
+            // Проверка прав доступа
+            if (!userIsManager || !isManagerMode) {
+                console.log('Access denied - user is not a manager or not in manager mode');
+                promotionModal.style.display = 'none';
+                return;
+            }
+
+            const id = promotionIdInput.value ? parseInt(promotionIdInput.value) : Date.now();
+            const title = promotionTitleInput.value;
+            const description = promotionDescriptionInput.value;
+            const image = promotionImageInput.value || `https://via.placeholder.com/375x160/00BCD4/FFFFFF?text=${encodeURIComponent(title)}`;
+            const date = promotionDateInput.value || 'Постоянная акция';
+
+            if (promotionIdInput.value) {
+                // Редактирование существующей акции
+                const index = promotions.findIndex(p => p.id === parseInt(id));
+                if (index !== -1) {
+                    promotions[index] = { id, title, description, image, date };
+                }
+            } else {
+                // Добавление новой акции
+                promotions.push({ id, title, description, image, date });
+            }
+
+            // В реальном приложении здесь должен быть запрос к серверу для сохранения акции
+            console.log('Акция сохранена:', { id, title, description, image, date });
+
+            promotionModal.style.display = 'none';
+            renderPromotions();
+        });
+
+        // Инициализация при загрузке страницы
+        document.addEventListener('DOMContentLoaded', () => {
+            // Скрыть кнопку режима менеджера для обычных пользователей
+            if (!userIsManager) {
+                managerModeToggle.style.display = 'none';
+                console.log('Manager mode hidden - user is not a manager');
+            } else {
+                console.log('Manager mode available - user is a manager');
+            }
+            
+            renderPromotions();
+        });
+
+        // Функция возврата назад
+        function goBack() {
+            console.log('🔙 Возврат назад');
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                window.location.href = 'index.html';
+            }
+        }
+
+        // Функции для обработки изображений
+        function handleImageLoad(img) {
+            if (img && img.classList) {
+                img.classList.remove("loading");
+            }
+        }
+        
+        function handleImageError(img, fallbackText) {
+            if (img) {
+                img.style.display = "none";
+                const fallback = img.nextElementSibling;
+                if (fallback && fallback.classList.contains("image-fallback")) {
+                    fallback.style.display = "flex";
+                    fallback.textContent = fallbackText;
+                }
+            }
+        }
+    </script>
+
+    <!-- SVG Stylized Back Button -->
+    <button class="svg-back-button show" onclick="goBack()" aria-label="Назад">
+        <img src="img/back_button.svg" alt="Назад" class="back-button-svg" 
+             onerror="handleImageError(this, 'Назад')" 
+             onload="handleImageLoad(this)">
+    </button>
+</body>
+
+</html>
